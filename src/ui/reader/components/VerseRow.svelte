@@ -23,6 +23,7 @@
 		hoveredNotePath?: string | null;
 		onVerseClick: (verseNumber: number, event: MouseEvent) => void;
 		onToggleVerseSelection?: (verseNumber: number) => void;
+		onVerseTextClick?: (event: MouseEvent) => void;
 		onOpenNote: (path: string, event?: MouseEvent) => void;
 		onNoteLineHover?: (event: MouseEvent, notePath: string) => void;
 		onNoteLineEnter?: (notePath: string) => void;
@@ -45,6 +46,7 @@
 		hoveredNotePath = null,
 		onVerseClick,
 		onToggleVerseSelection,
+		onVerseTextClick,
 		onOpenNote,
 		onNoteLineHover,
 		onNoteLineEnter,
@@ -131,6 +133,7 @@
 {/snippet}
 
 <!-- svelte-ignore a11y_click_events_have_key_events -->
+<!-- svelte-ignore a11y_no_noninteractive_tabindex -->
 <div
 	class="open-bible-reader-verse"
 	class:is-selected={isSelected}
@@ -141,9 +144,13 @@
 	class:has-thompson-xref-start={showXrefGutter && xrefRefs.length > 0 && xrefGutterAlign === "start"}
 	style:--note-lane-count={isSelectionMode ? 0 : totalLanes}
 	data-verse={verse.number}
-	role="button"
-	tabindex="0"
-	onclick={(e) => onVerseClick(verse.number, e)}
+	role={isSelectionMode ? "button" : "group"}
+	tabindex={isSelectionMode ? 0 : undefined}
+	onclick={(e) => {
+		if (isSelectionMode) {
+			onVerseClick(verse.number, e);
+		}
+	}}
 >
 	{#if isSelectionMode}
 		<!-- svelte-ignore a11y_click_events_have_key_events -->
@@ -194,8 +201,32 @@
 			{/each}
 		</div>
 	{/if}
-	<span class="open-bible-reader-verse-number">{verse.number}</span>
-	<span class="open-bible-reader-verse-text">
+	<!-- svelte-ignore a11y_click_events_have_key_events -->
+	<span
+		class="open-bible-reader-verse-number"
+		role="button"
+		tabindex="0"
+		title={t("reader.selectVerseTooltip", { number: verse.number })}
+		aria-label={t("reader.selectVerseTooltip", { number: verse.number })}
+		onclick={(e) => {
+			e.stopPropagation();
+			onVerseClick(verse.number, e);
+		}}
+		onkeydown={(e) => {
+			if (e.key === "Enter" || e.key === " ") {
+				e.preventDefault();
+				onVerseClick(verse.number, e as unknown as MouseEvent);
+			}
+		}}
+	>
+		{verse.number}
+	</span>
+	<!-- svelte-ignore a11y_click_events_have_key_events -->
+	<span
+		class="open-bible-reader-verse-text"
+		role="presentation"
+		onclick={(e) => onVerseTextClick?.(e)}
+	>
 		{#if !isSelectionMode && rangedHighlights.length > 0}
 			{@render renderRangeSegments()}
 		{:else if !isSelectionMode && legacyHighlights.length > 0}

@@ -227,6 +227,7 @@ export const en: TranslationStrings = {
 		singleColumn: "Single-column layout",
 		loadingVerses: "Loading verses…",
 		rangeHighlightMarker: "Text highlight",
+		selectVerseTooltip: "Select verse {number}",
 		noVersesFound: "No verses found for this chapter.",
 		retry: "Try again",
 	},

@@ -19,10 +19,10 @@ OpenBible includes a complete Bible study note-taking and highlighting system di
   - **Notes**: Rendered as colored vertical indicator lines (`.open-bible-verse-note-line`) in the gutter to the left of the verse text. Multi-verse notes connect smoothly across consecutive verses. Hovering any segment of a multi-verse indicator highlights the entire vertical line synchronously across all spanned verses. Clicking a note indicator opens the note preview modal or editor, while holding `Ctrl` / `Cmd` triggers Obsidian's native hover preview tooltip.
 
 - **Selection System & Mobile Selection Mode**:
-  - **Single Click**: Clicking a verse selects only that verse. Clicking it again deselects it.
-  - **Multi-Verse Range (`Shift + Click`)**: Holding `Shift` while clicking another verse selects the contiguous range between the anchor and the target verse.
-  - **Visual Feedback**: Selected verses display a distinct accent background tint (`var(--background-modifier-hover)` / primary tint), an accent left-border indicator, and an accent-highlighted verse number.
-  - **Selection Mode Toggle**: A dedicated toggle button (`check-square`) in the reader toolbar, page header action, and command palette (`toggle-selection-mode`) activates explicit checkboxes on the left side of every verse row, making multi-verse selection effortless on mobile touch devices.
+  - **Verse Number Selection**: In standard reading mode, clicking the verse number (e.g. `5`) selects the entire verse (clicking it again deselects it). Holding `Shift` while clicking another verse number selects the contiguous range between the anchor and target verse. The verse number features a hover pill indicator with tooltip guidance.
+  - **Natural Word & Phrase Text Selection**: The verse text has a dedicated text cursor (`cursor: text`) and free selection (`user-select: text`). Users can double-click words (e.g. "SENHOR") or drag across phrases (e.g. "torre que estavam construindo") without triggering whole-verse selection or premature popovers. Selecting text opens the Verse Action Bar specifically for that snippet. Clicking the text when an action bar is open cleanly dismisses it.
+  - **Visual Feedback**: Selected verses display a distinct accent background tint (`var(--background-modifier-hover)` / primary tint), an accent border indicator (`1.5px solid var(--interactive-accent)`), and an accent-highlighted verse number.
+  - **Selection Mode Toggle**: A dedicated toggle button (`check-square`) in the reader toolbar, page header action, and command palette (`toggle-selection-mode`) activates explicit checkboxes on the left side of every verse row, making multi-verse selection effortless on mobile touch devices. When selection mode is active, clicking anywhere on the row toggles the verse checkbox.
 
 - **Highlights Panel (Drawer)**:
   - Accessible from the reader toolbar (`highlighter` button), view header action, and command palette (`open-bible-highlights`).

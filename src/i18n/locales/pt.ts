@@ -228,6 +228,7 @@ export const pt: TranslationStrings = {
 		singleColumn: "Coluna única",
 		loadingVerses: "Carregando versículos…",
 		rangeHighlightMarker: "Destaque de texto",
+		selectVerseTooltip: "Selecionar versículo {number}",
 		noVersesFound: "Nenhum versículo encontrado neste capítulo.",
 		retry: "Tentar novamente",
 	},

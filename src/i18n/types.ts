@@ -216,6 +216,7 @@ export interface TranslationStrings {
 		singleColumn: string;
 		loadingVerses: string;
 		rangeHighlightMarker: string;
+		selectVerseTooltip: string;
 		noVersesFound: string;
 		retry: string;
 	};

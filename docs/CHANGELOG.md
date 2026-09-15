@@ -40,6 +40,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - **Selection Mode Clutter / Checkbox Overlap**:
   - Automatically hides note indicator gutter lines and text highlight underlines whenever Selection Mode is active, preventing visual overlap with checkboxes. Highlights and note indicators are seamlessly restored upon exiting selection mode.
+- **Natural Text Selection vs. Whole Verse Selection**:
+  - Isolated whole-verse selection to clicking the verse number (e.g. `5`) or using Selection Mode checkboxes, freeing the verse text (`cursor: text`, `user-select: text`) for natural word double-clicking and click-and-drag phrase selection.
+  - Eliminated premature popovers and whole-verse selection conflicts when attempting to highlight phrases or words.
+  - Clicking on the text when an action bar is open cleanly dismisses it.
 - **Selected Verse Visibility**:
   - Added a complete 1.5px accent border (`var(--interactive-accent)`) with subtle glow around selected verses, ensuring they remain immediately recognizable even when adjacent to note indicators.
 - **Mobile Floating Popover Navigation Bar Collision**:

@@ -307,6 +307,20 @@
 		}
 	}
 
+	function handleVerseTextClick(event: MouseEvent) {
+		if (isSelectionMode) return;
+		if (justCapturedTextRange) return;
+
+		const selection = window.getSelection();
+		if (selection && !selection.isCollapsed && selection.toString().trim()) {
+			return;
+		}
+
+		if (selectedVerseNumbers.length > 0 || textRangeSelection) {
+			clearSelection();
+		}
+	}
+
 	async function copyReference() {
 		if (!formattedRef) return;
 		try {
@@ -572,6 +586,7 @@
 									xrefGutterAlign="end"
 									onVerseClick={handleVerseClick}
 									onToggleVerseSelection={handleToggleVerseSelection}
+									onVerseTextClick={handleVerseTextClick}
 									onOpenNote={handleOpenNote}
 									onNoteLineHover={handleNoteLineHover}
 									onNoteLineEnter={(path) => (hoveredNotePath = path)}
@@ -597,6 +612,7 @@
 									xrefGutterAlign="start"
 									onVerseClick={handleVerseClick}
 									onToggleVerseSelection={handleToggleVerseSelection}
+									onVerseTextClick={handleVerseTextClick}
 									onOpenNote={handleOpenNote}
 									onNoteLineHover={handleNoteLineHover}
 									onNoteLineEnter={(path) => (hoveredNotePath = path)}
@@ -632,6 +648,7 @@
 								showXrefGutter={showThompsonXrefs}
 								onVerseClick={handleVerseClick}
 								onToggleVerseSelection={handleToggleVerseSelection}
+								onVerseTextClick={handleVerseTextClick}
 								onOpenNote={handleOpenNote}
 								onNoteLineHover={handleNoteLineHover}
 								onNoteLineEnter={(path) => (hoveredNotePath = path)}
