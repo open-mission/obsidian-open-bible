@@ -22,7 +22,7 @@ export default class OpenBiblePlugin extends Plugin {
 	async onload(): Promise<void> {
 		await this.loadSettings();
 		this.applyLanguage();
-		this.bibleVersions = new BibleVersionService(this.app, () => this.settings);
+		this.bibleVersions = new BibleVersionService(this.app, () => this.settings, () => this.saveSettings());
 		this.bibleText = new BibleTextService(this.app, this.bibleVersions);
 		this.crossReferenceService = new CrossReferenceService(() => this.bibleText.getSql());
 		this.versePreviewService = new VersePreviewService(this);

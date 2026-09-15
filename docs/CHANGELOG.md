@@ -11,6 +11,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - **Directional Chapter Transitions**: Smooth GPU-accelerated CSS animations (`is-next`, `is-prev`, `is-jump`) when changing chapters, respecting user reduced-motion preferences.
+- **Custom Version Metadata Editing**: Edit Bible Version Name, Abbreviation, and Language without changing or renaming the underlying `.sqlite` file reference. Overrides are stored in plugin settings (`customVersionMetadata`).
+- **Version Search & Filtering**: Live search by name, abbreviation, language, and file path in both the Version Settings tab and the Reader's Version Picker drawer.
+- **Primary / Default Bible Version**:
+  - Set a preferred default Bible version via General Settings, the Version Settings star toggle, or the Version Edit modal.
+  - Automatically selected by default in the Bible Reader, Verse Previews, and future verse citations.
+  - Automatic cleanup of metadata and default assignment when a version is deleted.
+
 
 ## [0.1.0] - 2026-09-15
 

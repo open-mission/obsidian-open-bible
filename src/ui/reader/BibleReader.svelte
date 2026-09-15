@@ -237,6 +237,15 @@
 						if (settings.lastReadBookId > 0) initialBookId = settings.lastReadBookId;
 						if (settings.lastReadChapter > 0) initialChapter = settings.lastReadChapter;
 					}
+				} else if (settings.defaultVersionPath) {
+					const found = versions.find(
+						(v) =>
+							v.filePath === settings.defaultVersionPath ||
+							v.filePath.endsWith(`/${settings.defaultVersionPath}`)
+					);
+					if (found) {
+						targetPath = found.filePath;
+					}
 				}
 
 				await selectDatabase(targetPath, initialBookId, initialChapter);

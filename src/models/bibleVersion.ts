@@ -4,4 +4,6 @@ export interface BibleVersion {
 	name: string;
 	abbreviation: string;
 	filePath: string;
+	language?: string;
+	isDefault?: boolean;
 }

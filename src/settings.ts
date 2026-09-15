@@ -17,9 +17,19 @@ export interface ReadingHistoryEntry {
 	timestamp: number;
 }
 
+export interface CustomVersionMetadata {
+	name?: string;
+	abbreviation?: string;
+	language?: string;
+}
+
 export interface OpenBibleSettings {
 	dataFolder: string;
 	defaultReference: string;
+	/** Primary/default Bible version file path for reader, preview, and citations. */
+	defaultVersionPath?: string;
+	/** Custom metadata overrides per SQLite file path. */
+	customVersionMetadata?: Record<string, CustomVersionMetadata>;
 	/** UI language preference: "auto" follows the Obsidian language. */
 	language: LocalePreference;
 	/** Reader layout: two columns. */
@@ -50,6 +60,8 @@ export interface OpenBibleSettings {
 export const DEFAULT_SETTINGS: OpenBibleSettings = {
 	dataFolder: DEFAULT_DATA_FOLDER,
 	defaultReference: "João 3:16",
+	defaultVersionPath: "",
+	customVersionMetadata: {},
 	language: "auto",
 	readerTwoColumns: false,
 	twoColumnLayout: false,

@@ -83,6 +83,23 @@ export interface TranslationStrings {
 		creditsDesc: string;
 		creditsOpenBibleDesc: string;
 		creditsOpenMissionDesc: string;
+		defaultVersionName: string;
+		defaultVersionDesc: string;
+		defaultVersionNone: string;
+		editVersionTitle: string;
+		editVersionButton: string;
+		versionPathLabel: string;
+		versionNameLabel: string;
+		versionAbbrLabel: string;
+		versionLanguageLabel: string;
+		versionLanguagePlaceholder: string;
+		setAsDefaultLabel: string;
+		setAsDefaultDesc: string;
+		setAsDefaultButton: string;
+		isDefaultBadge: string;
+		versionUpdatedNotice: string;
+		searchVersionsPlaceholder: string;
+		noVersionsFound: string;
 	};
 	errors: {
 		invalidFolderPath: string;
@@ -212,5 +229,8 @@ export interface TranslationStrings {
 		installedCountPlural: string;
 		close: string;
 		selectVersionAria: string;
+		searchPlaceholder: string;
+		noResults: string;
+		defaultBadge: string;
 	};
 }

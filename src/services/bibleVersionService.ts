@@ -25,11 +25,12 @@ export interface BibleVersionEntry {
 export interface ResolvedVersionInfo {
 	name: string;
 	abbreviation: string;
+	language?: string;
 }
 
 /**
  * Access point for SQLite files in the vault.
- * Scans directories, resolves translation names/abbreviations via registry and SQLite metadata.
+ * Scans directories, resolves translation names/abbreviations via registry, custom metadata, and SQLite metadata.
  */
 export class BibleVersionService {
 	private versionRegistry: BibleVersionEntry[] = [];
@@ -38,6 +39,7 @@ export class BibleVersionService {
 	constructor(
 		private readonly app: App,
 		private readonly getSettings: () => OpenBibleSettings,
+		private readonly onSaveSettings?: () => Promise<void>,
 	) {
 		this.loadVersionRegistry();
 	}
@@ -75,6 +77,20 @@ export class BibleVersionService {
 		const base = filename.replace(DATABASE_EXTENSION, "").trim();
 		const candidateAbbr = abbreviationFromFilename(filename);
 
+		// 1. Check custom user-defined metadata in settings first
+		const settings = this.getSettings();
+		const custom =
+			settings.customVersionMetadata?.[filenameOrPath] ??
+			(filename !== filenameOrPath ? settings.customVersionMetadata?.[filename] : undefined);
+		if (custom && (custom.name || custom.abbreviation || custom.language)) {
+			return {
+				name: custom.name || base,
+				abbreviation: custom.abbreviation || candidateAbbr,
+				language: custom.language,
+			};
+		}
+
+		// 2. Check metadata cache
 		const cached = this.metadataCache.get(filenameOrPath) ?? this.metadataCache.get(filename);
 		if (cached) {
 			return cached;
@@ -150,12 +166,19 @@ export class BibleVersionService {
 					if (seenNames.has(name)) continue;
 					seenNames.add(name);
 
-					const info = this.resolveVersionInfo(name);
+					const info = this.resolveVersionInfo(path);
+					const defaultPath = this.getSettings().defaultVersionPath;
+					const isDefault = Boolean(
+						defaultPath &&
+						(defaultPath === path || defaultPath === name || defaultPath.endsWith(`/${name}`))
+					);
 					results.push({
 						id: path,
 						name: info.name,
 						abbreviation: info.abbreviation,
 						filePath: path,
+						language: info.language,
+						isDefault,
 					});
 				}
 			} catch (error) {
@@ -186,12 +209,13 @@ export class BibleVersionService {
 		const filename = await this.uniqueFilename(file.name);
 		const filePath = normalizePath(`${this.getVersionsFolder()}/${filename}`);
 		await this.app.vault.adapter.writeBinary(filePath, contents);
-		const info = this.resolveVersionInfo(filename);
+		const info = this.resolveVersionInfo(filePath);
 		return {
 			id: filePath,
 			name: info.name,
 			abbreviation: info.abbreviation,
 			filePath,
+			language: info.language,
 		};
 	}
 
@@ -203,16 +227,67 @@ export class BibleVersionService {
 		if (await this.app.vault.adapter.exists(normalized)) {
 			await this.app.vault.adapter.remove(normalized);
 		}
+
+		const settings = this.getSettings();
+		const filename = normalized.slice(normalized.lastIndexOf("/") + 1);
+		if (settings.customVersionMetadata) {
+			delete settings.customVersionMetadata[normalized];
+			delete settings.customVersionMetadata[filename];
+		}
+		if (settings.defaultVersionPath === normalized || settings.defaultVersionPath === filename) {
+			settings.defaultVersionPath = "";
+		}
+		await this.onSaveSettings?.();
+	}
+
+	async updateVersionMetadata(
+		filePath: string,
+		metadata: { name?: string; abbreviation?: string; language?: string }
+	): Promise<void> {
+		const settings = this.getSettings();
+		if (!settings.customVersionMetadata) {
+			settings.customVersionMetadata = {};
+		}
+		const filename = filePath.slice(filePath.lastIndexOf("/") + 1);
+		const current = settings.customVersionMetadata[filePath] ?? settings.customVersionMetadata[filename] ?? {};
+		const updated = {
+			...current,
+			...metadata,
+		};
+		settings.customVersionMetadata[filePath] = updated;
+
+		this.setCachedMetadata(filePath, {
+			name: updated.name || this.resolveVersionInfo(filePath).name,
+			abbreviation: updated.abbreviation || this.resolveVersionInfo(filePath).abbreviation,
+			language: updated.language,
+		});
+
+		await this.onSaveSettings?.();
+	}
+
+	async setDefaultVersion(filePath: string): Promise<void> {
+		const settings = this.getSettings();
+		settings.defaultVersionPath = filePath;
+		const info = this.resolveVersionInfo(filePath);
+		settings.previewDefaultVersion = info.abbreviation;
+		await this.onSaveSettings?.();
 	}
 
 	toBibleVersion(filePath: string): BibleVersion {
 		const filename = filePath.slice(filePath.lastIndexOf("/") + 1);
-		const info = this.resolveVersionInfo(filename);
+		const info = this.resolveVersionInfo(filePath);
+		const defaultPath = this.getSettings().defaultVersionPath;
+		const isDefault = Boolean(
+			defaultPath &&
+			(defaultPath === filePath || defaultPath === filename || defaultPath.endsWith(`/${filename}`))
+		);
 		return {
 			id: filePath,
 			name: info.name,
 			abbreviation: info.abbreviation,
 			filePath,
+			language: info.language,
+			isDefault,
 		};
 	}
 

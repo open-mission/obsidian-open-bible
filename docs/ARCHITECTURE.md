@@ -78,7 +78,7 @@ obsidian-open-bible/
 │   │   ├── actions/               # Svelte actions (portal, icon)
 │   │   ├── core/                  # Core primitives (EmptyState, LoadingState, icons)
 │   │   ├── kit/                   # UI Kit (buttons, search, drawers, modals)
-│   │   ├── modals/                # Obsidian Modal dialogs (VersePreviewModal)
+│   │   ├── modals/                # Obsidian Modal dialogs (VersePreviewModal, EditVersionModal)
 │   │   ├── reader/                # Bible Reader component tree
 │   │   └── settings/              # Plugin settings pages & subpages
 │   └── workspace/                 # Workspace leaf split and reveal utilities
@@ -125,6 +125,14 @@ The UI is constructed using **Svelte 5 runes**:
 - Full accessibility compliance with `@media (prefers-reduced-motion: reduce)`.
 
 
+### Bible Version Management & SQLite Referencing
+- **Physical SQLite Integrity**: User-imported SQLite files (`.sqlite`, `.db`, `.sqlite3`) are stored in the configured data folder. The physical file paths serve as immutable identity keys (`filePath`).
+- **Custom Metadata Overrides**: Users can customize version attributes (Name, Abbreviation, Language) via the `EditVersionModal`. These customizations are stored in plugin settings under `customVersionMetadata[filePath]`. Modifying metadata never renames or touches the underlying binary file, preventing broken citations, deadlocks, or vault sync conflicts.
+- **Primary / Default Version**: Configured through `settings.defaultVersionPath`. The default version is highlighted across the UI and automatically utilized by:
+  - **Bible Reader**: Loads as the initial version on startup if no specific previous state exists.
+  - **Verse Preview & Citations**: Used by `VersePreviewService` whenever references do not declare an explicit translation.
+- **Search & Filtering**: Real-time filtering in both Settings and the Reader's Version Picker drawer matches normalized search queries against version name, abbreviation, language, and file path.
+
 ---
 
 ## 4. Internationalization (i18n)
@@ -136,3 +144,4 @@ UI copy is strictly decoupled from components:
   - `en` (English - default)
   - `pt` (Portuguese)
   - `auto` (follows Obsidian's interface language setting)
+

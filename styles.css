@@ -947,6 +947,35 @@
 	width: 1.35rem;
 }
 
+.open-bible-version-title-row {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	overflow: hidden;
+}
+
+.open-bible-version-default-tag {
+	flex-shrink: 0;
+	font-size: var(--font-ui-smaller, 0.75rem);
+	padding: 1px 6px;
+	border-radius: 999px;
+	background: var(--interactive-accent);
+	color: var(--text-on-accent);
+	font-weight: var(--font-semibold);
+	line-height: 1.2;
+}
+
+.open-bible-picker-search-container {
+	padding: 0 0.5rem 0.5rem 0.5rem;
+}
+
+.open-bible-picker-empty {
+	padding: 1.5rem 1rem;
+	text-align: center;
+	color: var(--text-muted);
+	font-size: var(--font-ui-small);
+}
+
 /* History List */
 .open-bible-history-list {
 	display: flex;
@@ -2101,3 +2130,48 @@ button.open-bible-xref-toggle {
 button.open-bible-xref-toggle:hover {
 	text-decoration: underline;
 }
+
+/* Version list & metadata settings */
+.ob-version-search-wrap {
+	margin: 0.75rem 0;
+}
+
+.ob-empty-search-message {
+	padding: 1.5rem 1rem;
+	text-align: center;
+	color: var(--text-muted);
+}
+
+.ob-version-item.is-default-item {
+	border-color: var(--interactive-accent) !important;
+	background: var(--background-primary-alt);
+}
+
+.ob-badge-primary {
+	background: var(--interactive-accent) !important;
+	color: var(--text-on-accent) !important;
+	border-color: var(--interactive-accent) !important;
+	font-weight: var(--font-semibold);
+}
+
+.ob-badge-lang {
+	background: var(--background-secondary);
+	color: var(--text-muted) !important;
+	border-color: var(--background-modifier-border);
+}
+
+.clickable-icon.is-active-star {
+	color: var(--text-accent);
+}
+
+.clickable-icon.is-active-star svg {
+	fill: currentColor;
+}
+
+.open-bible-edit-version-modal .ob-setting-readonly .setting-item-description {
+	user-select: text;
+	font-family: var(--font-monospace);
+	font-size: var(--font-ui-smaller);
+	word-break: break-all;
+}
+

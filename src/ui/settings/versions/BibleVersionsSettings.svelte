@@ -4,9 +4,12 @@
 	import type { BibleVersion } from "../../../models/bibleVersion";
 	import { confirmAction } from "../../../core/confirm";
 	import { t } from "../../../i18n";
+	import { normalizeText } from "../../../constants";
 	import { lucide } from "../../core/icons";
 	import EmptyState from "../../core/EmptyState.svelte";
 	import LoadingState from "../../core/LoadingState.svelte";
+	import SearchField from "../../kit/SearchField.svelte";
+	import { EditVersionModal } from "../../modals/EditVersionModal";
 
 	interface Props {
 		app: App;
@@ -22,6 +25,23 @@
 	let importing = $state(false);
 	let removingPath = $state<string | null>(null);
 	let fileInput = $state<HTMLInputElement>();
+	let searchQuery = $state("");
+
+	let filteredVersions = $derived.by(() => {
+		const q = normalizeText(searchQuery);
+		if (!q) return versions;
+		return versions.filter((v) => {
+			const name = normalizeText(v.name);
+			const abbr = normalizeText(v.abbreviation);
+			const lang = v.language ? normalizeText(v.language) : "";
+			return (
+				name.includes(q) ||
+				abbr.includes(q) ||
+				lang.includes(q) ||
+				v.filePath.toLowerCase().includes(q)
+			);
+		});
+	});
 
 	async function load(): Promise<void> {
 		loading = true;
@@ -75,6 +95,33 @@
 			removingPath = null;
 		}
 	}
+
+	function onEdit(version: BibleVersion): void {
+		new EditVersionModal(app, version, async (result) => {
+			await service.updateVersionMetadata(version.filePath, {
+				name: result.name,
+				abbreviation: result.abbreviation,
+				language: result.language,
+			});
+			if (result.isDefault) {
+				await service.setDefaultVersion(version.filePath);
+			} else if (version.isDefault) {
+				await service.setDefaultVersion("");
+			}
+			new Notice(t("settings.versionUpdatedNotice"));
+			await load();
+		}).open();
+	}
+
+	async function onToggleDefault(version: BibleVersion): Promise<void> {
+		if (version.isDefault) {
+			await service.setDefaultVersion("");
+		} else {
+			await service.setDefaultVersion(version.filePath);
+		}
+		new Notice(t("settings.versionUpdatedNotice"));
+		await load();
+	}
 </script>
 
 <div class="setting-item">
@@ -90,23 +137,58 @@
 	</div>
 </div>
 
+{#if versions.length > 2}
+	<div class="ob-version-search-wrap">
+		<SearchField
+			bind:value={searchQuery}
+			placeholder={t("settings.searchVersionsPlaceholder")}
+		/>
+	</div>
+{/if}
+
 {#if loading}
 	<LoadingState message={t("common.loading")} />
 {:else if versions.length === 0}
 	<EmptyState message={t("settings.noVersionsYet")} hint={t("settings.importDesc")} />
+{:else if filteredVersions.length === 0}
+	<div class="ob-empty-search-message">
+		<p>{t("settings.noVersionsFound")}</p>
+	</div>
 {:else}
 	<div class="ob-version-list">
-		{#each versions as version (version.id)}
-			<div class="setting-item ob-version-item">
+		{#each filteredVersions as version (version.id)}
+			<div class="setting-item ob-version-item" class:is-default-item={version.isDefault}>
 				<div class="setting-item-info">
 					<div class="setting-item-name">
 						{version.name}
 						<span class="ob-badge">{version.abbreviation}</span>
+						{#if version.language}
+							<span class="ob-badge ob-badge-lang">{version.language}</span>
+						{/if}
+						{#if version.isDefault}
+							<span class="ob-badge ob-badge-primary">{t("settings.isDefaultBadge")}</span>
+						{/if}
 					</div>
 					<div class="setting-item-description">{version.filePath}</div>
 				</div>
 				<div class="setting-item-control">
 					<button
+						type="button"
+						class="clickable-icon"
+						class:is-active-star={version.isDefault}
+						use:lucide={"star"}
+						aria-label={t("settings.setAsDefaultLabel")}
+						onclick={() => void onToggleDefault(version)}
+					></button>
+					<button
+						type="button"
+						class="clickable-icon"
+						use:lucide={"pencil"}
+						aria-label={`${t("settings.editVersionButton")}: ${version.name}`}
+						onclick={() => onEdit(version)}
+					></button>
+					<button
+						type="button"
 						class="clickable-icon"
 						use:lucide={"trash-2"}
 						aria-label={`${t("settings.removeButton")} ${version.name}`}
