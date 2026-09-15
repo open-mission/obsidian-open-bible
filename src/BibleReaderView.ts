@@ -15,6 +15,8 @@ export class BibleReaderView extends ItemView {
 	private controller: BibleReaderController | null = null;
 	private passageTitle = "";
 	private viewState: BibleReaderViewState = {};
+	private appearanceActionEl: HTMLElement | null = null;
+	private historyActionEl: HTMLElement | null = null;
 
 	constructor(
 		leaf: WorkspaceLeaf,
@@ -162,6 +164,25 @@ export class BibleReaderView extends ItemView {
 	}
 
 	async onOpen(): Promise<void> {
+		if (!this.appearanceActionEl) {
+			this.appearanceActionEl = this.addAction(
+				"sliders-horizontal",
+				t("readerMenu.appearance") || "Aparência",
+				() => {
+					this.openAppearance();
+				},
+			);
+		}
+		if (!this.historyActionEl) {
+			this.historyActionEl = this.addAction(
+				"history",
+				t("readerMenu.readingHistory") || "Histórico de leitura",
+				() => {
+					this.openHistory();
+				},
+			);
+		}
+
 		this.contentEl.empty();
 		this.contentEl.addClass("open-bible-reader-view");
 
@@ -196,6 +217,8 @@ export class BibleReaderView extends ItemView {
 	}
 
 	async onClose(): Promise<void> {
+		this.appearanceActionEl = null;
+		this.historyActionEl = null;
 		if (this.component) {
 			await unmount(this.component);
 			this.component = undefined;

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { Platform } from "obsidian";
 	import { t } from "../../../i18n";
 	import type { BibleDatabaseInfo } from "../../../models/bible";
 	import { icon } from "../../actions/icon";
@@ -28,6 +29,8 @@
 		onTogglePicker,
 	}: Props = $props();
 
+	let isMobile = Platform.isMobile;
+
 	let defaultVersionLabel = $derived(t("toolbar.defaultVersion"));
 	let versionFullName = $derived(
 		currentInfo
@@ -42,7 +45,7 @@
 	<!-- 1. Previous Button (<) -->
 	<IconButton
 		iconName="chevron-left"
-		class="open-bible-reader-nav"
+		class="open-bible-reader-nav open-bible-reader-prev-btn"
 		title={t("toolbar.prevChapter")}
 		ariaLabel={t("toolbar.prevChapter")}
 		disabled={!canNavigatePrevious}
@@ -97,30 +100,32 @@
 		<span class="open-bible-reader-pill-chevron" use:icon={"chevron-down"}></span>
 	</button>
 
-	<!-- 5. Appearance Controls -->
-	<IconButton
-		iconName="sliders-horizontal"
-		class="open-bible-reader-nav"
-		active={activePicker === "appearance"}
-		title={t("readerMenu.appearance") || "Aparência"}
-		ariaLabel={t("readerMenu.appearance") || "Aparência"}
-		onclick={() => onTogglePicker("appearance")}
-	/>
+	<!-- 5. Appearance Controls (hidden on mobile; accessed via page header '...' menu) -->
+	{#if !isMobile}
+		<IconButton
+			iconName="sliders-horizontal"
+			class="open-bible-reader-nav open-bible-reader-toolbar-appearance"
+			active={activePicker === "appearance"}
+			title={t("readerMenu.appearance") || "Aparência"}
+			ariaLabel={t("readerMenu.appearance") || "Aparência"}
+			onclick={() => onTogglePicker("appearance")}
+		/>
+	{/if}
 
 	<!-- 6. History -->
 	<IconButton
 		iconName="history"
-		class="open-bible-reader-nav"
+		class="open-bible-reader-nav open-bible-reader-toolbar-history"
 		active={activePicker === "history"}
 		title={t("readerMenu.readingHistory") || "Histórico"}
 		ariaLabel={t("readerMenu.readingHistory") || "Histórico"}
 		onclick={() => onTogglePicker("history")}
 	/>
 
-	<!-- 8. Next Button (>) -->
+	<!-- 7. Next Button (>) -->
 	<IconButton
 		iconName="chevron-right"
-		class="open-bible-reader-nav"
+		class="open-bible-reader-nav open-bible-reader-next-btn"
 		title={t("toolbar.nextChapter")}
 		ariaLabel={t("toolbar.nextChapter")}
 		disabled={!canNavigateNext}

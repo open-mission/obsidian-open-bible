@@ -197,6 +197,7 @@ export interface TranslationStrings {
 		thompsonPositionCenter: string;
 		bottomCrossRefs: string;
 		appearance: string;
+		readingHistory: string;
 	};
 	resources: {
 		crossReferences: string;

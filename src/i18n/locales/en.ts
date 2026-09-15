@@ -208,6 +208,7 @@ export const en: TranslationStrings = {
 		thompsonPositionCenter: "Thompson: center",
 		bottomCrossRefs: "Cross-references panel",
 		appearance: "Appearance",
+		readingHistory: "Reading history",
 	},
 	resources: {
 		crossReferences: "Cross-references",

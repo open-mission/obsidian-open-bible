@@ -209,6 +209,7 @@ export const pt: TranslationStrings = {
 		thompsonPositionCenter: "Thompson: centro",
 		bottomCrossRefs: "Painel de referências cruzadas",
 		appearance: "Aparência",
+		readingHistory: "Histórico de leitura",
 	},
 	resources: {
 		crossReferences: "Referências cruzadas",
