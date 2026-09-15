@@ -22,6 +22,7 @@ import {
 	deleteMarkdownFile,
 	getVersionMarkdownPath,
 } from "./versionMetadata";
+import { registerKnownVersions } from "./VerseReferenceParser";
 
 export interface BibleVersionEntry {
 	name: string;
@@ -68,6 +69,7 @@ export class BibleVersionService {
 
 	loadVersionRegistry(): void {
 		this.versionRegistry = [...(defaultVersionsData as BibleVersionEntry[])];
+		registerKnownVersions(this.versionRegistry.map((v) => v.abbreviation));
 	}
 
 	/**
@@ -79,6 +81,9 @@ export class BibleVersionService {
 			: pathOrFilename;
 		this.metadataCache.set(pathOrFilename, info);
 		this.metadataCache.set(filename, info);
+		if (info.abbreviation) {
+			registerKnownVersions([info.abbreviation]);
+		}
 	}
 
 	/**

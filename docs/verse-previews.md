@@ -7,8 +7,8 @@ OpenBible automatically scans and detects Scripture references in your Markdown 
 ## 1. Overview & User Experience
 
 - **Automatic Reference Detection**:
-  As soon as you type a Bible reference (e.g. `João 3:16`, `Sl 23:1-3`, `Rm 8:28 NVT`, `1 Coríntios 13:4 ARA`), OpenBible identifies it in real time and styles it with a subtle dotted underline (`.open-bible-verse-preview-link`).
-  References inside code blocks, markdown links (`[[...]]` or `[...]`), URLs, and HTML tags are safely ignored.
+  As soon as you type a Bible reference (e.g. `João 3:16`, `Mateus 10`, `Sl 23`, `Sl 23:1-3`, `Rm 8:28 NVT`, `1 Coríntios 13:4 ARA`), OpenBible identifies it in real time and styles it with a subtle dotted underline (`.open-bible-verse-preview-link`). Both chapter references (e.g. `Mateus 10`) and verse ranges (e.g. `Mateus 10.1` or `Mateus 10:1-5`) are detected seamlessly.
+  References inside code blocks, YAML frontmatter, markdown links (`[[...]]` or `[...]`), URLs, and HTML tags are safely ignored.
 
 - **Preview on Hover with Configurable Modifier Key**:
   Positioning the mouse cursor over the underlined reference while holding the configured modifier key (default: `Shift`, with options for `Ctrl / Cmd`, `Alt / Option`, or `None / hover only`) immediately renders an unobtrusive floating tooltip (`.open-bible-verse-hover-popover`) containing the reference title, Bible version abbreviation, and formatted verses. If you already have the cursor over the reference, pressing the modifier key reveals the preview instantly. Releasing the modifier hides the tooltip.

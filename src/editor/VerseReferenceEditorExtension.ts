@@ -34,6 +34,8 @@ const EXCLUDED_SYNTAX_NODES = new Set([
 	"HTMLBlock",
 	"HTMLTag",
 	"comment",
+	"Frontmatter",
+	"frontmatter",
 ]);
 
 function isInsideExcludedSyntax(view: EditorView, from: number): boolean {

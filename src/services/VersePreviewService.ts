@@ -73,6 +73,23 @@ export class VersePreviewService {
 
 		try {
 			const allChapterVerses = await this.plugin.bibleText.readChapter(dbInfo.path, ref.canonicalBookId, ref.chapter);
+			if (allChapterVerses.length === 0) return null;
+
+			if (ref.isChapterOnly) {
+				const reference = `${ref.bookName} ${ref.chapter}`;
+				return {
+					reference,
+					bookName: ref.bookName,
+					chapter: ref.chapter,
+					verseStart: 1,
+					verseEnd: allChapterVerses[allChapterVerses.length - 1]?.number,
+					versionAbbr: dbInfo.abbreviation,
+					versionName: dbInfo.name,
+					databasePath: dbInfo.path,
+					verses: allChapterVerses,
+				};
+			}
+
 			const start = ref.verseStart;
 			const end = ref.verseEnd ?? ref.verseStart;
 

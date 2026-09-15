@@ -100,6 +100,7 @@ export function processMarkdownVerseReferences(
 			link.setAttribute("data-verse-start", String(ref.verseStart));
 			if (ref.verseEnd) link.setAttribute("data-verse-end", String(ref.verseEnd));
 			if (ref.versionAbbr) link.setAttribute("data-version", ref.versionAbbr);
+			if (ref.isChapterOnly) link.setAttribute("data-chapter-only", "true");
 			if (plugin.settings.enableVerseClickPreview === false) {
 				link.setAttribute("data-open-bible-clickable", "false");
 			}

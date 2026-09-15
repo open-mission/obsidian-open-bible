@@ -72,30 +72,86 @@ describe("parseSingleReference", () => {
 });
 
 describe("findAllReferencesInText", () => {
-	it("finds multiple references and requires a verse in running text", () => {
-		const refs = findAllReferencesInText("See João 3:16 and Mt 5:1-12 NVT, but ignore Sl 23 here.");
+	it("finds chapter-only references like Mateus 10 and Sl 23", () => {
+		const refs = findAllReferencesInText("Veja Mateus 10 e depois Sl 23 para edificar.");
 		assert.equal(refs.length, 2);
+		assert.equal(refs[0].canonicalBookId, 40);
+		assert.equal(refs[0].chapter, 10);
+		assert.equal(refs[0].verseStart, 1);
+		assert.equal(refs[0].isChapterOnly, true);
+		assert.equal(refs[0].raw, "Mateus 10");
+
+		assert.equal(refs[1].canonicalBookId, 19);
+		assert.equal(refs[1].chapter, 23);
+		assert.equal(refs[1].verseStart, 1);
+		assert.equal(refs[1].isChapterOnly, true);
+		assert.equal(refs[1].raw, "Sl 23");
+	});
+
+	it("finds mixed chapter-only and verse references in running text", () => {
+		const refs = findAllReferencesInText("See João 3:16 and Mt 5:1-12 NVT, also Sl 23 here.");
+		assert.equal(refs.length, 3);
 		assert.equal(refs[0].canonicalBookId, 43);
 		assert.equal(refs[0].verseStart, 16);
+		assert.equal(refs[0].isChapterOnly, false);
+
 		assert.equal(refs[1].canonicalBookId, 40);
 		assert.equal(refs[1].verseStart, 1);
 		assert.equal(refs[1].verseEnd, 12);
 		assert.equal(refs[1].versionAbbr, "NVT");
+		assert.equal(refs[1].isChapterOnly, false);
+
+		assert.equal(refs[2].canonicalBookId, 19);
+		assert.equal(refs[2].chapter, 23);
+		assert.equal(refs[2].isChapterOnly, true);
+		assert.equal(refs[2].raw, "Sl 23");
 	});
 
-	it("does not consume an unknown trailing word as version", () => {
-		const refs = findAllReferencesInText("Jo 3:16 Hello");
+	it("finds chapter reference with version suffix", () => {
+		const refs = findAllReferencesInText("Leia Mateus 10 ARA com atenção.");
 		assert.equal(refs.length, 1);
-		assert.equal(refs[0].versionAbbr, undefined);
+		assert.equal(refs[0].canonicalBookId, 40);
+		assert.equal(refs[0].chapter, 10);
+		assert.equal(refs[0].versionAbbr, "ARA");
+		assert.equal(refs[0].raw, "Mateus 10 ARA");
+		assert.equal(refs[0].isChapterOnly, true);
+	});
+
+	it("does not consume an unknown trailing word as version and correctly rewinds", () => {
+		const refs = findAllReferencesInText("Jo 3:16 Hello and Mateus 10 Jo 3:16");
+		assert.equal(refs.length, 3);
 		assert.equal(refs[0].raw, "Jo 3:16");
+		assert.equal(refs[0].versionAbbr, undefined);
+
+		assert.equal(refs[1].raw, "Mateus 10");
+		assert.equal(refs[1].chapter, 10);
+		assert.equal(refs[1].isChapterOnly, true);
+
+		assert.equal(refs[2].raw, "Jo 3:16");
+		assert.equal(refs[2].verseStart, 16);
 	});
 
 	it("finds references with accented book names in running text", () => {
-		const refs = findAllReferencesInText("Leia Êxodo 20:1 e Números 6:24-26, também Isaías 6:3.");
-		assert.equal(refs.length, 3, "Should find Êxodo, Números, and Isaías");
+		const refs = findAllReferencesInText("Leia Êxodo 20 e Números 6:24-26, também Isaías 6.");
+		assert.equal(refs.length, 3, "Should find Êxodo 20, Números 6:24-26, and Isaías 6");
 		assert.equal(refs[0].canonicalBookId, 2);
+		assert.equal(refs[0].chapter, 20);
+		assert.equal(refs[0].isChapterOnly, true);
+
 		assert.equal(refs[1].canonicalBookId, 4);
+		assert.equal(refs[1].chapter, 6);
+		assert.equal(refs[1].verseStart, 24);
+		assert.equal(refs[1].verseEnd, 26);
+		assert.equal(refs[1].isChapterOnly, false);
+
 		assert.equal(refs[2].canonicalBookId, 23);
+		assert.equal(refs[2].chapter, 6);
+		assert.equal(refs[2].isChapterOnly, true);
+	});
+
+	it("does not match chapters beyond book bounds", () => {
+		const refs = findAllReferencesInText("Veja Mateus 50 e Judas 5");
+		assert.equal(refs.length, 0);
 	});
 
 	it("does not match across newlines", () => {
