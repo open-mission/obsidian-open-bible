@@ -34,6 +34,17 @@
 	let otCount = $derived(books.filter((b) => b.testament === 1).length);
 	let ntCount = $derived(books.filter((b) => b.testament === 2).length);
 
+	let parsedRef = $derived.by(() => {
+		const q = searchQuery.trim();
+		if (!q) return null;
+		return parseSingleReference(q);
+	});
+
+	let matchedRefBook = $derived.by(() => {
+		if (!parsedRef) return null;
+		return books.find((b) => b.id === parsedRef.canonicalBookId) ?? null;
+	});
+
 	let filteredBooks = $derived.by(() => {
 		let list = books;
 		if (activeTab === "ot") {
@@ -42,8 +53,23 @@
 			list = list.filter((b) => b.testament === 2);
 		}
 
-		if (searchQuery.trim()) {
-			list = list.filter((b) => matchesBookSearch(b.name, searchQuery));
+		const query = searchQuery.trim();
+		if (query) {
+			const matched = matchedRefBook;
+			const textFiltered = list.filter((b) => matchesBookSearch(b.name, query));
+			if (matched && !textFiltered.some((b) => b.id === matched.id)) {
+				const belongsToTab =
+					activeTab === "all" ||
+					(activeTab === "ot" && matched.testament === 1) ||
+					(activeTab === "nt" && matched.testament === 2);
+				if (belongsToTab) {
+					list = [matched, ...textFiltered];
+				} else {
+					list = textFiltered;
+				}
+			} else {
+				list = textFiltered;
+			}
 		}
 		return list;
 	});
@@ -52,21 +78,32 @@
 	let otBooks = $derived(filteredBooks.filter((b) => b.testament === 1));
 	let ntBooks = $derived(filteredBooks.filter((b) => b.testament === 2));
 
+	function handleBookClick(book: BibleBook) {
+		if (matchedRefBook?.id === book.id && parsedRef?.chapter && onNavigateToChapter) {
+			if (book.chapters.includes(parsedRef.chapter)) {
+				onNavigateToChapter(book.id, parsedRef.chapter);
+				return;
+			}
+		}
+		onSelectBook(book);
+	}
+
 	function handleKeyDown(e: KeyboardEvent) {
 		if (e.key === "Enter") {
 			e.preventDefault();
 
-			// Try parsing as a reference first (e.g. "Gn 10" or "Genesis 10:1")
-			const query = searchQuery.trim();
-			if (query && onNavigateToChapter) {
-				const parsed = parseSingleReference(query);
-				if (parsed && parsed.chapter) {
-					const book = books.find((b) => b.id === parsed.canonicalBookId);
-					if (book && book.chapters.includes(parsed.chapter)) {
-						onNavigateToChapter(parsed.canonicalBookId, parsed.chapter);
-						return;
-					}
+			// If reference matched with chapter (e.g. "Gn 10" or "Genesis 10:1")
+			if (parsedRef && matchedRefBook && onNavigateToChapter && parsedRef.chapter) {
+				if (matchedRefBook.chapters.includes(parsedRef.chapter)) {
+					onNavigateToChapter(matchedRefBook.id, parsedRef.chapter);
+					return;
 				}
+			}
+
+			// If reference matched a book without chapter
+			if (matchedRefBook) {
+				onSelectBook(matchedRefBook);
+				return;
 			}
 
 			// Fallback to selecting first filtered book
@@ -103,6 +140,26 @@
 		onkeydown={handleKeyDown}
 	/>
 </div>
+
+{#if parsedRef && matchedRefBook}
+	<button
+		type="button"
+		class="open-bible-picker-ref-badge"
+		onclick={() => handleBookClick(matchedRefBook!)}
+	>
+		<span class="open-bible-picker-ref-badge-icon" use:icon={"bookmark"}></span>
+		<div class="open-bible-picker-ref-badge-content">
+			<span class="open-bible-picker-ref-badge-title">
+				{matchedRefBook.name} {parsedRef.chapter}{parsedRef.verseStart ? `:${parsedRef.verseStart}${parsedRef.verseEnd ? `-${parsedRef.verseEnd}` : ""}` : ""}
+				{#if parsedRef.versionAbbr}
+					<span class="open-bible-picker-ref-badge-version">({parsedRef.versionAbbr})</span>
+				{/if}
+			</span>
+			<span class="open-bible-picker-ref-badge-hint">{t("bookPicker.pressEnterToOpen")}</span>
+		</div>
+		<span class="open-bible-picker-ref-badge-arrow" use:icon={"arrow-right"}></span>
+	</button>
+{/if}
 
 <!-- Tabs: Todos, AT, NT -->
 <div class="open-bible-picker-tabs">
@@ -146,10 +203,11 @@
 							type="button"
 							class="open-bible-book-tile"
 							class:is-active={book.id === currentBookId}
+							class:is-reference-target={matchedRefBook?.id === book.id}
 							aria-label={book.chapters.length === 1
 								? t("bookPicker.bookAriaSingle", { name: book.name })
 								: t("bookPicker.bookAriaPlural", { name: book.name, count: book.chapters.length })}
-							onclick={() => onSelectBook(book)}
+							onclick={() => handleBookClick(book)}
 						>
 							<span class="open-bible-book-tile-name">{book.name}</span>
 							<span class="open-bible-book-tile-count">
@@ -172,10 +230,11 @@
 							type="button"
 							class="open-bible-book-tile"
 							class:is-active={book.id === currentBookId}
+							class:is-reference-target={matchedRefBook?.id === book.id}
 							aria-label={book.chapters.length === 1
 								? t("bookPicker.bookAriaSingle", { name: book.name })
 								: t("bookPicker.bookAriaPlural", { name: book.name, count: book.chapters.length })}
-							onclick={() => onSelectBook(book)}
+							onclick={() => handleBookClick(book)}
 						>
 							<span class="open-bible-book-tile-name">{book.name}</span>
 							<span class="open-bible-book-tile-count">
@@ -195,10 +254,11 @@
 					type="button"
 					class="open-bible-book-tile"
 					class:is-active={book.id === currentBookId}
+					class:is-reference-target={matchedRefBook?.id === book.id}
 					aria-label={book.chapters.length === 1
 						? t("bookPicker.bookAriaSingle", { name: book.name })
 						: t("bookPicker.bookAriaPlural", { name: book.name, count: book.chapters.length })}
-					onclick={() => onSelectBook(book)}
+					onclick={() => handleBookClick(book)}
 				>
 					<span class="open-bible-book-tile-name">{book.name}</span>
 					<span class="open-bible-book-tile-count">
