@@ -10,6 +10,10 @@ export interface TranslationStrings {
 		openReaderRightSidebar: string;
 		openReaderLeftSidebar: string;
 		toggleTwoColumns: string;
+		openHighlights: string;
+		openHighlightsRightSidebar: string;
+		openHighlightsLeftSidebar: string;
+		toggleSelectionMode: string;
 	};
 	ribbon: {
 		openReader: string;
@@ -124,6 +128,35 @@ export interface TranslationStrings {
 		noVersionsFound: string;
 		openMetadataNote: string;
 		versionMdPathLabel: string;
+		pageNotesHighlights: string;
+		pageNotesHighlightsDesc: string;
+		notesFolderName: string;
+		notesFolderDesc: string;
+		highlightsFolderName: string;
+		highlightsFolderDesc: string;
+		confirmHighlightDeletionName: string;
+		confirmHighlightDeletionDesc: string;
+		configuredHighlightsHeading: string;
+		configuredHighlightsDesc: string;
+		addHighlightBtn: string;
+		resetHighlightsBtn: string;
+		chooseColor: string;
+		highlightLabelPlaceholder: string;
+		newHighlightDefaultLabel: string;
+		highlightAddedNotice: string;
+		highlightRemovedNotice: string;
+		highlightsResetNotice: string;
+		cannotDeleteLastHighlight: string;
+		configuredNotesHeading: string;
+		configuredNotesDesc: string;
+		addNoteBtn: string;
+		resetNotesBtn: string;
+		noteLabelPlaceholder: string;
+		newNoteDefaultLabel: string;
+		noteAddedNotice: string;
+		noteRemovedNotice: string;
+		notesResetNotice: string;
+		cannotDeleteLastNote: string;
 	};
 	errors: {
 		invalidFolderPath: string;
@@ -138,11 +171,15 @@ export interface TranslationStrings {
 		saveError: string;
 		cancel: string;
 		confirm: string;
+		delete: string;
 		loading: string;
 		backToSettings: string;
 		search: string;
 		recent: string;
 		importing: string;
+		empty: string;
+		error: string;
+		close: string;
 	};
 	about: {
 		tagline: string;
@@ -178,6 +215,7 @@ export interface TranslationStrings {
 		twoColumns: string;
 		singleColumn: string;
 		loadingVerses: string;
+		rangeHighlightMarker: string;
 		noVersesFound: string;
 		retry: string;
 	};
@@ -198,6 +236,20 @@ export interface TranslationStrings {
 		bottomCrossRefs: string;
 		appearance: string;
 		readingHistory: string;
+		selectionMode: string;
+		highlights: string;
+	};
+	highlightsPanel: {
+		title: string;
+		searchPlaceholder: string;
+		allColors: string;
+		emptyTitle: string;
+		emptyDesc: string;
+		noResults: string;
+		deleteTooltip: string;
+		openNoteTooltip: string;
+		countSingle: string;
+		countPlural: string;
 	};
 	resources: {
 		crossReferences: string;
@@ -222,11 +274,32 @@ export interface TranslationStrings {
 		expandPanel: string;
 	};
 	popover: {
+		highlights: string;
+		selectHighlight: string;
+		highlightWithColor: string;
+		removeHighlight: string;
+		configureHighlights: string;
+		copyReference: string;
 		copyText: string;
+		createNote: string;
 		close: string;
 	};
 	notices: {
 		textCopied: string;
+		referenceCopied: string;
+		noteCreated: string;
+		createNoteError: string;
+		highlightAdded: string;
+		highlightRemoved: string;
+		historyCleared: string;
+	};
+	modals: {
+		confirmDeleteTitle: string;
+		confirmDeleteDesc: string;
+		confirmDeleteAlwaysAsk: string;
+	};
+	note: {
+		openInEditor: string;
 	};
 	bookPicker: {
 		title: string;
@@ -257,5 +330,16 @@ export interface TranslationStrings {
 		searchPlaceholder: string;
 		noResults: string;
 		defaultBadge: string;
+	};
+	history: {
+		title: string;
+		countSingle: string;
+		countPlural: string;
+		clearHistory: string;
+		emptyTitle: string;
+		emptyDesc: string;
+		justNow: string;
+		yesterday: string;
+		close: string;
 	};
 }

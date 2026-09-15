@@ -25,8 +25,37 @@ export interface CustomVersionMetadata {
 
 export type VerseHoverModifier = "shift" | "ctrlCmd" | "alt" | "none";
 
+export interface HighlightConfig {
+	id: string;
+	label: string;
+	color: string;
+}
+
+export const DEFAULT_HIGHLIGHT_CONFIGS: HighlightConfig[] = [
+	{ id: "yellow", label: "Amarelo", color: "yellow" },
+	{ id: "green", label: "Verde", color: "green" },
+	{ id: "blue", label: "Azul", color: "blue" },
+	{ id: "purple", label: "Roxo", color: "purple" },
+	{ id: "pink", label: "Rosa", color: "pink" },
+	{ id: "orange", label: "Laranja", color: "orange" },
+];
+
+export const DEFAULT_NOTE_CONFIGS: HighlightConfig[] = [
+	{ id: "note_yellow", label: "Geral", color: "yellow" },
+	{ id: "note_green", label: "Devocional", color: "green" },
+	{ id: "note_blue", label: "Estudo", color: "blue" },
+	{ id: "note_purple", label: "Teologia", color: "purple" },
+	{ id: "note_pink", label: "Aplicação", color: "pink" },
+	{ id: "note_orange", label: "Contexto", color: "orange" },
+];
+
 export interface OpenBibleSettings {
 	dataFolder: string;
+	notesFolder?: string;
+	highlightsFolder?: string;
+	configuredHighlights?: HighlightConfig[];
+	configuredNotes?: HighlightConfig[];
+	confirmHighlightDeletion?: boolean;
 	defaultReference: string;
 	/** Primary/default Bible version file path for reader, preview, and citations. */
 	defaultVersionPath?: string;
@@ -71,6 +100,11 @@ export interface OpenBibleSettings {
 
 export const DEFAULT_SETTINGS: OpenBibleSettings = {
 	dataFolder: DEFAULT_DATA_FOLDER,
+	notesFolder: "OpenBible/notes",
+	highlightsFolder: "OpenBible/highlights",
+	configuredHighlights: DEFAULT_HIGHLIGHT_CONFIGS,
+	configuredNotes: DEFAULT_NOTE_CONFIGS,
+	confirmHighlightDeletion: false,
 	defaultReference: "João 3:16",
 	defaultVersionPath: "",
 	customVersionMetadata: {},

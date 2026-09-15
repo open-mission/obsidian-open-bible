@@ -12,6 +12,7 @@
 	import LanguageSection from "./sections/LanguageSection.svelte";
 	import ReaderSection from "./sections/ReaderSection.svelte";
 	import StudySection from "./sections/StudySection.svelte";
+	import NotesHighlightsSection from "./sections/NotesHighlightsSection.svelte";
 	import AboutSection from "./sections/AboutSection.svelte";
 
 	interface Props extends SectionContext {
@@ -76,6 +77,13 @@
 			description: t("settings.pageResourcesDesc"),
 			icon: "glasses",
 			component: StudySection,
+		},
+		{
+			id: "notes-highlights",
+			title: t("settings.pageNotesHighlights"),
+			description: t("settings.pageNotesHighlightsDesc"),
+			icon: "highlighter",
+			component: NotesHighlightsSection,
 		},
 		{
 			id: "language",

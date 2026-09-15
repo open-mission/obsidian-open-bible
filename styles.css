@@ -1470,7 +1470,7 @@
 
 .open-bible-reader-verse {
 	align-items: baseline;
-	border-left: none;
+	border: 1.5px solid transparent;
 	border-radius: var(--radius-s, 4px);
 	cursor: pointer;
 	display: grid;
@@ -1482,7 +1482,7 @@
 	position: relative;
 	background-color: transparent;
 	text-align: left;
-	transition: background-color 0.12s ease;
+	transition: background-color 0.12s ease, border-color 0.12s ease;
 }
 
 .open-bible-reader-verse:hover .open-bible-reader-verse-text {
@@ -2334,3 +2334,1018 @@ button.open-bible-xref-toggle:hover {
 	font-size: var(--font-ui-smaller);
 	word-break: break-all;
 }
+
+/* ==========================================================================
+   Notes, Highlights & Verse Action Bar Styles
+   ========================================================================== */
+
+:root {
+	--bible-hl-yellow-solid: var(--color-yellow, #eab308);
+	--bible-hl-green-solid: var(--color-green, #22c55e);
+	--bible-hl-blue-solid: var(--color-blue, #3b82f6);
+	--bible-hl-purple-solid: var(--color-purple, #a855f7);
+	--bible-hl-pink-solid: var(--color-pink, #ec4899);
+	--bible-hl-orange-solid: var(--color-orange, #f97316);
+}
+
+/* Verse Highlighting (Underline in Reader) */
+.open-bible-hl-line {
+	text-decoration: underline;
+	text-decoration-color: var(--hl-line-color, var(--interactive-accent));
+	text-decoration-thickness: var(--hl-line-thickness, 2.5px);
+	text-underline-offset: var(--hl-line-offset, 3.5px);
+	text-decoration-skip-ink: none;
+}
+
+/* Range Highlight Marker */
+.open-bible-range-marker {
+	all: unset;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	cursor: pointer;
+	margin-left: 2px;
+	margin-right: 1px;
+	vertical-align: super;
+	font-size: 0.65em;
+	line-height: 1;
+	color: var(--marker-color, var(--text-accent));
+	opacity: 0.7;
+	transition: opacity 0.12s ease, transform 0.12s ease;
+}
+
+.open-bible-range-marker:hover {
+	opacity: 1;
+	transform: scale(1.15);
+}
+
+.open-bible-range-marker-icon,
+.open-bible-range-marker-icon svg {
+	width: 10px;
+	height: 10px;
+	display: inline-flex;
+}
+
+/* Note Lanes Gutter & Vertical Indicator Lines */
+.open-bible-reader-verse.has-note-lanes {
+	padding-left: calc(0.9rem + var(--note-lane-count, 1) * 8px);
+}
+
+.open-bible-verse-lines-gutter {
+	bottom: 0;
+	box-sizing: border-box;
+	display: flex;
+	flex-direction: row;
+	gap: 4px;
+	left: 0.35rem;
+	margin: 0;
+	padding: 0;
+	pointer-events: none;
+	position: absolute;
+	top: 0;
+	user-select: none;
+	-webkit-user-select: none;
+	z-index: 5;
+}
+
+.open-bible-verse-note-line {
+	align-self: stretch;
+	appearance: none;
+	-webkit-appearance: none;
+	background-color: var(--note-line-color, var(--interactive-accent)) !important;
+	background-image: none !important;
+	border: none !important;
+	border-radius: 0;
+	box-shadow: none !important;
+	box-sizing: border-box;
+	cursor: pointer;
+	display: block;
+	flex-shrink: 0;
+	height: 100%;
+	margin: 0;
+	opacity: 0.92;
+	padding: 0;
+	pointer-events: auto;
+	position: relative;
+	transition: opacity 0.15s ease, transform 0.15s ease;
+	width: 4px;
+	z-index: 6;
+}
+
+button.open-bible-verse-note-line.is-hovered,
+button.open-bible-verse-note-line:hover,
+button.open-bible-verse-note-line:focus-visible,
+button.open-bible-verse-note-line:active {
+	background-color: var(--note-line-color, var(--interactive-accent)) !important;
+	background-image: none !important;
+	box-shadow: 0 0 8px var(--note-line-color, var(--interactive-accent)) !important;
+	filter: brightness(1.2);
+	opacity: 1;
+	transform: scaleX(1.75);
+	transform-origin: center;
+}
+
+button.open-bible-verse-note-line.is-hovered::after,
+button.open-bible-verse-note-line:hover::after {
+	opacity: 1;
+	filter: brightness(1.2);
+}
+
+.open-bible-verse-note-line.is-start {
+	border-top-left-radius: 4px;
+	border-top-right-radius: 4px;
+	height: calc(100% - 0.3rem);
+	margin-top: 0.3rem;
+}
+
+.open-bible-verse-note-line:not(.is-start) {
+	border-top-left-radius: 0;
+	border-top-right-radius: 0;
+	margin-top: 0;
+}
+
+.open-bible-verse-note-line.is-end {
+	border-bottom-left-radius: 4px;
+	border-bottom-right-radius: 4px;
+	height: calc(100% - 0.3rem);
+}
+
+.open-bible-verse-note-line.is-start.is-end {
+	border-radius: 4px;
+	height: calc(100% - 0.6rem);
+	margin-top: 0.3rem;
+}
+
+.open-bible-verse-note-line:not(.is-end) {
+	border-bottom-left-radius: 0;
+	border-bottom-right-radius: 0;
+	margin-bottom: 0;
+}
+
+.open-bible-verse-note-line:not(.is-end)::after {
+	background-color: inherit;
+	content: "";
+	height: calc(var(--open-bible-verse-gap, 0.85rem) + 2px);
+	left: 0;
+	pointer-events: auto;
+	position: absolute;
+	top: 100%;
+	width: 100%;
+	z-index: 6;
+}
+
+.open-bible-verse-note-line.is-empty {
+	background: transparent !important;
+	border: none !important;
+	cursor: default;
+	flex-shrink: 0;
+	height: 100%;
+	margin: 0;
+	opacity: 0 !important;
+	padding: 0;
+	pointer-events: none;
+	width: 4px;
+}
+
+/* Verse Action Bar / Popover */
+.open-bible-verse-action-bar-container {
+	bottom: var(--size-4-4, 1rem);
+	box-sizing: border-box;
+	display: flex;
+	justify-content: center;
+	left: 0;
+	margin-top: var(--size-4-4);
+	pointer-events: none;
+	position: sticky;
+	right: 0;
+	width: 100%;
+	z-index: 50;
+	padding: 0 var(--size-4-2, 0.5rem);
+	transition: bottom 0.15s ease;
+}
+
+.open-bible-verse-action-bar {
+	animation: open-bible-action-bar-slide-up 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+	background: var(--modal-background, var(--background-primary));
+	border: var(--border-width, 1px) solid var(--background-modifier-border);
+	border-radius: var(--radius-l, 14px);
+	box-shadow: var(--modal-shadow, var(--shadow-l, 0 8px 24px rgba(0, 0, 0, 0.25)));
+	box-sizing: border-box;
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	gap: 0.4rem;
+	max-width: min(calc(100% - 1rem), 860px);
+	width: max-content;
+	padding: 0.35rem 0.5rem;
+	pointer-events: auto;
+}
+
+@keyframes open-bible-action-bar-slide-up {
+	from {
+		opacity: 0;
+		transform: translateY(8px) scale(0.97);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0) scale(1);
+	}
+}
+
+.open-bible-action-bar-scroll-track {
+	align-items: center;
+	display: flex;
+	flex: 1;
+	gap: 0.45rem;
+	min-width: 0;
+	overflow-x: auto;
+	overflow-y: hidden;
+	overscroll-behavior-x: contain;
+	padding: 0.1rem 0.2rem;
+	scrollbar-width: none;
+	touch-action: pan-x;
+	-webkit-overflow-scrolling: touch;
+	white-space: nowrap;
+}
+
+.open-bible-action-bar-scroll-track::-webkit-scrollbar {
+	display: none;
+}
+
+.open-bible-action-bar-divider {
+	background-color: var(--background-modifier-border);
+	flex-shrink: 0;
+	height: 1.25rem;
+	margin: 0 0.1rem;
+	width: 1px;
+}
+
+.open-bible-action-bar-badge {
+	align-items: center;
+	background: var(--background-modifier-hover);
+	border: var(--border-width, 1px) solid var(--background-modifier-border);
+	border-radius: var(--radius-m, 12px);
+	box-sizing: border-box;
+	color: var(--text-normal);
+	display: inline-flex;
+	font-size: var(--font-ui-smaller, 0.75rem);
+	font-weight: var(--font-semibold);
+	gap: 0.35rem;
+	max-width: 14rem;
+	overflow: hidden;
+	padding: 0.2rem 0.55rem;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	flex-shrink: 0;
+}
+
+.open-bible-action-bar-badge-icon {
+	color: var(--interactive-accent);
+	display: inline-flex;
+	flex-shrink: 0;
+}
+
+.open-bible-action-bar-badge-icon svg {
+	display: block;
+	height: 0.85rem;
+	width: 0.85rem;
+}
+
+.open-bible-action-bar-badge-text {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.open-bible-action-bar-badge-text em {
+	font-style: normal;
+	opacity: 0.8;
+	margin-left: 0.2rem;
+}
+
+.open-bible-action-bar-badge-count {
+	color: var(--text-muted);
+	font-size: var(--font-ui-smaller, 0.75rem);
+	font-weight: var(--font-medium);
+	flex-shrink: 0;
+}
+
+.open-bible-action-bar-btn {
+	align-items: center;
+	background: transparent;
+	border: var(--border-width, 1px) solid transparent;
+	border-radius: var(--button-radius, var(--radius-s));
+	box-sizing: border-box;
+	color: var(--text-muted);
+	cursor: pointer;
+	display: inline-flex;
+	flex-shrink: 0;
+	font-size: var(--font-ui-small, 0.78rem);
+	font-weight: var(--font-medium);
+	gap: 0.35rem;
+	height: 1.85rem;
+	justify-content: center;
+	line-height: 1.25;
+	padding: 0 0.55rem;
+	transition: background-color 0.12s ease, color 0.12s ease, border-color 0.12s ease;
+	user-select: none;
+	white-space: nowrap;
+}
+
+.open-bible-action-bar-btn:hover {
+	background-color: var(--background-modifier-hover);
+	color: var(--text-normal);
+}
+
+.open-bible-action-bar-btn.mod-cta {
+	background-color: var(--interactive-accent);
+	border-color: var(--interactive-accent);
+	color: var(--text-on-accent);
+	font-weight: var(--font-semibold);
+}
+
+.open-bible-action-bar-btn.mod-cta:hover {
+	background-color: var(--interactive-accent-hover);
+	border-color: var(--interactive-accent-hover);
+}
+
+.open-bible-action-bar-icon {
+	display: inline-flex;
+	align-items: center;
+	flex-shrink: 0;
+}
+
+.open-bible-action-bar-icon svg {
+	display: block;
+	height: 0.9rem;
+	width: 0.9rem;
+}
+
+.open-bible-action-bar-label {
+	display: inline-flex;
+	align-items: center;
+	white-space: nowrap;
+}
+
+.open-bible-action-bar-pinned-end {
+	align-items: center;
+	border-left: var(--border-width, 1px) solid var(--background-modifier-border);
+	display: flex;
+	flex-shrink: 0;
+	margin-left: auto;
+	padding-left: 0.35rem;
+}
+
+.open-bible-action-bar-close {
+	align-items: center;
+	background: transparent;
+	border: none;
+	border-radius: var(--radius-s);
+	color: var(--text-muted);
+	cursor: pointer;
+	display: inline-flex;
+	flex-shrink: 0;
+	height: 1.65rem;
+	width: 1.65rem;
+	aspect-ratio: 1 / 1;
+	justify-content: center;
+	padding: 0;
+	transition: background-color 0.12s ease, color 0.12s ease;
+}
+
+.open-bible-action-bar-close svg {
+	display: block;
+	height: 0.95rem;
+	width: 0.95rem;
+}
+
+.open-bible-action-bar-close:hover {
+	background-color: var(--background-modifier-hover);
+	color: var(--text-normal);
+}
+
+.open-bible-action-bar-palette {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.35rem;
+}
+
+button.open-bible-action-bar-color-dot {
+	width: 1.25rem !important;
+	height: 1.25rem !important;
+	min-width: 1.25rem !important;
+	min-height: 1.25rem !important;
+	border-radius: 50% !important;
+	background: var(--dot-color) !important;
+	background-color: var(--dot-color) !important;
+	border: 2px solid transparent !important;
+	cursor: pointer;
+	padding: 0 !important;
+	display: inline-flex !important;
+	align-items: center !important;
+	justify-content: center !important;
+	transition: transform 0.12s ease, border-color 0.12s ease !important;
+	flex-shrink: 0 !important;
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+button.open-bible-action-bar-color-dot:hover {
+	transform: scale(1.22);
+}
+
+button.open-bible-action-bar-color-dot.is-active {
+	border-color: var(--text-normal) !important;
+	transform: scale(1.15);
+	box-shadow: 0 0 0 2px var(--background-primary), 0 0 0 3.5px var(--text-normal) !important;
+}
+
+.open-bible-color-dot-check {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	color: #fff;
+	filter: drop-shadow(0 0 1px rgba(0, 0, 0, 0.85)) drop-shadow(0 1px 0 rgba(0, 0, 0, 0.45));
+}
+
+.open-bible-color-dot-check svg {
+	width: 0.75rem;
+	height: 0.75rem;
+	stroke-width: 3px;
+}
+
+.open-bible-action-bar-remove-hl {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 1.5rem;
+	height: 1.5rem;
+	border-radius: 50%;
+	border: none;
+	background: transparent;
+	color: var(--text-error);
+	cursor: pointer;
+	transition: background-color 0.12s ease;
+}
+
+.open-bible-action-bar-remove-hl:hover {
+	background-color: var(--background-modifier-hover);
+}
+
+.open-bible-action-bar-remove-hl svg {
+	width: 0.9rem;
+	height: 0.9rem;
+}
+
+.open-bible-action-bar-config-btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 1.5rem;
+	height: 1.5rem;
+	border-radius: 50%;
+	border: none;
+	background: transparent;
+	color: var(--text-muted);
+	cursor: pointer;
+	transition: background-color 0.12s ease;
+}
+
+.open-bible-action-bar-config-btn:hover {
+	background-color: var(--background-modifier-hover);
+	color: var(--text-normal);
+}
+
+.open-bible-action-bar-config-btn svg {
+	width: 0.9rem;
+	height: 0.9rem;
+}
+
+.open-bible-mobile-current-color-dot {
+	width: 0.75rem;
+	height: 0.75rem;
+	border-radius: 50%;
+	display: inline-block;
+	margin-left: 0.25rem;
+	border: 1px solid var(--background-modifier-border);
+}
+
+/* Mobile Docked Bar */
+body.is-phone,
+body.is-mobile {
+	--mobile-bottom-offset: calc(80px + env(safe-area-inset-bottom, 0px));
+}
+
+body.is-phone .open-bible-verse-action-bar-container,
+body.is-mobile .open-bible-verse-action-bar-container.is-mobile-docked,
+body.is-phone .open-bible-verse-action-bar-container.is-mobile-docked {
+	bottom: var(--mobile-bottom-offset, calc(80px + env(safe-area-inset-bottom, 0px))) !important;
+	left: 0 !important;
+	margin: 0 !important;
+	padding: 0 !important;
+	pointer-events: none !important;
+	position: fixed !important;
+	right: 0 !important;
+	top: auto !important;
+	width: 100vw !important;
+	z-index: var(--layer-popover, 100) !important;
+}
+
+body.is-phone .open-bible-verse-action-bar-container .open-bible-verse-action-bar,
+body.is-mobile .open-bible-verse-action-bar-container.is-mobile-docked .open-bible-verse-action-bar,
+body.is-phone .open-bible-verse-action-bar-container.is-mobile-docked .open-bible-verse-action-bar {
+	backdrop-filter: blur(16px);
+	-webkit-backdrop-filter: blur(16px);
+	background: var(--background-secondary, var(--background-primary)) !important;
+	border: none !important;
+	border-radius: 14px 14px 0 0 !important;
+	border-top: 1px solid var(--background-modifier-border) !important;
+	box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.28) !important;
+	box-sizing: border-box;
+	gap: 0.4rem !important;
+	margin: 0 !important;
+	max-width: 100vw !important;
+	padding: 0.5rem 0.65rem !important;
+	pointer-events: auto !important;
+	width: 100vw !important;
+}
+
+body.is-phone .open-bible-action-bar-btn,
+body.is-mobile .is-mobile-docked .open-bible-action-bar-btn,
+body.is-phone .is-mobile-docked .open-bible-action-bar-btn {
+	background-color: var(--background-modifier-hover);
+	border-radius: var(--radius-m, 8px);
+	font-size: var(--font-ui-small, 0.8rem);
+	height: 2.1rem;
+	padding: 0 0.65rem;
+}
+
+body.is-phone .open-bible-action-bar-btn.mod-cta,
+body.is-mobile .is-mobile-docked .open-bible-action-bar-btn.mod-cta,
+body.is-phone .is-mobile-docked .open-bible-action-bar-btn.mod-cta {
+	background-color: var(--interactive-accent) !important;
+	color: var(--text-on-accent) !important;
+}
+
+body.is-phone .open-bible-reader-content.has-verse-selection,
+body.is-mobile .open-bible-reader-content.has-verse-selection {
+	padding-bottom: calc(var(--mobile-bottom-offset, 80px) + 74px) !important;
+}
+
+/* Highlights Sidebar & Tab View Container */
+.open-bible-highlights-view-container {
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+	width: 100%;
+	padding: 0.75rem 0.5rem;
+	overflow: hidden;
+	box-sizing: border-box;
+}
+
+.open-bible-highlights-view-container .open-bible-highlights-panel {
+	height: 100%;
+}
+
+/* Highlights Mobile Drawer */
+.open-bible-highlights-drawer {
+	padding: 0.5rem 1rem 1.5rem;
+	display: flex;
+	flex-direction: column;
+	gap: 1rem;
+}
+
+.open-bible-highlights-drawer-list {
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
+}
+
+.open-bible-highlights-drawer-item {
+	all: unset;
+	display: flex;
+	align-items: center;
+	gap: 0.85rem;
+	padding: 0.6rem 0.8rem;
+	border-radius: var(--radius-m, 8px);
+	cursor: pointer;
+	background: var(--background-secondary);
+	border: 1px solid var(--background-modifier-border);
+	transition: background 0.12s ease;
+}
+
+.open-bible-highlights-drawer-item:hover {
+	background: var(--background-modifier-hover);
+}
+
+.open-bible-highlights-drawer-item.is-active {
+	border-color: var(--interactive-accent);
+	background: var(--background-modifier-active-hover);
+}
+
+.open-bible-highlights-drawer-dot {
+	width: 1.5rem;
+	height: 1.5rem;
+	border-radius: 50%;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	flex-shrink: 0;
+}
+
+.open-bible-highlights-drawer-check {
+	color: #fff;
+	display: inline-flex;
+}
+
+.open-bible-highlights-drawer-check svg {
+	width: 0.9rem;
+	height: 0.9rem;
+}
+
+.open-bible-highlights-drawer-label {
+	font-size: var(--font-ui-medium);
+	font-weight: var(--font-medium);
+	color: var(--text-normal);
+}
+
+.open-bible-highlights-drawer-footer {
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
+	margin-top: 0.5rem;
+	padding-top: 0.5rem;
+	border-top: 1px solid var(--background-modifier-border);
+}
+
+.open-bible-highlights-drawer-action {
+	all: unset;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 0.5rem;
+	padding: 0.6rem 1rem;
+	border-radius: var(--radius-m, 8px);
+	cursor: pointer;
+	font-size: var(--font-ui-small);
+	color: var(--text-muted);
+	background: var(--background-modifier-hover);
+	transition: color 0.12s ease, background 0.12s ease;
+}
+
+.open-bible-highlights-drawer-action:hover {
+	color: var(--text-normal);
+}
+
+.open-bible-highlights-drawer-action.mod-danger {
+	color: var(--text-error);
+}
+
+.open-bible-highlights-drawer-action.mod-danger:hover {
+	background: var(--background-modifier-error-hover, var(--background-modifier-hover));
+}
+
+/* Settings: Notes & Highlights */
+.open-bible-settings-notes-section {
+	display: flex;
+	flex-direction: column;
+	gap: 1rem;
+}
+
+.open-bible-settings-highlights-list {
+	display: flex;
+	flex-direction: column;
+	gap: 0.6rem;
+	margin: 0.5rem 0;
+}
+
+.open-bible-settings-highlight-row {
+	display: flex;
+	align-items: center;
+	gap: 0.75rem;
+	padding: 0.35rem 0.5rem;
+	border-radius: var(--radius-m, 8px);
+	background: var(--background-secondary);
+	border: 1px solid var(--background-modifier-border);
+}
+
+.open-bible-settings-color-wrapper {
+	position: relative;
+	width: 1.75rem;
+	height: 1.75rem;
+	flex-shrink: 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.open-bible-settings-color-preview {
+	width: 1.75rem;
+	height: 1.75rem;
+	border-radius: 50%;
+	border: 2px solid var(--background-modifier-border);
+	box-sizing: border-box;
+	display: block;
+	pointer-events: none;
+}
+
+.open-bible-settings-color-input {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	opacity: 0;
+	cursor: pointer;
+}
+
+.open-bible-settings-label-input {
+	flex: 1;
+}
+
+.open-bible-settings-delete-btn {
+	color: var(--text-muted);
+	cursor: pointer;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	padding: 0.3rem;
+	border-radius: var(--radius-s);
+}
+
+.open-bible-settings-delete-btn:hover {
+	color: var(--text-error);
+	background: var(--background-modifier-hover);
+}
+
+.open-bible-settings-actions-row {
+	display: flex;
+	align-items: center;
+	gap: 0.75rem;
+	margin-top: 0.5rem;
+}
+
+/* Note Preview Modal */
+.open-bible-note-preview-modal {
+	padding: 1.25rem;
+	display: flex;
+	flex-direction: column;
+	max-height: 80vh;
+}
+
+.open-bible-note-preview-header {
+	margin-bottom: 0.75rem;
+	padding-bottom: 0.5rem;
+	border-bottom: 1px solid var(--background-modifier-border);
+}
+
+.open-bible-note-preview-title {
+	margin: 0;
+	font-size: var(--font-ui-large);
+	color: var(--text-normal);
+}
+
+.open-bible-note-preview-body-container {
+	overflow-y: auto;
+	flex: 1;
+	padding: 0.5rem 0;
+}
+
+/* ==========================================================================
+   Selected Verse Visual Indicator & Checkboxes
+   ========================================================================== */
+
+.open-bible-reader-verse.is-selected {
+	background-color: rgba(var(--interactive-accent-rgb, 120, 120, 255), 0.12) !important;
+	border: 1.5px solid var(--interactive-accent) !important;
+	border-radius: var(--radius-s, 6px) !important;
+	box-shadow: 0 0 0 1px rgba(var(--interactive-accent-rgb, 120, 120, 255), 0.25) !important;
+}
+
+.open-bible-reader-verse.is-selected .open-bible-reader-verse-number {
+	color: var(--interactive-accent) !important;
+	font-weight: 700 !important;
+}
+
+.open-bible-reader-verse.is-selected .open-bible-reader-verse-text {
+	background-color: transparent !important;
+}
+
+.open-bible-reader-verse.has-checkbox {
+	grid-template-columns: 1.5rem 2.25rem minmax(0, 1fr);
+}
+
+.open-bible-reader-verse.has-checkbox.has-thompson-xref {
+	grid-template-columns: 1.5rem 2.25rem minmax(0, 1fr) 1.5rem;
+}
+
+.open-bible-reader-verse-checkbox-wrap {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	user-select: none;
+	-webkit-user-select: none;
+	flex-shrink: 0;
+	align-self: center;
+}
+
+.open-bible-reader-verse-checkbox {
+	cursor: pointer;
+	width: 1.05rem;
+	height: 1.05rem;
+	accent-color: var(--interactive-accent);
+	margin: 0;
+	border-radius: var(--radius-s, 3px);
+}
+
+/* Header selection mode button active state */
+.clickable-icon.open-bible-action-active,
+.open-bible-reader-toolbar-selection.is-active {
+	color: var(--interactive-accent) !important;
+}
+
+/* ==========================================================================
+   Highlights Panel in Drawer / Modal
+   ========================================================================== */
+
+.open-bible-picker-popover.is-mode-highlights {
+	max-width: 38rem;
+}
+
+.open-bible-highlights-panel {
+	display: flex;
+	flex-direction: column;
+	flex: 1 1 auto;
+	min-height: 0;
+	gap: 0.75rem;
+}
+
+.open-bible-highlights-panel-controls {
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
+	flex-shrink: 0;
+}
+
+.open-bible-highlights-panel-search {
+	width: 100%;
+}
+
+.open-bible-highlights-panel-chips {
+	display: flex;
+	align-items: center;
+	gap: 0.4rem;
+	overflow-x: auto;
+	padding-bottom: 0.25rem;
+	scrollbar-width: none;
+	-webkit-overflow-scrolling: touch;
+}
+
+.open-bible-highlights-panel-chips::-webkit-scrollbar {
+	display: none;
+}
+
+.open-bible-highlights-chip {
+	all: unset;
+	display: inline-flex;
+	align-items: center;
+	gap: 0.35rem;
+	padding: 0.25rem 0.6rem;
+	border-radius: var(--radius-m, 12px);
+	background: var(--background-secondary);
+	border: 1px solid var(--background-modifier-border);
+	font-size: var(--font-ui-smaller, 0.78rem);
+	color: var(--text-muted);
+	cursor: pointer;
+	white-space: nowrap;
+	flex-shrink: 0;
+	transition: background-color 0.12s ease, border-color 0.12s ease, color 0.12s ease;
+}
+
+.open-bible-highlights-chip:hover {
+	background: var(--background-modifier-hover);
+	color: var(--text-normal);
+}
+
+.open-bible-highlights-chip.is-active {
+	background: var(--interactive-accent);
+	border-color: var(--interactive-accent);
+	color: var(--text-on-accent);
+	font-weight: var(--font-medium);
+}
+
+.open-bible-highlights-chip-dot {
+	width: 0.65rem;
+	height: 0.65rem;
+	border-radius: 50%;
+	flex-shrink: 0;
+	display: inline-block;
+}
+
+.open-bible-highlights-panel-list {
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
+	overflow-y: auto;
+	flex: 1 1 auto;
+	min-height: 0;
+	padding: 0.25rem 0.1rem 1rem 0.1rem;
+}
+
+.open-bible-highlights-panel-item {
+	display: flex;
+	align-items: stretch;
+	gap: 0.75rem;
+	padding: 0.65rem 0.85rem;
+	border-radius: var(--radius-m, 8px);
+	background: var(--background-secondary);
+	border: 1px solid var(--background-modifier-border);
+	cursor: pointer;
+	text-align: left;
+	transition: background-color 0.15s ease, border-color 0.15s ease;
+	position: relative;
+	overflow: hidden;
+}
+
+.open-bible-highlights-panel-item:hover {
+	background: var(--background-modifier-hover);
+	border-color: var(--background-modifier-border-hover);
+}
+
+.open-bible-highlights-panel-bar {
+	width: 4px;
+	border-radius: 2px;
+	flex-shrink: 0;
+}
+
+.open-bible-highlights-panel-content {
+	display: flex;
+	flex-direction: column;
+	gap: 0.3rem;
+	flex: 1;
+	min-width: 0;
+}
+
+.open-bible-highlights-panel-header {
+	display: flex;
+	align-items: baseline;
+	gap: 0.5rem;
+}
+
+.open-bible-highlights-panel-ref {
+	font-weight: var(--font-semibold, 600);
+	font-size: var(--font-ui-small, 0.9rem);
+	color: var(--text-normal);
+}
+
+.open-bible-highlights-panel-version {
+	font-size: var(--font-ui-smaller, 0.72rem);
+	font-weight: var(--font-bold);
+	color: var(--text-muted);
+	background: var(--background-primary);
+	padding: 0.1rem 0.35rem;
+	border-radius: var(--radius-s);
+}
+
+.open-bible-highlights-panel-tag {
+	font-size: var(--font-ui-smaller, 0.72rem);
+	font-weight: var(--font-medium, 500);
+	color: var(--text-accent);
+	background: var(--background-modifier-hover);
+	padding: 0.1rem 0.45rem;
+	border-radius: var(--radius-s);
+	border: 1px solid var(--background-modifier-border);
+}
+
+.open-bible-highlights-panel-snippet {
+	margin: 0;
+	font-size: var(--font-ui-smaller, 0.82rem);
+	color: var(--text-muted);
+	font-style: italic;
+	display: -webkit-box;
+	-webkit-line-clamp: 2;
+	-webkit-box-orient: vertical;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	line-height: 1.4;
+}
+
+.open-bible-highlights-panel-actions {
+	display: flex;
+	align-items: center;
+	gap: 0.25rem;
+	flex-shrink: 0;
+	align-self: center;
+}
+
+.open-bible-highlights-action-btn.mod-danger:hover {
+	color: var(--text-error) !important;
+}
+
+.open-bible-highlights-panel-no-results {
+	padding: 2rem 1rem;
+	text-align: center;
+	color: var(--text-muted);
+	font-size: var(--font-ui-small);
+}
+
+
