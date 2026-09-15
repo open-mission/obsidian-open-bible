@@ -40,6 +40,13 @@ export class EditVersionModal extends Modal {
 			.setDesc(this.version.filePath)
 			.setClass("ob-setting-readonly");
 
+		if (this.version.mdPath) {
+			new Setting(contentEl)
+				.setName(t("settings.versionMdPathLabel"))
+				.setDesc(this.version.mdPath)
+				.setClass("ob-setting-readonly");
+		}
+
 		// Version Name
 		new Setting(contentEl)
 			.setName(t("settings.versionNameLabel"))

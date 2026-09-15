@@ -100,8 +100,10 @@ export const en: TranslationStrings = {
 		setAsDefaultButton: "Set as primary",
 		isDefaultBadge: "Primary",
 		versionUpdatedNotice: "Version metadata updated.",
-		searchVersionsPlaceholder: "Search versions by name or abbreviation…",
-		noVersionsFound: "No versions found matching your search.",
+		searchVersionsPlaceholder: "Search versions by name, abbreviation or language...",
+		noVersionsFound: "No Bible versions found.",
+		openMetadataNote: "Open metadata note in Obsidian",
+		versionMdPathLabel: "Metadata file (.md)",
 	},
 	errors: {
 		invalidFolderPath: "Invalid folder path.",

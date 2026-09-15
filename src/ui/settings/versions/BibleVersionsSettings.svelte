@@ -122,6 +122,12 @@
 		new Notice(t("settings.versionUpdatedNotice"));
 		await load();
 	}
+
+	function onOpenNote(version: BibleVersion): void {
+		if (version.mdPath) {
+			void app.workspace.openLinkText(version.mdPath, "", false);
+		}
+	}
 </script>
 
 <div class="setting-item">
@@ -172,6 +178,15 @@
 					<div class="setting-item-description">{version.filePath}</div>
 				</div>
 				<div class="setting-item-control">
+					{#if version.mdPath}
+						<button
+							type="button"
+							class="clickable-icon"
+							use:lucide={"file-text"}
+							aria-label={`${t("settings.openMetadataNote")}: ${version.abbreviation}.md`}
+							onclick={() => onOpenNote(version)}
+						></button>
+					{/if}
 					<button
 						type="button"
 						class="clickable-icon"

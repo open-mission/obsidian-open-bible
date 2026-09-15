@@ -103,6 +103,8 @@ export const pt: TranslationStrings = {
 		versionUpdatedNotice: "Metadados da versão atualizados.",
 		searchVersionsPlaceholder: "Buscar versão por nome ou abreviação…",
 		noVersionsFound: "Nenhuma versão encontrada para a busca.",
+		openMetadataNote: "Abrir nota de metadados no Obsidian",
+		versionMdPathLabel: "Arquivo de metadados (.md)",
 	},
 	errors: {
 		invalidFolderPath: "Caminho de pasta inválido.",

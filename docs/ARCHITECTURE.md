@@ -71,6 +71,7 @@ obsidian-open-bible/
 │   ├── services/
 │   │   ├── bibleTextService.ts    # Chapter, verse, and search SQL queries
 │   │   ├── bibleVersionService.ts # Detection, import, and registry of SQLite DBs
+│   │   ├── versionMetadata.ts     # Markdown frontmatter properties parser & serializer (.md notes)
 │   │   ├── CrossReferenceService.ts # Thomson cross-reference lookups
 │   │   ├── VersePreviewService.ts # Preview orchestration
 │   │   └── VerseReferenceParser.ts# Scripture reference string parser
@@ -125,13 +126,29 @@ The UI is constructed using **Svelte 5 runes**:
 - Full accessibility compliance with `@media (prefers-reduced-motion: reduce)`.
 
 
-### Bible Version Management & SQLite Referencing
-- **Physical SQLite Integrity**: User-imported SQLite files (`.sqlite`, `.db`, `.sqlite3`) are stored in the configured data folder. The physical file paths serve as immutable identity keys (`filePath`).
-- **Custom Metadata Overrides**: Users can customize version attributes (Name, Abbreviation, Language) via the `EditVersionModal`. These customizations are stored in plugin settings under `customVersionMetadata[filePath]`. Modifying metadata never renames or touches the underlying binary file, preventing broken citations, deadlocks, or vault sync conflicts.
-- **Primary / Default Version**: Configured through `settings.defaultVersionPath`. The default version is highlighted across the UI and automatically utilized by:
+### Bible Version Management & Markdown Properties Notes
+- **Physical SQLite Integrity**: User-imported SQLite files (`.sqlite`, `.db`, `.sqlite3`) are stored in the configured versions folder (e.g. `OpenBible/versions/`).
+- **Markdown Properties Notes (`.md`)**:
+  - For every installed Bible version, a corresponding markdown file is created in the versions folder (e.g. `ACF.md` alongside `ACF.sqlite`).
+  - Standard Obsidian YAML frontmatter properties define the metadata:
+    ```yaml
+    ---
+    name: Almeida Corrigida Fiel
+    abbreviation: ACF
+    file: ACF.sqlite
+    language: pt
+    default: false
+    ---
+    ```
+  - **Bidirectional Synchronization**:
+    - Users can view and edit properties directly in Obsidian using the native **Properties** view or markdown editor.
+    - Obsidian vault events (`modify`, `delete`) keep `BibleVersionService` in sync in real time without restarting the plugin.
+    - Editing through the plugin UI (`EditVersionModal` or star button) updates the `.md` file while preserving user notes and extra custom properties.
+- **Primary / Default Version**: Configured through `settings.defaultVersionPath` and the `default: true` property in the `.md` note. The default version is highlighted across the UI and automatically utilized by:
   - **Bible Reader**: Loads as the initial version on startup if no specific previous state exists.
   - **Verse Preview & Citations**: Used by `VersePreviewService` whenever references do not declare an explicit translation.
 - **Search & Filtering**: Real-time filtering in both Settings and the Reader's Version Picker drawer matches normalized search queries against version name, abbreviation, language, and file path.
+- **Clean Removal**: Deleting a version safely removes both the SQLite binary file and the associated `.md` metadata note.
 
 ---
 

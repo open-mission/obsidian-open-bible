@@ -100,6 +100,8 @@ export interface TranslationStrings {
 		versionUpdatedNotice: string;
 		searchVersionsPlaceholder: string;
 		noVersionsFound: string;
+		openMetadataNote: string;
+		versionMdPathLabel: string;
 	};
 	errors: {
 		invalidFolderPath: string;

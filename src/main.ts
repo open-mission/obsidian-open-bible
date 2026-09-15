@@ -1,4 +1,4 @@
-import { Notice, Plugin, WorkspaceLeaf } from "obsidian";
+import { Notice, Plugin, WorkspaceLeaf, TFile } from "obsidian";
 import { OPEN_BIBLE_VIEW_TYPE, OpenBibleView } from "./OpenBibleView";
 import { BIBLE_READER_VIEW_TYPE, BibleReaderView } from "./BibleReaderView";
 import { DEFAULT_SETTINGS, type OpenBibleSettings } from "./settings";
@@ -82,6 +82,25 @@ export default class OpenBiblePlugin extends Plugin {
 				this.refreshReaderViews();
 			},
 		});
+
+		this.registerEvent(
+			this.app.vault.on("modify", (file) => {
+				if (file instanceof TFile && file.extension === "md") {
+					void this.bibleVersions.handleVaultFileChange(file).then(() => {
+						this.refreshReaderViews();
+					});
+				}
+			})
+		);
+
+		this.registerEvent(
+			this.app.vault.on("delete", (file) => {
+				if (file instanceof TFile && file.extension === "md") {
+					this.bibleVersions.handleVaultFileDelete(file);
+					this.refreshReaderViews();
+				}
+			})
+		);
 
 		this.addSettingTab(new OpenBibleSettingTab(this.app, this));
 	}

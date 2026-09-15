@@ -6,4 +6,5 @@ export interface BibleVersion {
 	filePath: string;
 	language?: string;
 	isDefault?: boolean;
+	mdPath?: string;
 }

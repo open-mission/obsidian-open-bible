@@ -11,12 +11,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - **Directional Chapter Transitions**: Smooth GPU-accelerated CSS animations (`is-next`, `is-prev`, `is-jump`) when changing chapters, respecting user reduced-motion preferences.
-- **Custom Version Metadata Editing**: Edit Bible Version Name, Abbreviation, and Language without changing or renaming the underlying `.sqlite` file reference. Overrides are stored in plugin settings (`customVersionMetadata`).
+- **Markdown Version Properties Notes (`.md`)**:
+  - Automatically creates a markdown note with Obsidian YAML properties (e.g. `ACF.md`) in the `versions/` folder upon importing or discovering a version.
+  - Frontmatter properties include `name`, `abbreviation`, `file`, `language`, and `default`.
+  - **Bidirectional synchronization**: edits made in Obsidian's native Properties view or markdown editor immediately update plugin version metadata in real time; edits made via the plugin UI update the `.md` note while preserving any user notes and extra custom properties.
+  - Quick action button in Settings to open the version's `.md` note directly in Obsidian.
 - **Version Search & Filtering**: Live search by name, abbreviation, language, and file path in both the Version Settings tab and the Reader's Version Picker drawer.
 - **Primary / Default Bible Version**:
-  - Set a preferred default Bible version via General Settings, the Version Settings star toggle, or the Version Edit modal.
+  - Set a preferred default Bible version via General Settings, the Version Settings star toggle, the Version Edit modal, or the `default: true` property in the `.md` note.
   - Automatically selected by default in the Bible Reader, Verse Previews, and future verse citations.
-  - Automatic cleanup of metadata and default assignment when a version is deleted.
+  - Automatic cleanup of `.sqlite` binary and associated `.md` note when a version is deleted.
 
 
 ## [0.1.0] - 2026-09-15
