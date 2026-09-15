@@ -24,7 +24,7 @@
 	import { indexOfCrossRef } from "../../data/crossRefModel";
 	import { openCrossRefPreview } from "../resources/openCrossRefPreview";
 	import { formatCrossRefOrigin } from "../resources/formatCrossRef";
-	import type { BibleReaderController } from "./types";
+	import type { BibleReaderController, BibleReaderViewState } from "./types";
 
 	type PickerMode = "book" | "chapter" | "version" | "history" | "appearance" | null;
 
@@ -33,7 +33,9 @@
 		textService: BibleTextService;
 		versionService: BibleVersionService;
 		settings: OpenBibleSettings;
+		initialViewState?: BibleReaderViewState;
 		updateSettings: (patch: Partial<OpenBibleSettings>) => Promise<void>;
+		onViewConfigChange?: (patch: Partial<BibleReaderViewState>) => void;
 		openSettings: () => void;
 		onPassageChange: (bookName: string, chapter: number | undefined) => void;
 		registerController?: (controller: BibleReaderController) => void;
@@ -44,7 +46,9 @@
 		textService,
 		versionService,
 		settings,
+		initialViewState,
 		updateSettings,
+		onViewConfigChange,
 		openSettings,
 		onPassageChange,
 		registerController,
@@ -66,17 +70,53 @@
 	let selectedBookForPicker = $state<BibleBook | undefined>();
 	let currentRequestId = 0;
 
-	// Local display states synced with plugin settings
-	let twoColumns = $state(false);
-	let containerWidth = $state<ReaderContainerWidth>("default");
-	let verseSpacing = $state<ReaderSpacing>("normal");
-	let lineSpacing = $state<ReaderSpacing>("normal");
-	let thompsonCrossRefsEnabled = $state(false);
-	let thompsonCrossRefsPosition = $state<"margin" | "center">("margin");
-	let showCrossRefsBottomPanel = $state(true);
-	let crossRefsBottomPanelFixed = $state(false);
-	let crossRefsBottomPanelColumns = $state<1 | 2>(2);
-	let crossRefsBottomPanelCollapsed = $state(false);
+	// Local display states initialized per-view (isolated from other open reader views)
+	function getInitialDisplayState() {
+		return {
+			twoColumns:
+				initialViewState?.twoColumns !== undefined
+					? initialViewState.twoColumns
+					: Boolean(settings.readerTwoColumns ?? settings.twoColumnLayout),
+			containerWidth:
+				initialViewState?.containerWidth || settings.readerContainerWidth || ("default" as ReaderContainerWidth),
+			verseSpacing:
+				initialViewState?.verseSpacing || settings.readerVerseSpacing || ("normal" as ReaderSpacing),
+			lineSpacing:
+				initialViewState?.lineSpacing || settings.readerLineSpacing || ("normal" as ReaderSpacing),
+			thompsonCrossRefsEnabled:
+				initialViewState?.thompsonCrossRefsEnabled !== undefined
+					? initialViewState.thompsonCrossRefsEnabled
+					: Boolean(settings.thompsonCrossRefsEnabled),
+			thompsonCrossRefsPosition:
+				initialViewState?.thompsonCrossRefsPosition || settings.thompsonCrossRefsPosition || ("margin" as const),
+			showCrossRefsBottomPanel:
+				initialViewState?.showCrossRefsBottomPanel !== undefined
+					? initialViewState.showCrossRefsBottomPanel
+					: (settings.showCrossRefsBottomPanel ?? true),
+			crossRefsBottomPanelFixed:
+				initialViewState?.crossRefsBottomPanelFixed !== undefined
+					? initialViewState.crossRefsBottomPanelFixed
+					: Boolean(settings.crossRefsBottomPanelFixed),
+			crossRefsBottomPanelColumns:
+				initialViewState?.crossRefsBottomPanelColumns || settings.crossRefsBottomPanelColumns || (2 as const),
+			crossRefsBottomPanelCollapsed:
+				initialViewState?.crossRefsBottomPanelCollapsed !== undefined
+					? initialViewState.crossRefsBottomPanelCollapsed
+					: Boolean(settings.crossRefsBottomPanelCollapsed),
+		};
+	}
+
+	const initial = getInitialDisplayState();
+	let twoColumns = $state(initial.twoColumns);
+	let containerWidth = $state<ReaderContainerWidth>(initial.containerWidth);
+	let verseSpacing = $state<ReaderSpacing>(initial.verseSpacing);
+	let lineSpacing = $state<ReaderSpacing>(initial.lineSpacing);
+	let thompsonCrossRefsEnabled = $state(initial.thompsonCrossRefsEnabled);
+	let thompsonCrossRefsPosition = $state<"margin" | "center">(initial.thompsonCrossRefsPosition);
+	let showCrossRefsBottomPanel = $state(initial.showCrossRefsBottomPanel);
+	let crossRefsBottomPanelFixed = $state(initial.crossRefsBottomPanelFixed);
+	let crossRefsBottomPanelColumns = $state<1 | 2>(initial.crossRefsBottomPanelColumns);
+	let crossRefsBottomPanelCollapsed = $state(initial.crossRefsBottomPanelCollapsed);
 	let activeVerseNumber = $state<number | undefined>();
 
 	export function syncSettings(): void {
@@ -91,10 +131,6 @@
 		crossRefsBottomPanelColumns = settings.crossRefsBottomPanelColumns || 2;
 		crossRefsBottomPanelCollapsed = Boolean(settings.crossRefsBottomPanelCollapsed);
 	}
-
-	$effect.pre(() => {
-		syncSettings();
-	});
 
 	let currentBook = $derived(
 		currentInfo?.books.find((b) => b.id === currentBookId)
@@ -178,7 +214,6 @@
 	}
 
 	async function initDatabases(): Promise<void> {
-		syncSettings();
 		isLoadingVersions = true;
 		try {
 			versions = await versionService.listVersions();
@@ -187,7 +222,14 @@
 				let initialBookId: number | undefined;
 				let initialChapter: number | undefined;
 
-				if (settings.rememberLastReadPassage && settings.lastReadVersionPath) {
+				if (initialViewState?.versionPath) {
+					const found = versions.find((v) => v.filePath === initialViewState.versionPath);
+					if (found) {
+						targetPath = found.filePath;
+						if (initialViewState.bookId) initialBookId = initialViewState.bookId;
+						if (initialViewState.chapter) initialChapter = initialViewState.chapter;
+					}
+				} else if (settings.rememberLastReadPassage && settings.lastReadVersionPath) {
 					const found = versions.find((v) => v.filePath === settings.lastReadVersionPath);
 					if (found) {
 						targetPath = found.filePath;
@@ -278,6 +320,11 @@
 			const bookName = bookObj?.name ?? "";
 
 			onPassageChange(bookName, chapter);
+			onViewConfigChange?.({
+				bookId,
+				chapter,
+				versionPath: currentInfo.path,
+			});
 
 			await updateSettings({
 				lastReadVersionPath: currentInfo.path,
@@ -366,24 +413,17 @@
 		}
 	}
 
-	async function toggleTwoColumns(): Promise<void> {
+	function toggleTwoColumns(): void {
 		twoColumns = !twoColumns;
-		await updateSettings({
-			readerTwoColumns: twoColumns,
-			twoColumnLayout: twoColumns,
-		});
-		syncSettings();
+		onViewConfigChange?.({ twoColumns });
 	}
 
-	async function toggleThompson(): Promise<void> {
+	function toggleThompson(): void {
 		thompsonCrossRefsEnabled = !thompsonCrossRefsEnabled;
 		if (thompsonCrossRefsEnabled && plugin?.crossReferenceService && !plugin.crossReferenceService.isReady()) {
 			void plugin.crossReferenceService.load();
 		}
-		await updateSettings({
-			thompsonCrossRefsEnabled,
-		});
-		syncSettings();
+		onViewConfigChange?.({ thompsonCrossRefsEnabled });
 	}
 
 	async function handleSelectCrossRef(verseNumber: number, ref: CrossReference, _event: MouseEvent): Promise<void> {
@@ -399,39 +439,27 @@
 		});
 	}
 
-	async function toggleBottomPanel(): Promise<void> {
+	function toggleBottomPanel(): void {
 		showCrossRefsBottomPanel = !showCrossRefsBottomPanel;
 		if (showCrossRefsBottomPanel && plugin?.crossReferenceService && !plugin.crossReferenceService.isReady()) {
 			void plugin.crossReferenceService.load();
 		}
-		await updateSettings({
-			showCrossRefsBottomPanel,
-		});
-		syncSettings();
+		onViewConfigChange?.({ showCrossRefsBottomPanel });
 	}
 
-	async function toggleBottomPanelFixed(): Promise<void> {
+	function toggleBottomPanelFixed(): void {
 		crossRefsBottomPanelFixed = !crossRefsBottomPanelFixed;
-		await updateSettings({
-			crossRefsBottomPanelFixed,
-		});
-		syncSettings();
+		onViewConfigChange?.({ crossRefsBottomPanelFixed });
 	}
 
-	async function toggleBottomPanelCollapsed(): Promise<void> {
+	function toggleBottomPanelCollapsed(): void {
 		crossRefsBottomPanelCollapsed = !crossRefsBottomPanelCollapsed;
-		await updateSettings({
-			crossRefsBottomPanelCollapsed,
-		});
-		syncSettings();
+		onViewConfigChange?.({ crossRefsBottomPanelCollapsed });
 	}
 
-	async function toggleBottomPanelColumns(): Promise<void> {
+	function toggleBottomPanelColumns(): void {
 		crossRefsBottomPanelColumns = crossRefsBottomPanelColumns === 2 ? 1 : 2;
-		await updateSettings({
-			crossRefsBottomPanelColumns,
-		});
-		syncSettings();
+		onViewConfigChange?.({ crossRefsBottomPanelColumns });
 	}
 
 	function scrollToVerse(verseNumber: number): void {
@@ -448,7 +476,7 @@
 		}
 	}
 
-	async function handleAppearanceChange(patch: {
+	function handleAppearanceChange(patch: {
 		readerContainerWidth?: ReaderContainerWidth;
 		readerVerseSpacing?: ReaderSpacing;
 		readerLineSpacing?: ReaderSpacing;
@@ -456,7 +484,8 @@
 		showCrossRefsBottomPanel?: boolean;
 		crossRefsBottomPanelFixed?: boolean;
 		crossRefsBottomPanelColumns?: 1 | 2;
-	}): Promise<void> {
+		twoColumns?: boolean;
+	}): void {
 		if (patch.readerContainerWidth !== undefined) containerWidth = patch.readerContainerWidth;
 		if (patch.readerVerseSpacing !== undefined) verseSpacing = patch.readerVerseSpacing;
 		if (patch.readerLineSpacing !== undefined) lineSpacing = patch.readerLineSpacing;
@@ -464,8 +493,17 @@
 		if (patch.showCrossRefsBottomPanel !== undefined) showCrossRefsBottomPanel = patch.showCrossRefsBottomPanel;
 		if (patch.crossRefsBottomPanelFixed !== undefined) crossRefsBottomPanelFixed = patch.crossRefsBottomPanelFixed;
 		if (patch.crossRefsBottomPanelColumns !== undefined) crossRefsBottomPanelColumns = patch.crossRefsBottomPanelColumns;
-		await updateSettings(patch);
-		syncSettings();
+		if (patch.twoColumns !== undefined) twoColumns = patch.twoColumns;
+		onViewConfigChange?.({
+			twoColumns,
+			containerWidth,
+			verseSpacing,
+			lineSpacing,
+			thompsonCrossRefsPosition,
+			showCrossRefsBottomPanel,
+			crossRefsBottomPanelFixed,
+			crossRefsBottomPanelColumns,
+		});
 	}
 
 	export async function navigateTo(
@@ -529,7 +567,27 @@
 			openHistory: () => openPicker("history"),
 			openBookPicker: () => openPicker("book"),
 			openVersionPicker: () => openPicker("version"),
+			openAppearancePicker: () => openPicker("appearance"),
 			refreshSettings: () => syncSettings(),
+			getViewState: () => ({
+				bookId: currentBookId,
+				chapter: currentChapter,
+				versionPath: currentInfo?.path,
+				twoColumns,
+				containerWidth,
+				verseSpacing,
+				lineSpacing,
+				thompsonCrossRefsEnabled,
+				thompsonCrossRefsPosition,
+				showCrossRefsBottomPanel,
+				crossRefsBottomPanelFixed,
+				crossRefsBottomPanelColumns,
+				crossRefsBottomPanelCollapsed,
+			}),
+			toggleTwoColumns: () => toggleTwoColumns(),
+			toggleThompson: () => toggleThompson(),
+			toggleBottomPanel: () => toggleBottomPanel(),
+			toggleBottomPanelFixed: () => toggleBottomPanelFixed(),
 		});
 	});
 </script>
@@ -563,10 +621,8 @@
 				{activePicker}
 				{canNavigatePrevious}
 				{canNavigateNext}
-				{twoColumns}
 				onNavigate={navigateChapter}
 				onTogglePicker={togglePicker}
-				onToggleTwoColumns={() => void toggleTwoColumns()}
 			/>
 
 			<VersesView

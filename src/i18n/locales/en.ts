@@ -159,6 +159,7 @@ export const en: TranslationStrings = {
 		thompsonPositionMargin: "Thompson: margin",
 		thompsonPositionCenter: "Thompson: center",
 		bottomCrossRefs: "Cross-references panel",
+		appearance: "Appearance",
 	},
 	resources: {
 		crossReferences: "Cross-references",

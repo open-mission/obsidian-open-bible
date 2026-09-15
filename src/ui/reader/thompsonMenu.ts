@@ -1,6 +1,7 @@
 import { Menu, Platform } from "obsidian";
 import type OpenBiblePlugin from "../../main";
 import { t } from "../../i18n";
+import type { BibleReaderController } from "./types";
 
 export const THOMPSON_NARROW_BREAKPOINT = 640;
 
@@ -8,9 +9,16 @@ export function isWideViewport(): boolean {
 	return !Platform.isMobile && window.innerWidth > THOMPSON_NARROW_BREAKPOINT;
 }
 
-export function addThompsonMenuItems(menu: Menu, plugin: OpenBiblePlugin): void {
-	const enabled = Boolean(plugin.settings.thompsonCrossRefsEnabled);
-	const position = plugin.settings.thompsonCrossRefsPosition ?? "margin";
+export function addThompsonMenuItems(
+	menu: Menu,
+	plugin: OpenBiblePlugin,
+	controller?: BibleReaderController | null,
+): void {
+	const viewState = controller?.getViewState?.();
+	const enabled = viewState?.thompsonCrossRefsEnabled !== undefined
+		? viewState.thompsonCrossRefsEnabled
+		: Boolean(plugin.settings.thompsonCrossRefsEnabled);
+	const position = viewState?.thompsonCrossRefsPosition ?? plugin.settings.thompsonCrossRefsPosition ?? "margin";
 
 	menu.addItem((item) => {
 		item
@@ -18,9 +26,13 @@ export function addThompsonMenuItems(menu: Menu, plugin: OpenBiblePlugin): void 
 			.setIcon("link")
 			.setChecked(enabled)
 			.onClick(async () => {
-				plugin.settings.thompsonCrossRefsEnabled = !enabled;
-				await plugin.saveSettings();
-				plugin.refreshReaderViews();
+				if (controller?.toggleThompson) {
+					controller.toggleThompson();
+				} else {
+					plugin.settings.thompsonCrossRefsEnabled = !enabled;
+					await plugin.saveSettings();
+					plugin.refreshReaderViews();
+				}
 			});
 	});
 

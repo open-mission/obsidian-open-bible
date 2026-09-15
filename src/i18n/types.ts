@@ -155,6 +155,7 @@ export interface TranslationStrings {
 		thompsonPositionMargin: string;
 		thompsonPositionCenter: string;
 		bottomCrossRefs: string;
+		appearance: string;
 	};
 	resources: {
 		crossReferences: string;

@@ -63,7 +63,7 @@
 </script>
 
 <PickerHeader
-	title={t("settings.pageReaderAppearance") || "Leitor e aparência"}
+	title={t("readerMenu.appearance") || "Aparência"}
 	closeLabel={t("bookPicker.close")}
 	{onClose}
 />

@@ -194,7 +194,6 @@
 	overflow: hidden;
 	box-sizing: border-box;
 	position: relative;
-	background-color: var(--background-primary);
 	color: var(--text-normal);
 }
 
@@ -2012,6 +2011,7 @@ button.open-bible-xref-link {
 	text-align: left;
 	border-radius: var(--radius-s, 3px);
 	transition: color 0.12s ease;
+	height: inherit;
 }
 
 button.open-bible-xref-link:hover,
@@ -2039,5 +2039,3 @@ button.open-bible-xref-toggle {
 button.open-bible-xref-toggle:hover {
 	text-decoration: underline;
 }
-
-
