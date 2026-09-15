@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-09-15
+
+### Added
 - **Scripture Quote Insertion via Context Menu**:
   - Added editor and reading view right-click context menu on Bible reference links to insert formatted Scripture blockquotes into notes.
   - Configurable insertion position in Settings: `"below"` (default) or `"above"` the current paragraph/block (`verseInsertPosition`).
