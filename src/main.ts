@@ -1,12 +1,14 @@
 import { Notice, Plugin, WorkspaceLeaf, TFile } from "obsidian";
 import { OPEN_BIBLE_VIEW_TYPE, OpenBibleView } from "./OpenBibleView";
 import { BIBLE_READER_VIEW_TYPE, BibleReaderView } from "./BibleReaderView";
+import { BIBLE_HIGHLIGHTS_VIEW_TYPE, HighlightsView } from "./HighlightsView";
 import { DEFAULT_SETTINGS, type OpenBibleSettings } from "./settings";
 import { normalizeDataFolder } from "./core/paths";
 import { BibleVersionService } from "./services/bibleVersionService";
 import { BibleTextService } from "./services/bibleTextService";
 import { CrossReferenceService } from "./services/CrossReferenceService";
 import { VersePreviewService } from "./services/VersePreviewService";
+import { HighlightService } from "./services/HighlightService";
 import { OpenBibleSettingTab } from "./settings/SettingsTab";
 import { openOrRevealView, type ViewSplit } from "./workspace/openPluginView";
 import { applyLocalePreference, t } from "./i18n";
@@ -19,6 +21,7 @@ export default class OpenBiblePlugin extends Plugin {
 	bibleText!: BibleTextService;
 	crossReferenceService!: CrossReferenceService;
 	versePreviewService!: VersePreviewService;
+	highlightService!: HighlightService;
 	private ribbonIconEl?: HTMLElement;
 
 	async onload(): Promise<void> {
@@ -28,6 +31,7 @@ export default class OpenBiblePlugin extends Plugin {
 		this.bibleText = new BibleTextService(this.app, this.bibleVersions);
 		this.crossReferenceService = new CrossReferenceService(() => this.bibleText.getSql());
 		this.versePreviewService = new VersePreviewService(this);
+		this.highlightService = new HighlightService(this.app, () => this.settings);
 
 		this.registerEditorExtension(createVerseReferenceEditorExtension(this));
 		this.registerMarkdownPostProcessor((el, ctx) => {
@@ -44,6 +48,7 @@ export default class OpenBiblePlugin extends Plugin {
 
 		this.registerView(OPEN_BIBLE_VIEW_TYPE, (leaf) => new OpenBibleView(leaf, this.app, this.settings));
 		this.registerView(BIBLE_READER_VIEW_TYPE, (leaf) => new BibleReaderView(leaf, this));
+		this.registerView(BIBLE_HIGHLIGHTS_VIEW_TYPE, (leaf) => new HighlightsView(leaf, this));
 
 		this.ribbonIconEl = this.addRibbonIcon("book-open", t("ribbon.openReader"), () => {
 			void this.openReader();
@@ -90,6 +95,56 @@ export default class OpenBiblePlugin extends Plugin {
 			},
 		});
 
+		this.addCommand({
+			id: "open-bible-highlights",
+			name: t("commands.openHighlights"),
+			callback: async () => {
+				let leaves = this.app.workspace.getLeavesOfType(BIBLE_READER_VIEW_TYPE);
+				if (leaves.length === 0) {
+					await this.openReader();
+					leaves = this.app.workspace.getLeavesOfType(BIBLE_READER_VIEW_TYPE);
+				}
+				for (const leaf of leaves) {
+					if (leaf.view instanceof BibleReaderView) {
+						await this.app.workspace.revealLeaf(leaf);
+						leaf.view.openHighlights();
+						break;
+					}
+				}
+			},
+		});
+
+		this.addCommand({
+			id: "open-bible-highlights-right-sidebar",
+			name: t("commands.openHighlightsRightSidebar"),
+			callback: () => {
+				void this.openHighlightsView("right");
+			},
+		});
+
+		this.addCommand({
+			id: "open-bible-highlights-left-sidebar",
+			name: t("commands.openHighlightsLeftSidebar"),
+			callback: () => {
+				void this.openHighlightsView("left");
+			},
+		});
+
+		this.addCommand({
+			id: "toggle-selection-mode",
+			name: t("commands.toggleSelectionMode"),
+			checkCallback: (checking: boolean) => {
+				const activeView = this.app.workspace.getActiveViewOfType(BibleReaderView);
+				if (activeView) {
+					if (!checking) {
+						activeView.toggleSelectionMode();
+					}
+					return true;
+				}
+				return false;
+			},
+		});
+
 		this.registerEvent(
 			this.app.vault.on("modify", (file) => {
 				if (file instanceof TFile && file.extension === "md") {
@@ -113,6 +168,7 @@ export default class OpenBiblePlugin extends Plugin {
 	}
 
 	override onunload(): void {
+		this.highlightService?.destroy();
 		this.bibleText?.closeActiveDatabase();
 	}
 
@@ -126,6 +182,15 @@ export default class OpenBiblePlugin extends Plugin {
 		const view = leaf.view;
 		if (view instanceof BibleReaderView) {
 			view.refreshSettings();
+		}
+	}
+
+	/** Opens (or reveals) the Highlights view in the requested location (tab, right sidebar, or left sidebar). */
+	async openHighlightsView(split: ViewSplit = "right"): Promise<void> {
+		const leaf = await openOrRevealView(this.app.workspace, BIBLE_HIGHLIGHTS_VIEW_TYPE, split);
+		if (!leaf) {
+			new Notice(t("view.errorOpening"));
+			return;
 		}
 	}
 

@@ -5,7 +5,7 @@
 	import { icon } from "../../actions/icon";
 	import IconButton from "../../kit/IconButton.svelte";
 
-	type PickerMode = "book" | "chapter" | "version" | "history" | "appearance" | null;
+	type PickerMode = "book" | "chapter" | "version" | "history" | "appearance" | "highlights" | null;
 
 	interface Props {
 		currentInfo?: BibleDatabaseInfo;
@@ -14,8 +14,10 @@
 		activePicker: PickerMode;
 		canNavigatePrevious: boolean;
 		canNavigateNext: boolean;
+		isSelectionMode?: boolean;
 		onNavigate: (direction: -1 | 1) => void;
 		onTogglePicker: (picker: Exclude<PickerMode, null>) => void;
+		onToggleSelectionMode?: () => void;
 	}
 
 	let {
@@ -25,8 +27,10 @@
 		activePicker,
 		canNavigatePrevious,
 		canNavigateNext,
+		isSelectionMode = false,
 		onNavigate,
 		onTogglePicker,
+		onToggleSelectionMode,
 	}: Props = $props();
 
 	let isMobile = Platform.isMobile;
@@ -112,15 +116,17 @@
 		/>
 	{/if}
 
-	<!-- 6. History -->
-	<IconButton
-		iconName="history"
-		class="open-bible-reader-nav open-bible-reader-toolbar-history"
-		active={activePicker === "history"}
-		title={t("readerMenu.readingHistory") || "Histórico"}
-		ariaLabel={t("readerMenu.readingHistory") || "Histórico"}
-		onclick={() => onTogglePicker("history")}
-	/>
+	<!-- 6. Selection Mode Toggle Button -->
+	{#if onToggleSelectionMode}
+		<IconButton
+			iconName="check-square"
+			class="open-bible-reader-nav open-bible-reader-toolbar-selection"
+			active={isSelectionMode}
+			title={t("readerMenu.selectionMode") || "Modo de seleção"}
+			ariaLabel={t("readerMenu.selectionMode") || "Modo de seleção"}
+			onclick={onToggleSelectionMode}
+		/>
+	{/if}
 
 	<!-- 7. Next Button (>) -->
 	<IconButton

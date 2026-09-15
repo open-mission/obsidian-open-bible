@@ -18,27 +18,27 @@
 	function formatRelativeTime(timestamp: number): string {
 		const diffMs = Date.now() - timestamp;
 		const diffMinutes = Math.floor(diffMs / 60000);
-		if (diffMinutes < 1) return t("history.justNow") || "Agora há pouco";
+		if (diffMinutes < 1) return t("history.justNow");
 		if (diffMinutes < 60) return `${diffMinutes}m`;
 		const diffHours = Math.floor(diffMinutes / 60);
 		if (diffHours < 24) return `${diffHours}h`;
 		const diffDays = Math.floor(diffHours / 24);
-		if (diffDays === 1) return t("history.yesterday") || "Ontem";
+		if (diffDays === 1) return t("history.yesterday");
 		return `${diffDays}d`;
 	}
 
 	async function handleClearHistory() {
 		await onClear();
-		new Notice(t("notices.historyCleared") || "Histórico limpo.");
+		new Notice(t("notices.historyCleared"));
 	}
 </script>
 
 <PickerHeader
-	title={t("history.title") || "Histórico de leitura"}
+	title={t("history.title")}
 	subtitle={history.length === 1
-		? "1 passagem recente"
-		: `${history.length} passagens recentes`}
-	closeLabel={t("bookPicker.close")}
+		? t("history.countSingle")
+		: t("history.countPlural", { count: history.length })}
+	closeLabel={t("history.close")}
 	{onClose}
 >
 	{#snippet actions()}
@@ -46,7 +46,8 @@
 			<IconButton
 				iconName="trash-2"
 				class="open-bible-picker-clear-btn"
-				title="Limpar histórico"
+				title={t("history.clearHistory")}
+				ariaLabel={t("history.clearHistory")}
 				onclick={handleClearHistory}
 			/>
 		{/if}
@@ -56,8 +57,8 @@
 {#if history.length === 0}
 	<EmptyState
 		iconName="history"
-		title="Nenhum histórico ainda"
-		description="Os capítulos lidos aparecerão aqui."
+		title={t("history.emptyTitle")}
+		description={t("history.emptyDesc")}
 	/>
 {:else}
 	<div class="open-bible-history-list">

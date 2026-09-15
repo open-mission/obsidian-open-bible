@@ -17,6 +17,8 @@ export class BibleReaderView extends ItemView {
 	private viewState: BibleReaderViewState = {};
 	private appearanceActionEl: HTMLElement | null = null;
 	private historyActionEl: HTMLElement | null = null;
+	private selectionActionEl: HTMLElement | null = null;
+	private highlightsActionEl: HTMLElement | null = null;
 
 	constructor(
 		leaf: WorkspaceLeaf,
@@ -90,6 +92,18 @@ export class BibleReaderView extends ItemView {
 		this.controller?.openAppearancePicker?.();
 	}
 
+	openHighlights(): void {
+		this.controller?.openHighlights?.();
+	}
+
+	toggleSelectionMode(): boolean {
+		const active = this.controller?.toggleSelectionMode?.() ?? false;
+		if (this.selectionActionEl) {
+			this.selectionActionEl.toggleClass("is-active", active);
+		}
+		return active;
+	}
+
 	async navigateToPassage(
 		bookIdOrName: number | string,
 		chapter: number,
@@ -104,6 +118,36 @@ export class BibleReaderView extends ItemView {
 
 	override onPaneMenu(menu: Menu, source: string): void {
 		super.onPaneMenu(menu, source);
+		menu.addSeparator();
+
+		menu.addItem((item) =>
+			item
+				.setTitle(t("reader.selectionMode") || "Modo de seleção")
+				.setIcon("check-square")
+				.setChecked(this.controller?.isSelectionMode?.() ?? false)
+				.onClick(() => {
+					this.toggleSelectionMode();
+				}),
+		);
+
+		menu.addItem((item) =>
+			item
+				.setTitle(t("highlightsPanel.title") || "Destaques")
+				.setIcon("highlighter")
+				.onClick(() => {
+					this.openHighlights();
+				}),
+		);
+
+		menu.addItem((item) =>
+			item
+				.setTitle(t("commands.openHighlightsRightSidebar"))
+				.setIcon("layout-sidebar-right")
+				.onClick(() => {
+					void this.plugin.openHighlightsView("right");
+				}),
+		);
+
 		menu.addSeparator();
 
 		const viewState = this.controller?.getViewState?.() ?? this.viewState;
@@ -164,6 +208,24 @@ export class BibleReaderView extends ItemView {
 	}
 
 	async onOpen(): Promise<void> {
+		if (!this.selectionActionEl) {
+			this.selectionActionEl = this.addAction(
+				"check-square",
+				t("reader.selectionMode") || "Modo de seleção",
+				() => {
+					this.toggleSelectionMode();
+				},
+			);
+		}
+		if (!this.highlightsActionEl) {
+			this.highlightsActionEl = this.addAction(
+				"highlighter",
+				t("highlightsPanel.title") || "Destaques",
+				() => {
+					this.openHighlights();
+				},
+			);
+		}
 		if (!this.appearanceActionEl) {
 			this.appearanceActionEl = this.addAction(
 				"sliders-horizontal",
@@ -219,6 +281,8 @@ export class BibleReaderView extends ItemView {
 	async onClose(): Promise<void> {
 		this.appearanceActionEl = null;
 		this.historyActionEl = null;
+		this.selectionActionEl = null;
+		this.highlightsActionEl = null;
 		if (this.component) {
 			await unmount(this.component);
 			this.component = undefined;

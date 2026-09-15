@@ -6,8 +6,9 @@
 	interface Props {
 		title: string;
 		subtitle?: string;
-		onClose: () => void;
-		closeLabel: string;
+		onClose?: () => void;
+		closeLabel?: string;
+		showCloseButton?: boolean;
 		onBack?: () => void;
 		backLabel?: string;
 		actions?: Snippet;
@@ -17,7 +18,8 @@
 		title,
 		subtitle,
 		onClose,
-		closeLabel,
+		closeLabel = "Close",
+		showCloseButton = true,
 		onBack,
 		backLabel,
 		actions,
@@ -48,12 +50,14 @@
 
 	<div class="open-bible-picker-actions">
 		{@render actions?.()}
-		<IconButton
-			iconName="x"
-			class="open-bible-picker-close-btn"
-			title={closeLabel}
-			ariaLabel={closeLabel}
-			onclick={onClose}
-		/>
+		{#if showCloseButton && onClose}
+			<IconButton
+				iconName="x"
+				class="open-bible-picker-close-btn"
+				title={closeLabel}
+				ariaLabel={closeLabel}
+				onclick={onClose}
+			/>
+		{/if}
 	</div>
 </div>
