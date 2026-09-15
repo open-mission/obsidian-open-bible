@@ -2,7 +2,7 @@
 	import { t } from "../../../i18n";
 	import type { ReaderContainerWidth, ReaderSpacing } from "../../../settings";
 	import PickerHeader from "../../kit/PickerHeader.svelte";
-	import { icon } from "../../actions/icon";
+	import Toggle from "../../kit/Toggle.svelte";
 
 	interface Props {
 		twoColumns: boolean;
@@ -69,135 +69,166 @@
 />
 
 <div class="open-bible-appearance-body">
-	<button type="button" class="open-bible-appearance-toggle-row" onclick={onToggleTwoColumns}>
-		<span class="open-bible-appearance-row-icon" use:icon={twoColumns ? "columns-2" : "columns-1"}></span>
-		<span class="open-bible-appearance-row-label">{t("readerMenu.twoColumnsToggle")}</span>
-		<span class="open-bible-switch" class:is-on={twoColumns} aria-hidden="true"></span>
-	</button>
+	<!-- Two Columns Layout -->
+	<div class="setting-item">
+		<div class="setting-item-info">
+			<div class="setting-item-name">{t("settings.readerTwoColumnsName") || t("readerMenu.twoColumnsToggle")}</div>
+		</div>
+		<div class="setting-item-control">
+			<Toggle
+				checked={twoColumns}
+				ariaLabel={t("settings.readerTwoColumnsName") || t("readerMenu.twoColumnsToggle")}
+				onchange={onToggleTwoColumns}
+			/>
+		</div>
+	</div>
 
+	<!-- Thompson Cross-references -->
 	{#if onToggleThompson}
-		<button type="button" class="open-bible-appearance-toggle-row" onclick={onToggleThompson}>
-			<span class="open-bible-appearance-row-icon" use:icon={"link-2"}></span>
-			<span class="open-bible-appearance-row-label">{t("readerMenu.thompsonCrossRefs") || "Referências cruzadas"}</span>
-			<span class="open-bible-switch" class:is-on={thompsonEnabled} aria-hidden="true"></span>
-		</button>
+		<div class="setting-item">
+			<div class="setting-item-info">
+				<div class="setting-item-name">{t("settings.thompsonCrossRefsName") || t("readerMenu.thompsonCrossRefs")}</div>
+			</div>
+			<div class="setting-item-control">
+				<Toggle
+					checked={thompsonEnabled}
+					ariaLabel={t("settings.thompsonCrossRefsName")}
+					onchange={onToggleThompson}
+				/>
+			</div>
+		</div>
 
 		{#if thompsonEnabled}
-			<h4 class="open-bible-appearance-section-title">{t("settings.thompsonCrossRefsPositionName") || "Posição do layout"}</h4>
-			<div class="open-bible-segmented" role="group">
-				<button
-					type="button"
-					class="open-bible-segmented-btn"
-					class:is-active={thompsonPosition === "margin"}
-					onclick={() => onChange({ thompsonCrossRefsPosition: "margin" })}
-				>
-					{t("settings.thompsonPositionMargin") || "Margem"}
-				</button>
-				<button
-					type="button"
-					class="open-bible-segmented-btn"
-					class:is-active={thompsonPosition === "center"}
-					onclick={() => onChange({ thompsonCrossRefsPosition: "center" })}
-				>
-					{t("settings.thompsonPositionCenter") || "Centro"}
-				</button>
+			<div class="setting-item mod-sub">
+				<div class="setting-item-info">
+					<div class="setting-item-name">{t("settings.thompsonCrossRefsPositionName") || "Posição do layout"}</div>
+				</div>
+				<div class="setting-item-control">
+					<select
+						class="dropdown"
+						value={thompsonPosition}
+						aria-label={t("settings.thompsonCrossRefsPositionName") || "Posição do layout"}
+						onchange={(e) => onChange({ thompsonCrossRefsPosition: e.currentTarget.value as "margin" | "center" })}
+					>
+						<option value="margin">{t("settings.thompsonPositionMargin") || "Margem"}</option>
+						<option value="center">{t("settings.thompsonPositionCenter") || "Centro"}</option>
+					</select>
+				</div>
 			</div>
 		{/if}
 	{/if}
 
+	<!-- Cross References Bottom Panel -->
 	{#if onToggleBottomPanel}
-		<button type="button" class="open-bible-appearance-toggle-row" onclick={onToggleBottomPanel}>
-			<span class="open-bible-appearance-row-icon" use:icon={"list-collapse"}></span>
-			<span class="open-bible-appearance-row-label">{t("readerMenu.bottomCrossRefs") || "Painel de referências cruzadas"}</span>
-			<span class="open-bible-switch" class:is-on={bottomPanelEnabled} aria-hidden="true"></span>
-		</button>
+		<div class="setting-item">
+			<div class="setting-item-info">
+				<div class="setting-item-name">{t("settings.showCrossRefsBottomPanelName") || t("readerMenu.bottomCrossRefs")}</div>
+			</div>
+			<div class="setting-item-control">
+				<Toggle
+					checked={bottomPanelEnabled}
+					ariaLabel={t("settings.showCrossRefsBottomPanelName")}
+					onchange={onToggleBottomPanel}
+				/>
+			</div>
+		</div>
 
 		{#if bottomPanelEnabled}
-			<h4 class="open-bible-appearance-section-title">{t("settings.crossRefsBottomPanelFixedName") || "Posição do painel"}</h4>
-			<div class="open-bible-segmented" role="group">
-				<button
-					type="button"
-					class="open-bible-segmented-btn"
-					class:is-active={!bottomPanelFixed}
-					onclick={() => {
-						if (bottomPanelFixed && onToggleBottomPanelFixed) onToggleBottomPanelFixed();
-					}}
-				>
-					{t("resources.pinInline") || "Final do texto"}
-				</button>
-				<button
-					type="button"
-					class="open-bible-segmented-btn"
-					class:is-active={bottomPanelFixed}
-					onclick={() => {
-						if (!bottomPanelFixed && onToggleBottomPanelFixed) onToggleBottomPanelFixed();
-					}}
-				>
-					{t("resources.pinFixed") || "Fixa no rodapé"}
-				</button>
+			<div class="setting-item mod-sub">
+				<div class="setting-item-info">
+					<div class="setting-item-name">{t("settings.crossRefsBottomPanelFixedName") || "Posição do painel"}</div>
+				</div>
+				<div class="setting-item-control">
+					<select
+						class="dropdown"
+						value={bottomPanelFixed ? "fixed" : "inline"}
+						aria-label={t("settings.crossRefsBottomPanelFixedName") || "Posição do painel"}
+						onchange={(e) => {
+							const isFixed = e.currentTarget.value === "fixed";
+							if (isFixed !== bottomPanelFixed && onToggleBottomPanelFixed) {
+								onToggleBottomPanelFixed();
+							}
+						}}
+					>
+						<option value="inline">{t("resources.pinInline") || "Final do texto"}</option>
+						<option value="fixed">{t("resources.pinFixed") || "Fixa no rodapé"}</option>
+					</select>
+				</div>
 			</div>
 
-			<h4 class="open-bible-appearance-section-title">{t("resources.columnsTwo") || "Colunas"}</h4>
-			<div class="open-bible-segmented" role="group">
-				<button
-					type="button"
-					class="open-bible-segmented-btn"
-					class:is-active={bottomPanelColumns === 1}
-					onclick={() => onChange({ crossRefsBottomPanelColumns: 1 })}
-				>
-					{t("resources.columnsOne") || "1 coluna"}
-				</button>
-				<button
-					type="button"
-					class="open-bible-segmented-btn"
-					class:is-active={bottomPanelColumns === 2}
-					onclick={() => onChange({ crossRefsBottomPanelColumns: 2 })}
-				>
-					{t("resources.columnsTwo") || "2 colunas"}
-				</button>
+			<div class="setting-item mod-sub">
+				<div class="setting-item-info">
+					<div class="setting-item-name">{t("resources.columnsTwo") || "Colunas"}</div>
+				</div>
+				<div class="setting-item-control">
+					<select
+						class="dropdown"
+						value={String(bottomPanelColumns)}
+						aria-label={t("resources.columnsTwo") || "Colunas"}
+						onchange={(e) => onChange({ crossRefsBottomPanelColumns: Number(e.currentTarget.value) as 1 | 2 })}
+					>
+						<option value="1">{t("resources.columnsOne") || "1 coluna"}</option>
+						<option value="2">{t("resources.columnsTwo") || "2 colunas"}</option>
+					</select>
+				</div>
 			</div>
 		{/if}
 	{/if}
 
-	<h4 class="open-bible-appearance-section-title">{t("readerMenu.containerWidthHeader")}</h4>
-	<div class="open-bible-segmented" role="group">
-		{#each widths as width (width)}
-			<button
-				type="button"
-				class="open-bible-segmented-btn"
-				class:is-active={containerWidth === width}
-				onclick={() => onChange({ readerContainerWidth: width })}
+	<!-- Text Container Width -->
+	<div class="setting-item">
+		<div class="setting-item-info">
+			<div class="setting-item-name">{t("readerMenu.containerWidthHeader")}</div>
+		</div>
+		<div class="setting-item-control">
+			<select
+				class="dropdown"
+				value={containerWidth}
+				aria-label={t("readerMenu.containerWidthHeader")}
+				onchange={(e) => onChange({ readerContainerWidth: e.currentTarget.value as ReaderContainerWidth })}
 			>
-				{widthLabel(width)}
-			</button>
-		{/each}
+				{#each widths as width (width)}
+					<option value={width}>{widthLabel(width)}</option>
+				{/each}
+			</select>
+		</div>
 	</div>
 
-	<h4 class="open-bible-appearance-section-title">{t("readerMenu.verseSpacingHeader")}</h4>
-	<div class="open-bible-segmented" role="group">
-		{#each spacings as spacing (spacing)}
-			<button
-				type="button"
-				class="open-bible-segmented-btn"
-				class:is-active={verseSpacing === spacing}
-				onclick={() => onChange({ readerVerseSpacing: spacing })}
+	<!-- Verse Spacing -->
+	<div class="setting-item">
+		<div class="setting-item-info">
+			<div class="setting-item-name">{t("readerMenu.verseSpacingHeader")}</div>
+		</div>
+		<div class="setting-item-control">
+			<select
+				class="dropdown"
+				value={verseSpacing}
+				aria-label={t("readerMenu.verseSpacingHeader")}
+				onchange={(e) => onChange({ readerVerseSpacing: e.currentTarget.value as ReaderSpacing })}
 			>
-				{spacingLabel(spacing)}
-			</button>
-		{/each}
+				{#each spacings as spacing (spacing)}
+					<option value={spacing}>{spacingLabel(spacing)}</option>
+				{/each}
+			</select>
+		</div>
 	</div>
 
-	<h4 class="open-bible-appearance-section-title">{t("readerMenu.lineSpacingHeader")}</h4>
-	<div class="open-bible-segmented" role="group">
-		{#each spacings as spacing (spacing)}
-			<button
-				type="button"
-				class="open-bible-segmented-btn"
-				class:is-active={lineSpacing === spacing}
-				onclick={() => onChange({ readerLineSpacing: spacing })}
+	<!-- Line Spacing -->
+	<div class="setting-item">
+		<div class="setting-item-info">
+			<div class="setting-item-name">{t("readerMenu.lineSpacingHeader")}</div>
+		</div>
+		<div class="setting-item-control">
+			<select
+				class="dropdown"
+				value={lineSpacing}
+				aria-label={t("readerMenu.lineSpacingHeader")}
+				onchange={(e) => onChange({ readerLineSpacing: e.currentTarget.value as ReaderSpacing })}
 			>
-				{spacingLabel(spacing)}
-			</button>
-		{/each}
+				{#each spacings as spacing (spacing)}
+					<option value={spacing}>{spacingLabel(spacing)}</option>
+				{/each}
+			</select>
+		</div>
 	</div>
 </div>
