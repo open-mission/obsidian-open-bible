@@ -100,6 +100,36 @@ export class BibleReaderView extends ItemView {
 
 		addThompsonMenuItems(menu, this.plugin);
 
+		const showBottomPanel = this.plugin.settings.showCrossRefsBottomPanel ?? true;
+		menu.addItem((item) =>
+			item
+				.setTitle(t("readerMenu.bottomCrossRefs") || "Painel de referências cruzadas")
+				.setIcon("list-collapse")
+				.setChecked(showBottomPanel)
+				.onClick(async () => {
+					await this.plugin.updateGeneral({
+						showCrossRefsBottomPanel: !showBottomPanel,
+					});
+					this.refreshSettings();
+				}),
+		);
+
+		if (showBottomPanel) {
+			const isFixed = Boolean(this.plugin.settings.crossRefsBottomPanelFixed);
+			menu.addItem((item) =>
+				item
+					.setTitle(isFixed ? t("resources.pinInline") : t("resources.pinFixed"))
+					.setIcon(isFixed ? "pin-off" : "pin")
+					.setChecked(isFixed)
+					.onClick(async () => {
+						await this.plugin.updateGeneral({
+							crossRefsBottomPanelFixed: !isFixed,
+						});
+						this.refreshSettings();
+					}),
+			);
+		}
+
 		menu.addItem((item) =>
 			item
 				.setTitle(t("readerMenu.readingHistory") || "Histórico de leitura")

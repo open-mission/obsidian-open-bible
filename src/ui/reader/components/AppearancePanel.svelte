@@ -11,13 +11,19 @@
 		lineSpacing: ReaderSpacing;
 		thompsonEnabled?: boolean;
 		thompsonPosition?: "margin" | "center";
+		bottomPanelEnabled?: boolean;
+		bottomPanelFixed?: boolean;
+		bottomPanelColumns?: 1 | 2;
 		onToggleTwoColumns: () => void;
 		onToggleThompson?: () => void;
+		onToggleBottomPanel?: () => void;
+		onToggleBottomPanelFixed?: () => void;
 		onChange: (patch: {
 			readerContainerWidth?: ReaderContainerWidth;
 			readerVerseSpacing?: ReaderSpacing;
 			readerLineSpacing?: ReaderSpacing;
 			thompsonCrossRefsPosition?: "margin" | "center";
+			crossRefsBottomPanelColumns?: 1 | 2;
 		}) => void;
 		onClose: () => void;
 	}
@@ -29,8 +35,13 @@
 		lineSpacing,
 		thompsonEnabled = false,
 		thompsonPosition = "margin",
+		bottomPanelEnabled = true,
+		bottomPanelFixed = false,
+		bottomPanelColumns = 2,
 		onToggleTwoColumns,
 		onToggleThompson,
+		onToggleBottomPanel,
+		onToggleBottomPanelFixed,
 		onChange,
 		onClose,
 	}: Props = $props();
@@ -89,6 +100,60 @@
 					onclick={() => onChange({ thompsonCrossRefsPosition: "center" })}
 				>
 					{t("settings.thompsonPositionCenter") || "Centro"}
+				</button>
+			</div>
+		{/if}
+	{/if}
+
+	{#if onToggleBottomPanel}
+		<button type="button" class="open-bible-appearance-toggle-row" onclick={onToggleBottomPanel}>
+			<span class="open-bible-appearance-row-icon" use:icon={"list-collapse"}></span>
+			<span class="open-bible-appearance-row-label">{t("readerMenu.bottomCrossRefs") || "Painel de referências cruzadas"}</span>
+			<span class="open-bible-switch" class:is-on={bottomPanelEnabled} aria-hidden="true"></span>
+		</button>
+
+		{#if bottomPanelEnabled}
+			<h4 class="open-bible-appearance-section-title">{t("settings.crossRefsBottomPanelFixedName") || "Posição do painel"}</h4>
+			<div class="open-bible-segmented" role="group">
+				<button
+					type="button"
+					class="open-bible-segmented-btn"
+					class:is-active={!bottomPanelFixed}
+					onclick={() => {
+						if (bottomPanelFixed && onToggleBottomPanelFixed) onToggleBottomPanelFixed();
+					}}
+				>
+					{t("resources.pinInline") || "Final do texto"}
+				</button>
+				<button
+					type="button"
+					class="open-bible-segmented-btn"
+					class:is-active={bottomPanelFixed}
+					onclick={() => {
+						if (!bottomPanelFixed && onToggleBottomPanelFixed) onToggleBottomPanelFixed();
+					}}
+				>
+					{t("resources.pinFixed") || "Fixa no rodapé"}
+				</button>
+			</div>
+
+			<h4 class="open-bible-appearance-section-title">{t("resources.columnsTwo") || "Colunas"}</h4>
+			<div class="open-bible-segmented" role="group">
+				<button
+					type="button"
+					class="open-bible-segmented-btn"
+					class:is-active={bottomPanelColumns === 1}
+					onclick={() => onChange({ crossRefsBottomPanelColumns: 1 })}
+				>
+					{t("resources.columnsOne") || "1 coluna"}
+				</button>
+				<button
+					type="button"
+					class="open-bible-segmented-btn"
+					class:is-active={bottomPanelColumns === 2}
+					onclick={() => onChange({ crossRefsBottomPanelColumns: 2 })}
+				>
+					{t("resources.columnsTwo") || "2 colunas"}
 				</button>
 			</div>
 		{/if}

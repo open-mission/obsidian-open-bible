@@ -75,6 +75,10 @@ export interface TranslationStrings {
 		thompsonCrossRefsPositionDesc: string;
 		thompsonPositionMargin: string;
 		thompsonPositionCenter: string;
+		showCrossRefsBottomPanelName: string;
+		showCrossRefsBottomPanelDesc: string;
+		crossRefsBottomPanelFixedName: string;
+		crossRefsBottomPanelFixedDesc: string;
 		creditsHeading: string;
 		creditsDesc: string;
 		creditsOpenBibleDesc: string;
@@ -150,6 +154,7 @@ export interface TranslationStrings {
 		thompsonCrossRefs: string;
 		thompsonPositionMargin: string;
 		thompsonPositionCenter: string;
+		bottomCrossRefs: string;
 	};
 	resources: {
 		crossReferences: string;
@@ -159,6 +164,19 @@ export interface TranslationStrings {
 		verseMissing: string;
 		previous: string;
 		next: string;
+		seeMore: string;
+		seeLess: string;
+		scrollToVerse: string;
+		expandAll: string;
+		collapseAll: string;
+		columnsOne: string;
+		columnsTwo: string;
+		searchPlaceholder: string;
+		searchTitle: string;
+		pinFixed: string;
+		pinInline: string;
+		collapsePanel: string;
+		expandPanel: string;
 	};
 	popover: {
 		copyText: string;

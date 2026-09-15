@@ -25,9 +25,11 @@
 		thompsonCrossRefsEnabled?: boolean;
 		thompsonCrossRefsPosition?: "margin" | "center";
 		crossReferenceService?: CrossReferenceService;
+		selectedVerseNumber?: number;
 		onRetry?: () => void;
 		onToggleTwoColumns?: () => void;
 		onSelectCrossRef?: (verseNumber: number, ref: CrossReference, event: MouseEvent) => void;
+		onSelectVerse?: (verseNumber: number) => void;
 	}
 
 	let {
@@ -43,9 +45,11 @@
 		thompsonCrossRefsEnabled = false,
 		thompsonCrossRefsPosition = "margin",
 		crossReferenceService,
+		selectedVerseNumber,
 		onRetry,
 		onToggleTwoColumns,
 		onSelectCrossRef,
+		onSelectVerse,
 	}: Props = $props();
 
 	let versesContainerEl = $state<HTMLElement | undefined>();
@@ -127,11 +131,16 @@
 {#snippet renderVerse(verse: BibleVerse, alignStart?: boolean)}
 	{@const xrefs = verseXrefsMap.get(verse.number) ?? []}
 	{@const hasXrefs = showThompsonXrefs && xrefs.length > 0}
+	<!-- svelte-ignore a11y_click_events_have_key_events -->
 	<div
 		class="open-bible-reader-verse"
 		class:has-thompson-xref={hasXrefs}
 		class:has-thompson-xref-start={hasXrefs && alignStart}
+		class:is-active-verse={selectedVerseNumber === verse.number}
 		data-verse={verse.number}
+		role="button"
+		tabindex="0"
+		onclick={() => onSelectVerse?.(verse.number)}
 	>
 		<span class="open-bible-reader-verse-number">{verse.number}</span>
 		<span class="open-bible-reader-verse-text">{verse.text}</span>

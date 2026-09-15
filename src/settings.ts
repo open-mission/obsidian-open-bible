@@ -39,6 +39,12 @@ export interface OpenBibleSettings {
 	thompsonCrossRefsEnabled?: boolean;
 	thompsonCrossRefsPosition?: "margin" | "center";
 	previewDefaultVersion?: string;
+	/** Cross-references bottom panel in reader. */
+	showCrossRefsBottomPanel?: boolean;
+	crossRefsBottomPanelFixed?: boolean;
+	crossRefsBottomPanelColumns?: 1 | 2;
+	crossRefsBottomPanelCollapsed?: boolean;
+	crossRefsBottomPanelHeight?: number;
 }
 
 export const DEFAULT_SETTINGS: OpenBibleSettings = {
@@ -59,4 +65,9 @@ export const DEFAULT_SETTINGS: OpenBibleSettings = {
 	thompsonCrossRefsEnabled: false,
 	thompsonCrossRefsPosition: "margin",
 	previewDefaultVersion: "",
+	showCrossRefsBottomPanel: true,
+	crossRefsBottomPanelFixed: false,
+	crossRefsBottomPanelColumns: 2,
+	crossRefsBottomPanelCollapsed: false,
+	crossRefsBottomPanelHeight: 220,
 };

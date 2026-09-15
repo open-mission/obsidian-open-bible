@@ -28,7 +28,7 @@ export default class OpenBiblePlugin extends Plugin {
 		this.versePreviewService = new VersePreviewService(this);
 
 		this.app.workspace.onLayoutReady(() => {
-			if (this.settings.thompsonCrossRefsEnabled) {
+			if (this.settings.thompsonCrossRefsEnabled || (this.settings.showCrossRefsBottomPanel ?? true)) {
 				void this.crossReferenceService.load().catch((error) => {
 					console.warn("OpenBible: failed to load cross-references:", error);
 				});

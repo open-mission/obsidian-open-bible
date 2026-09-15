@@ -72,6 +72,40 @@
 
 <div class="setting-item">
 	<div class="setting-item-info">
+		<div class="setting-item-name">{t("settings.showCrossRefsBottomPanelName")}</div>
+		<div class="setting-item-description">{t("settings.showCrossRefsBottomPanelDesc")}</div>
+	</div>
+	<div class="setting-item-control">
+		<input
+			type="checkbox"
+			checked={settings.showCrossRefsBottomPanel ?? true}
+			aria-label={t("settings.showCrossRefsBottomPanelName")}
+			onchange={(e) => void updateGeneral({ showCrossRefsBottomPanel: e.currentTarget.checked })}
+		/>
+	</div>
+</div>
+
+{#if settings.showCrossRefsBottomPanel ?? true}
+	<div class="setting-item">
+		<div class="setting-item-info">
+			<div class="setting-item-name">{t("settings.crossRefsBottomPanelFixedName")}</div>
+			<div class="setting-item-description">{t("settings.crossRefsBottomPanelFixedDesc")}</div>
+		</div>
+		<div class="setting-item-control">
+			<select
+				value={settings.crossRefsBottomPanelFixed ? "fixed" : "inline"}
+				aria-label={t("settings.crossRefsBottomPanelFixedName")}
+				onchange={(e) => void updateGeneral({ crossRefsBottomPanelFixed: e.currentTarget.value === "fixed" })}
+			>
+				<option value="inline">{t("resources.pinInline")}</option>
+				<option value="fixed">{t("resources.pinFixed")}</option>
+			</select>
+		</div>
+	</div>
+{/if}
+
+<div class="setting-item">
+	<div class="setting-item-info">
 		<div class="setting-item-name">{t("settings.readerContainerWidthName")}</div>
 		<div class="setting-item-description">{t("settings.readerContainerWidthDesc")}</div>
 	</div>
