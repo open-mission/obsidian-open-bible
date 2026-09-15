@@ -9,6 +9,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.1] - 2026-09-15
+
+### Added
+- **Page Header Actions**: Registered native Obsidian view header actions (`addAction`) in `BibleReaderView` for Appearance (`sliders-horizontal`) and Reading History (`history`), providing direct access from the desktop tab header.
+- **Reading History i18n**: Added full localization strings for reading history menu items across English and Portuguese.
+
+### Fixed
+- **Mobile Toolbar Overflow**: Optimized the Bible Reader toolbar on mobile devices by removing the inline Appearance button (accessible via page header `...` menu), enforcing `max-width: 100%`, and refining button min-widths, gaps, and text truncation so navigation arrows never get clipped.
+- **Appearance Modal & Mobile Drawer Redesign**:
+  - Re-architected `AppearancePanel` using native Obsidian `.setting-item`, `.setting-item-info`, `.setting-item-control`, native `Toggle` components, and responsive `<select class="dropdown">` selectors.
+  - Eliminated horizontal button overflow on mobile by replacing wide segmented button bars with clean, native dropdown menus and indented sub-settings (`.mod-sub`).
+  - Enabled mobile vertical touch scrolling in the appearance drawer (`overflow-y: auto`, `-webkit-overflow-scrolling: touch`, `touch-action: pan-y`) with bottom safe-area padding.
+  - Allowed the mobile appearance drawer to dynamically hug content (`height: auto; max-height: 85dvh`) instead of forcing a rigid 90dvh.
+
+## [0.2.0] - 2026-09-15
+
 ### Added
 - **Directional Chapter Transitions**: Smooth GPU-accelerated CSS animations (`is-next`, `is-prev`, `is-jump`) when changing chapters, respecting user reduced-motion preferences.
 - **Markdown Version Properties Notes (`.md`)**:
