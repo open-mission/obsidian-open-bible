@@ -57,6 +57,32 @@ export const en: TranslationStrings = {
 		studySectionPlaceholder: "Study settings coming soon",
 		studySectionPlaceholderDesc:
 			"Cross-reference, note, and study resource tools will be available in future versions.",
+		versePreviewsHeading: "Verse previews in notes",
+		versePreviewsDesc:
+			"Detects Bible references (e.g. Jn 3:16, Ps 23:1-3, Rom 8:28 NIV) in Markdown notes as you type to underline and preview scripture.",
+		enableVersePreviewsName: "Enable Bible reference previews",
+		enableVersePreviewsDesc:
+			"Detects and underlines Bible references in notes, allowing preview on hover or click.",
+		enableVerseHoverPreviewName: "Preview on hover",
+		enableVerseHoverPreviewDesc:
+			"Displays a floating tooltip with scripture when hovering over a reference.",
+		verseHoverRequireShiftName: "Require Shift key on hover",
+		verseHoverRequireShiftDesc:
+			"Only displays the floating tooltip when the Shift key is held while hovering.",
+		verseHoverModifierName: "Preview modifier key",
+		verseHoverModifierDesc:
+			"Key to hold while hovering to display scripture preview tooltip.",
+		verseHoverModifierShift: "Shift (Default)",
+		verseHoverModifierCtrlCmd: "Ctrl / Cmd",
+		verseHoverModifierAlt: "Alt / Option",
+		verseHoverModifierNone: "None (hover only)",
+		enableVerseClickPreviewName: "Preview on click",
+		enableVerseClickPreviewDesc:
+			"Opens a modal dialog with full scripture text, copy options, and a button to open in the reader.",
+		previewDefaultVersionName: "Default preview version",
+		previewDefaultVersionDesc:
+			"Bible version used to display verses in previews.",
+		previewDefaultVersionSameAsReader: "Same as reader / primary version",
 		versionsListErrorNotice: "Could not list the installed versions.",
 		removeVersionTitle: "Remove version",
 		removeVersionConfirm: "Remove \"{name}\"? The file will be deleted from {folder}/.",

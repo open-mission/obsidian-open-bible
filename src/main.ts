@@ -10,6 +10,8 @@ import { VersePreviewService } from "./services/VersePreviewService";
 import { OpenBibleSettingTab } from "./settings/SettingsTab";
 import { openOrRevealView, type ViewSplit } from "./workspace/openPluginView";
 import { applyLocalePreference, t } from "./i18n";
+import { createVerseReferenceEditorExtension } from "./editor/VerseReferenceEditorExtension";
+import { processMarkdownVerseReferences } from "./services/MarkdownVerseProcessor";
 
 export default class OpenBiblePlugin extends Plugin {
 	settings: OpenBibleSettings = DEFAULT_SETTINGS;
@@ -26,6 +28,11 @@ export default class OpenBiblePlugin extends Plugin {
 		this.bibleText = new BibleTextService(this.app, this.bibleVersions);
 		this.crossReferenceService = new CrossReferenceService(() => this.bibleText.getSql());
 		this.versePreviewService = new VersePreviewService(this);
+
+		this.registerEditorExtension(createVerseReferenceEditorExtension(this));
+		this.registerMarkdownPostProcessor((el, ctx) => {
+			processMarkdownVerseReferences(el, ctx, this);
+		});
 
 		this.app.workspace.onLayoutReady(() => {
 			if (this.settings.thompsonCrossRefsEnabled || (this.settings.showCrossRefsBottomPanel ?? true)) {
@@ -170,6 +177,8 @@ export default class OpenBiblePlugin extends Plugin {
 		}
 		// Push layout changes (two columns, widths, spacing) into open readers.
 		this.refreshReaderViews();
+		// Notify open markdown editors to update decorations with the latest settings.
+		this.app.workspace.updateOptions();
 	}
 
 	async navigateToPassage(

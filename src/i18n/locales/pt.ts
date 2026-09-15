@@ -58,6 +58,32 @@ export const pt: TranslationStrings = {
 		studySectionPlaceholder: "Configurações de Estudo em breve",
 		studySectionPlaceholderDesc:
 			"Ferramentas de referências cruzadas, notas e recursos de estudo estarão disponíveis em versões futuras.",
+		versePreviewsHeading: "Previews de versículos em notas",
+		versePreviewsDesc:
+			"Detecta referências bíblicas (ex: Jo 3:16, Sl 23:1-3, Rm 8:28 NVT) em notas Markdown ao digitar para sublinhar e exibir o texto bíblico.",
+		enableVersePreviewsName: "Ativar preview de referências bíblicas",
+		enableVersePreviewsDesc:
+			"Detecta e sublinha referências bíblicas em notas, permitindo visualização ao passar o mouse ou clicar.",
+		enableVerseHoverPreviewName: "Preview ao passar o mouse",
+		enableVerseHoverPreviewDesc:
+			"Exibe uma janela flutuante (tooltip) com o texto bíblico ao posicionar o cursor sobre a referência.",
+		verseHoverRequireShiftName: "Exigir tecla Shift ao passar o mouse",
+		verseHoverRequireShiftDesc:
+			"Apenas exibe o preview flutuante quando a tecla Shift estiver pressionada ao passar o mouse.",
+		verseHoverModifierName: "Tecla modificadora para preview",
+		verseHoverModifierDesc:
+			"Tecla que deve ser mantida pressionada ao passar o mouse para exibir o preview flutuante.",
+		verseHoverModifierShift: "Shift (Padrão)",
+		verseHoverModifierCtrlCmd: "Ctrl / Cmd",
+		verseHoverModifierAlt: "Alt / Option",
+		verseHoverModifierNone: "Nenhuma (apenas passar o mouse)",
+		enableVerseClickPreviewName: "Preview ao clicar",
+		enableVerseClickPreviewDesc:
+			"Abre uma janela modal detalhada com o texto bíblico completo e opções para copiar e abrir no leitor.",
+		previewDefaultVersionName: "Versão padrão para preview",
+		previewDefaultVersionDesc:
+			"Versão bíblica utilizada para exibir os textos bíblicos nos previews.",
+		previewDefaultVersionSameAsReader: "Mesma versão do leitor / padrão",
 		versionsListErrorNotice: "Não foi possível listar as versões instaladas.",
 		removeVersionTitle: "Remover versão",
 		removeVersionConfirm: "Remover \"{name}\"? O arquivo será excluído de {folder}/.",

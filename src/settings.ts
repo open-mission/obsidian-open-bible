@@ -23,6 +23,8 @@ export interface CustomVersionMetadata {
 	language?: string;
 }
 
+export type VerseHoverModifier = "shift" | "ctrlCmd" | "alt" | "none";
+
 export interface OpenBibleSettings {
 	dataFolder: string;
 	defaultReference: string;
@@ -49,6 +51,16 @@ export interface OpenBibleSettings {
 	thompsonCrossRefsEnabled?: boolean;
 	thompsonCrossRefsPosition?: "margin" | "center";
 	previewDefaultVersion?: string;
+	/** Whether verse reference previews in notes are enabled globally. */
+	enableVersePreviews: boolean;
+	/** Whether hovering over a verse reference displays the preview tooltip. */
+	enableVerseHoverPreview: boolean;
+	/** Modifier key required to show hover preview ("shift" | "ctrlCmd" | "alt" | "none"). */
+	verseHoverModifier: VerseHoverModifier;
+	/** Deprecated: use verseHoverModifier instead. Kept for backwards compatibility. */
+	verseHoverRequireShift?: boolean;
+	/** Whether clicking on a verse reference opens the preview modal / drawer. */
+	enableVerseClickPreview: boolean;
 	/** Cross-references bottom panel in reader. */
 	showCrossRefsBottomPanel?: boolean;
 	crossRefsBottomPanelFixed?: boolean;
@@ -77,6 +89,11 @@ export const DEFAULT_SETTINGS: OpenBibleSettings = {
 	thompsonCrossRefsEnabled: false,
 	thompsonCrossRefsPosition: "margin",
 	previewDefaultVersion: "",
+	enableVersePreviews: true,
+	enableVerseHoverPreview: true,
+	verseHoverModifier: "shift",
+	verseHoverRequireShift: true,
+	enableVerseClickPreview: true,
 	showCrossRefsBottomPanel: true,
 	crossRefsBottomPanelFixed: false,
 	crossRefsBottomPanelColumns: 2,

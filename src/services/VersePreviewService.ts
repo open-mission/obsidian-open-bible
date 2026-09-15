@@ -32,22 +32,22 @@ export class VersePreviewService {
 			}
 		}
 
-		// 2. If default version configured in plugin settings
-		if (this.plugin.settings.defaultVersionPath) {
-			const targetPath = this.plugin.settings.defaultVersionPath;
+		// 2. If default preview version abbreviation configured specifically
+		const defaultSetting = this.plugin.settings.previewDefaultVersion?.toUpperCase().trim();
+		if (defaultSetting) {
 			const match = versions.find(
-				(v) => v.filePath === targetPath || v.filePath.endsWith(`/${targetPath}`)
+				(v) => v.abbreviation.toUpperCase() === defaultSetting || v.name.toUpperCase().includes(defaultSetting)
 			);
 			if (match) {
 				return { path: match.filePath, abbreviation: match.abbreviation, name: match.name };
 			}
 		}
 
-		// 3. If default preview version abbreviation configured
-		const defaultSetting = this.plugin.settings.previewDefaultVersion?.toUpperCase().trim();
-		if (defaultSetting) {
+		// 3. If primary/default version configured in plugin settings
+		if (this.plugin.settings.defaultVersionPath) {
+			const targetPath = this.plugin.settings.defaultVersionPath;
 			const match = versions.find(
-				(v) => v.abbreviation.toUpperCase() === defaultSetting || v.name.toUpperCase().includes(defaultSetting)
+				(v) => v.filePath === targetPath || v.filePath.endsWith(`/${targetPath}`)
 			);
 			if (match) {
 				return { path: match.filePath, abbreviation: match.abbreviation, name: match.name };

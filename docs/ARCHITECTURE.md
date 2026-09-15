@@ -48,6 +48,8 @@ obsidian-open-bible/
 │       ├── ci.yml                 # PR & push check (svelte-check + build)
 │       └── release.yml            # Automated GitHub releases with attestations
 ├── docs/                          # Developer & architecture documentation
+│   ├── ARCHITECTURE.md            # System architecture and directory map
+│   └── verse-previews.md          # Scripture reference auto-detection & previews
 ├── src/
 │   ├── main.ts                    # Plugin entry point & lifecycle registration
 │   ├── BibleReaderView.ts         # Obsidian ItemView wrapper for the Svelte reader
@@ -62,6 +64,8 @@ obsidian-open-bible/
 │   │   ├── crossRefModel.ts       # Cross-reference data structures
 │   │   ├── crossRefsBytes.ts      # Binary cross-reference decoder
 │   │   └── generated/             # Precompiled binary data (cross-refs.bin)
+│   ├── editor/                    # CodeMirror 6 editor extensions
+│   │   └── VerseReferenceEditorExtension.ts # Live preview detection, underlines & hover/click
 │   ├── i18n/                      # Reactive localization system (EN & PT)
 │   │   ├── index.ts               # Public barrel (t, setLocale, getLocale)
 │   │   ├── store.svelte.ts        # Runes-based locale store
@@ -73,10 +77,12 @@ obsidian-open-bible/
 │   │   ├── bibleVersionService.ts # Detection, import, and registry of SQLite DBs
 │   │   ├── versionMetadata.ts     # Markdown frontmatter properties parser & serializer (.md notes)
 │   │   ├── CrossReferenceService.ts # Thomson cross-reference lookups
-│   │   ├── VersePreviewService.ts # Preview orchestration
+│   │   ├── MarkdownVerseProcessor.ts # Reading view reference post-processor
+│   │   ├── VersePreviewService.ts # Preview orchestration & DB resolution
 │   │   └── VerseReferenceParser.ts# Scripture reference string parser
 │   ├── ui/                        # User interface
 │   │   ├── actions/               # Svelte actions (portal, icon)
+│   │   ├── components/            # UI components (VerseHoverTooltip)
 │   │   ├── core/                  # Core primitives (EmptyState, LoadingState, icons)
 │   │   ├── kit/                   # UI Kit (buttons, search, drawers, modals)
 │   │   ├── modals/                # Obsidian Modal dialogs (VersePreviewModal, EditVersionModal)
