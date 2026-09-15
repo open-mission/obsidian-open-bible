@@ -7,6 +7,7 @@ import {
 	DEFAULT_DATA_FOLDER,
 	DEFAULT_DATABASE_FOLDER,
 	PLUGIN_FOLDER,
+	LEGACY_PLUGIN_FOLDER,
 	abbreviationFromFilename,
 	hasSqliteHeader,
 	sanitizeDatabaseName,
@@ -132,7 +133,8 @@ export class BibleVersionService {
 	async listVersions(): Promise<BibleVersion[]> {
 		await this.ensureVersionsFolder();
 		const primaryFolder = this.getVersionsFolder();
-		const legacyDir = normalizePath(`${PLUGIN_FOLDER}/bibles`);
+		const pluginDir = normalizePath(`${PLUGIN_FOLDER}/bibles`);
+		const legacyDir = normalizePath(`${LEGACY_PLUGIN_FOLDER}/bibles`);
 		const defaultFolder = normalizePath(`${DEFAULT_DATA_FOLDER}/${DEFAULT_DATABASE_FOLDER}`);
 
 		const results: BibleVersion[] = [];
@@ -165,7 +167,10 @@ export class BibleVersionService {
 		if (primaryFolder !== defaultFolder) {
 			await collectFrom(defaultFolder);
 		}
-		if (primaryFolder !== legacyDir && defaultFolder !== legacyDir) {
+		if (primaryFolder !== pluginDir && defaultFolder !== pluginDir) {
+			await collectFrom(pluginDir);
+		}
+		if (primaryFolder !== legacyDir && defaultFolder !== legacyDir && pluginDir !== legacyDir) {
 			await collectFrom(legacyDir);
 		}
 

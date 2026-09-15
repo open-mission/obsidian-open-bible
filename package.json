@@ -1,23 +1,34 @@
 {
 	"name": "obsidian-open-bible",
 	"version": "0.1.0",
-	"description": "Plugin OpenBible para Obsidian — interface em Svelte.",
+	"description": "Offline-first Bible reader and study companion for Obsidian.",
 	"main": "main.js",
 	"scripts": {
 		"dev": "node esbuild.config.mjs",
 		"build": "tsc -noEmit -skipLibCheck && node esbuild.config.mjs production",
 		"svelte-check": "svelte-check --tsconfig tsconfig.json",
-		"deploy": "mkdir -p \"/Users/claudio/Projects/vault-teste/.obsidian/plugins/obsidian-open-bible\" && cp main.js manifest.json styles.css \"/Users/claudio/Projects/vault-teste/.obsidian/plugins/obsidian-open-bible/\"",
+		"deploy": "mkdir -p \"/Users/claudio/Projects/vault-teste/.obsidian/plugins/open-bible\" && cp main.js manifest.json styles.css \"/Users/claudio/Projects/vault-teste/.obsidian/plugins/open-bible/\"",
 		"build:deploy": "npm run build && npm run deploy",
 		"version": "node version-bump.mjs && git add manifest.json versions.json"
 	},
 	"keywords": [
 		"obsidian",
+		"obsidian-plugin",
 		"bible",
-		"svelte"
+		"scripture",
+		"svelte",
+		"sqlite"
 	],
-	"author": "",
+	"author": "Open Mission",
 	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/open-mission/obsidian-open-bible.git"
+	},
+	"bugs": {
+		"url": "https://github.com/open-mission/obsidian-open-bible/issues"
+	},
+	"homepage": "https://github.com/open-mission/obsidian-open-bible#readme",
 	"devDependencies": {
 		"@types/node": "^22.10.0",
 		"@types/sql.js": "^1.4.11",

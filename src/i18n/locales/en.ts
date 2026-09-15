@@ -2,14 +2,14 @@ import type { TranslationStrings } from "../types";
 
 export const en: TranslationStrings = {
 	commands: {
-		openReader: "Open Bible reader",
-		openBibleText: "Open Bible text view",
-		openReaderRightSidebar: "Open Bible reader in right sidebar",
-		openReaderLeftSidebar: "Open Bible reader in left sidebar",
+		openReader: "Open reader",
+		openBibleText: "Open text view",
+		openReaderRightSidebar: "Open reader in right sidebar",
+		openReaderLeftSidebar: "Open reader in left sidebar",
 		toggleTwoColumns: "Toggle two-column layout",
 	},
 	ribbon: {
-		openReader: "Open Bible reader",
+		openReader: "Open reader",
 	},
 	view: {
 		title: "Open Bible",
@@ -21,16 +21,16 @@ export const en: TranslationStrings = {
 		searchResult: "Reference searched: {reference} (search #{count})",
 	},
 	settings: {
-		pageReaderAppearance: "Reader & appearance",
+		pageReaderAppearance: "Reader and appearance",
 		pageReaderAppearanceDesc: "Configure the Bible reader interface, layout, and visual settings",
-		pageResources: "Resources & study Bibles",
+		pageResources: "Resources and study Bibles",
 		pageResourcesDesc: "Study Bibles, commentaries, and reference materials",
 		generalHeading: "General",
 		generalDesc: "Core Bible reader settings and plugin startup behavior.",
 		dataFolderName: "Data folder root",
 		dataFolderPathDesc:
 			"Root folder for all OpenBible data (versions, notes, commentaries, hubs, plans, templates, highlights).",
-		databasesHeading: "Bible Versions & SQLite Databases",
+		databasesHeading: "Bible versions and SQLite databases",
 		databasesDesc:
 			"Manage offline SQLite Bible databases installed on your device and import new versions.",
 		importName: "Import SQLite version",

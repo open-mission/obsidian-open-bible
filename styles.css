@@ -18,7 +18,7 @@
 
 /* Bible reader leaf */
 .open-bible-reader-view {
-	padding: 0;
+	padding: 0 !important;
 }
 
 .open-bible-reader-view .ob-empty {
@@ -1672,7 +1672,7 @@
 .open-bible-footnotes-container {
 	position: relative;
 	box-sizing: border-box;
-	background-color: var(--background-primary);
+	/*background-color: var(--background-secondary);*/
 	border-top: var(--border-width, 1px) solid var(--background-modifier-border);
 	transition: max-height 0.2s ease, height 0.2s ease;
 }
@@ -1710,7 +1710,7 @@
 	left: 0;
 	right: 0;
 	z-index: 10;
-	background-color: var(--background-primary);
+	background-color: var(--background-secondary);
 	border-top: var(--border-width, 1px) solid var(--background-modifier-border);
 	box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.08);
 	display: flex;
@@ -1718,7 +1718,6 @@
 }
 
 .open-bible-footnotes-container.is-fixed.is-collapsed {
-	height: 38px !important;
 	overflow: hidden;
 }
 

@@ -150,7 +150,8 @@ export function matchesBookSearch(bookName: string, query: string): boolean {
 export const DATABASE_EXTENSION = /\.(sqlite|sqlite3|db)$/i;
 export const DEFAULT_DATA_FOLDER = "OpenBible";
 export const DEFAULT_DATABASE_FOLDER = "bibles";
-export const PLUGIN_FOLDER = ".obsidian/plugins/obsidian-open-bible";
+export const PLUGIN_FOLDER = ".obsidian/plugins/open-bible";
+export const LEGACY_PLUGIN_FOLDER = ".obsidian/plugins/obsidian-open-bible";
 export const VIEW_TYPE_BIBLE_READER = "open-bible-reader";
 
 export function hasSqliteHeader(buffer: ArrayBuffer): boolean {

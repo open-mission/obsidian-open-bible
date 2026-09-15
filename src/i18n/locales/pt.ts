@@ -2,14 +2,14 @@ import type { TranslationStrings } from "../types";
 
 export const pt: TranslationStrings = {
 	commands: {
-		openReader: "Abrir leitor da Bíblia",
-		openBibleText: "Abrir visão de texto bíblico",
+		openReader: "Abrir leitor",
+		openBibleText: "Abrir visão de texto",
 		openReaderRightSidebar: "Abrir leitor na barra lateral direita",
 		openReaderLeftSidebar: "Abrir leitor na barra lateral esquerda",
 		toggleTwoColumns: "Alternar layout em duas colunas",
 	},
 	ribbon: {
-		openReader: "Abrir leitor da Bíblia",
+		openReader: "Abrir leitor",
 	},
 	view: {
 		title: "Open Bible",
@@ -31,7 +31,7 @@ export const pt: TranslationStrings = {
 		dataFolderName: "Pasta raiz de dados",
 		dataFolderPathDesc:
 			"Pasta raiz para todos os dados do OpenBible (versões, notas, comentários, hubs, planos, templates, destaques).",
-		databasesHeading: "Versões da Bíblia e Bancos SQLite",
+		databasesHeading: "Versões da Bíblia e bancos SQLite",
 		databasesDesc:
 			"Gerencie as versões bíblicas instaladas no seu dispositivo e importe novos arquivos .sqlite.",
 		importName: "Importar versão SQLite",

@@ -1,10 +1,10 @@
 {
-	"id": "obsidian-open-bible",
+	"id": "open-bible",
 	"name": "OpenBible",
 	"version": "0.1.0",
 	"minAppVersion": "1.8.0",
-	"description": "Leia e estude a Bíblia dentro do Obsidian. Interface em Svelte.",
-	"author": "OpenBible Contributors",
-	"authorUrl": "https://github.com",
+	"description": "Offline-first Bible reader and study companion with SQLite databases, translations, and cross-references.",
+	"author": "Open Mission",
+	"authorUrl": "https://github.com/open-mission",
 	"isDesktopOnly": false
 }
