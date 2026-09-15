@@ -15,6 +15,7 @@
 	import VersionPicker from "./components/VersionPicker.svelte";
 	import HistoryPicker from "./components/HistoryPicker.svelte";
 	import AppearancePanel from "./components/AppearancePanel.svelte";
+	import HighlightsPanel from "./components/HighlightsPanel.svelte";
 	import CrossRefBottomPanel from "./components/CrossRefBottomPanel.svelte";
 	import Button from "../kit/Button.svelte";
 	import EmptyState from "../kit/EmptyState.svelte";
@@ -26,7 +27,7 @@
 	import { formatCrossRefOrigin } from "../resources/formatCrossRef";
 	import type { BibleReaderController, BibleReaderViewState, NavigationDirection } from "./types";
 
-	type PickerMode = "book" | "chapter" | "version" | "history" | "appearance" | null;
+	type PickerMode = "book" | "chapter" | "version" | "history" | "appearance" | "highlights" | null;
 
 	interface Props {
 		plugin?: OpenBiblePlugin;
@@ -119,6 +120,12 @@
 	let crossRefsBottomPanelCollapsed = $state(initial.crossRefsBottomPanelCollapsed);
 	let activeVerseNumber = $state<number | undefined>();
 	let navigationDirection = $state<NavigationDirection>("jump");
+	let isSelectionMode = $state(false);
+
+	function toggleSelectionMode(): boolean {
+		isSelectionMode = !isSelectionMode;
+		return isSelectionMode;
+	}
 
 	export function syncSettings(): void {
 		twoColumns = Boolean(settings.readerTwoColumns ?? settings.twoColumnLayout);
@@ -581,6 +588,9 @@
 			openBookPicker: () => openPicker("book"),
 			openVersionPicker: () => openPicker("version"),
 			openAppearancePicker: () => openPicker("appearance"),
+			openHighlights: () => openPicker("highlights"),
+			toggleSelectionMode: () => toggleSelectionMode(),
+			isSelectionMode: () => isSelectionMode,
 			refreshSettings: () => syncSettings(),
 			getViewState: () => ({
 				bookId: currentBookId,
@@ -634,6 +644,8 @@
 				{activePicker}
 				{canNavigatePrevious}
 				{canNavigateNext}
+				{isSelectionMode}
+				onToggleSelectionMode={toggleSelectionMode}
 				onNavigate={navigateChapter}
 				onTogglePicker={togglePicker}
 			/>
@@ -652,7 +664,10 @@
 				{thompsonCrossRefsEnabled}
 				{thompsonCrossRefsPosition}
 				crossReferenceService={plugin?.crossReferenceService}
+				{plugin}
+				versionAbbr={currentInfo?.abbreviation ?? ""}
 				selectedVerseNumber={activeVerseNumber}
+				{isSelectionMode}
 				onRetry={() => {
 					if (currentBookId !== undefined && currentChapter !== undefined) {
 						void loadChapter(currentBookId, currentChapter);
@@ -772,6 +787,16 @@
 					onToggleBottomPanel={() => void toggleBottomPanel()}
 					onToggleBottomPanelFixed={() => void toggleBottomPanelFixed()}
 					onChange={(patch) => void handleAppearanceChange(patch)}
+					onClose={closePicker}
+				/>
+			</DrawerModal>
+		{:else if activePicker === "highlights" && plugin}
+			<DrawerModal mode="highlights" onClose={closePicker}>
+				<HighlightsPanel
+					{plugin}
+					onNavigate={(bName, ch, vNum, vAbbr) => {
+						void navigateTo(bName, ch, vNum, vAbbr);
+					}}
 					onClose={closePicker}
 				/>
 			</DrawerModal>

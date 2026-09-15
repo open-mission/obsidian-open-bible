@@ -6,6 +6,7 @@
 	"scripts": {
 		"dev": "node esbuild.config.mjs",
 		"build": "tsc -noEmit -skipLibCheck && node esbuild.config.mjs production",
+		"test": "tsx --test src/services/verseFormat.test.ts src/ui/reader/noteLanes.test.ts src/ui/reader/textSegmentation.test.ts src/ui/reader/verseSelection.test.ts src/services/VerseReferenceParser.test.ts",
 		"svelte-check": "svelte-check --tsconfig tsconfig.json",
 		"deploy": "mkdir -p \"/Users/claudio/Projects/vault-teste/.obsidian/plugins/open-bible\" && cp main.js manifest.json styles.css \"/Users/claudio/Projects/vault-teste/.obsidian/plugins/open-bible/\"",
 		"build:deploy": "npm run build && npm run deploy",
@@ -48,6 +49,7 @@
 		"svelte-check": "^4.1.0",
 		"svelte-preprocess": "^6.0.3",
 		"tslib": "2.8.1",
+		"tsx": "^4.23.13",
 		"typescript": "~5.9.0"
 	}
 }
