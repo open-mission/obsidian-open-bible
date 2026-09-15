@@ -5,6 +5,8 @@ import { DEFAULT_SETTINGS, type OpenBibleSettings } from "./settings";
 import { normalizeDataFolder } from "./core/paths";
 import { BibleVersionService } from "./services/bibleVersionService";
 import { BibleTextService } from "./services/bibleTextService";
+import { CrossReferenceService } from "./services/CrossReferenceService";
+import { VersePreviewService } from "./services/VersePreviewService";
 import { OpenBibleSettingTab } from "./settings/SettingsTab";
 import { openOrRevealView, type ViewSplit } from "./workspace/openPluginView";
 import { applyLocalePreference, t } from "./i18n";
@@ -13,6 +15,8 @@ export default class OpenBiblePlugin extends Plugin {
 	settings: OpenBibleSettings = DEFAULT_SETTINGS;
 	bibleVersions!: BibleVersionService;
 	bibleText!: BibleTextService;
+	crossReferenceService!: CrossReferenceService;
+	versePreviewService!: VersePreviewService;
 	private ribbonIconEl?: HTMLElement;
 
 	async onload(): Promise<void> {
@@ -20,6 +24,16 @@ export default class OpenBiblePlugin extends Plugin {
 		this.applyLanguage();
 		this.bibleVersions = new BibleVersionService(this.app, () => this.settings);
 		this.bibleText = new BibleTextService(this.app, this.bibleVersions);
+		this.crossReferenceService = new CrossReferenceService(() => this.bibleText.getSql());
+		this.versePreviewService = new VersePreviewService(this);
+
+		this.app.workspace.onLayoutReady(() => {
+			if (this.settings.thompsonCrossRefsEnabled) {
+				void this.crossReferenceService.load().catch((error) => {
+					console.warn("OpenBible: failed to load cross-references:", error);
+				});
+			}
+		});
 
 		this.registerView(OPEN_BIBLE_VIEW_TYPE, (leaf) => new OpenBibleView(leaf, this.app, this.settings));
 		this.registerView(BIBLE_READER_VIEW_TYPE, (leaf) => new BibleReaderView(leaf, this));
@@ -137,6 +151,27 @@ export default class OpenBiblePlugin extends Plugin {
 		}
 		// Push layout changes (two columns, widths, spacing) into open readers.
 		this.refreshReaderViews();
+	}
+
+	async navigateToPassage(
+		bookIdOrName: number | string,
+		chapter: number,
+		verseNumber?: number,
+		versionAbbr?: string,
+	): Promise<boolean> {
+		let leaves = this.app.workspace.getLeavesOfType(BIBLE_READER_VIEW_TYPE);
+		if (leaves.length === 0) {
+			await this.openReader();
+			leaves = this.app.workspace.getLeavesOfType(BIBLE_READER_VIEW_TYPE);
+		}
+
+		for (const leaf of leaves) {
+			if (leaf.view instanceof BibleReaderView) {
+				await this.app.workspace.revealLeaf(leaf);
+				return await leaf.view.navigateToPassage(bookIdOrName, chapter, verseNumber, versionAbbr);
+			}
+		}
+		return false;
 	}
 
 	async activateView(): Promise<void> {

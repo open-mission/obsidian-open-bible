@@ -35,6 +35,10 @@ export interface OpenBibleSettings {
 	lastReadBookId: number;
 	lastReadChapter: number;
 	readingHistory?: ReadingHistoryEntry[];
+	/** Thompson cross references in reader. */
+	thompsonCrossRefsEnabled?: boolean;
+	thompsonCrossRefsPosition?: "margin" | "center";
+	previewDefaultVersion?: string;
 }
 
 export const DEFAULT_SETTINGS: OpenBibleSettings = {
@@ -52,4 +56,7 @@ export const DEFAULT_SETTINGS: OpenBibleSettings = {
 	lastReadBookId: 0,
 	lastReadChapter: 0,
 	readingHistory: [],
+	thompsonCrossRefsEnabled: false,
+	thompsonCrossRefsPosition: "margin",
+	previewDefaultVersion: "",
 };

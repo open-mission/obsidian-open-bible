@@ -69,6 +69,12 @@ export interface TranslationStrings {
 		readerVerseSpacingDesc: string;
 		readerLineSpacingName: string;
 		readerLineSpacingDesc: string;
+		thompsonCrossRefsName: string;
+		thompsonCrossRefsDesc: string;
+		thompsonCrossRefsPositionName: string;
+		thompsonCrossRefsPositionDesc: string;
+		thompsonPositionMargin: string;
+		thompsonPositionCenter: string;
 		creditsHeading: string;
 		creditsDesc: string;
 		creditsOpenBibleDesc: string;
@@ -141,6 +147,25 @@ export interface TranslationStrings {
 		spacingNormal: string;
 		spacingSpacious: string;
 		twoColumnsToggle: string;
+		thompsonCrossRefs: string;
+		thompsonPositionMargin: string;
+		thompsonPositionCenter: string;
+	};
+	resources: {
+		crossReferences: string;
+		crossRefsEmpty: string;
+		countSingle: string;
+		countPlural: string;
+		verseMissing: string;
+		previous: string;
+		next: string;
+	};
+	popover: {
+		copyText: string;
+		close: string;
+	};
+	notices: {
+		textCopied: string;
 	};
 	bookPicker: {
 		title: string;

@@ -9,11 +9,15 @@
 		containerWidth: ReaderContainerWidth;
 		verseSpacing: ReaderSpacing;
 		lineSpacing: ReaderSpacing;
+		thompsonEnabled?: boolean;
+		thompsonPosition?: "margin" | "center";
 		onToggleTwoColumns: () => void;
+		onToggleThompson?: () => void;
 		onChange: (patch: {
 			readerContainerWidth?: ReaderContainerWidth;
 			readerVerseSpacing?: ReaderSpacing;
 			readerLineSpacing?: ReaderSpacing;
+			thompsonCrossRefsPosition?: "margin" | "center";
 		}) => void;
 		onClose: () => void;
 	}
@@ -23,7 +27,10 @@
 		containerWidth,
 		verseSpacing,
 		lineSpacing,
+		thompsonEnabled = false,
+		thompsonPosition = "margin",
 		onToggleTwoColumns,
+		onToggleThompson,
 		onChange,
 		onClose,
 	}: Props = $props();
@@ -56,6 +63,36 @@
 		<span class="open-bible-appearance-row-label">{t("readerMenu.twoColumnsToggle")}</span>
 		<span class="open-bible-switch" class:is-on={twoColumns} aria-hidden="true"></span>
 	</button>
+
+	{#if onToggleThompson}
+		<button type="button" class="open-bible-appearance-toggle-row" onclick={onToggleThompson}>
+			<span class="open-bible-appearance-row-icon" use:icon={"link-2"}></span>
+			<span class="open-bible-appearance-row-label">{t("readerMenu.thompsonCrossRefs") || "Referências cruzadas"}</span>
+			<span class="open-bible-switch" class:is-on={thompsonEnabled} aria-hidden="true"></span>
+		</button>
+
+		{#if thompsonEnabled}
+			<h4 class="open-bible-appearance-section-title">{t("settings.thompsonCrossRefsPositionName") || "Posição do layout"}</h4>
+			<div class="open-bible-segmented" role="group">
+				<button
+					type="button"
+					class="open-bible-segmented-btn"
+					class:is-active={thompsonPosition === "margin"}
+					onclick={() => onChange({ thompsonCrossRefsPosition: "margin" })}
+				>
+					{t("settings.thompsonPositionMargin") || "Margem"}
+				</button>
+				<button
+					type="button"
+					class="open-bible-segmented-btn"
+					class:is-active={thompsonPosition === "center"}
+					onclick={() => onChange({ thompsonCrossRefsPosition: "center" })}
+				>
+					{t("settings.thompsonPositionCenter") || "Centro"}
+				</button>
+			</div>
+		{/if}
+	{/if}
 
 	<h4 class="open-bible-appearance-section-title">{t("readerMenu.containerWidthHeader")}</h4>
 	<div class="open-bible-segmented" role="group">

@@ -18,11 +18,17 @@
 	import Button from "../kit/Button.svelte";
 	import EmptyState from "../kit/EmptyState.svelte";
 
+	import type OpenBiblePlugin from "../../main";
+	import type { CrossReference } from "../../data/crossRefModel";
+	import { indexOfCrossRef } from "../../data/crossRefModel";
+	import { openCrossRefPreview } from "../resources/openCrossRefPreview";
+	import { formatCrossRefOrigin } from "../resources/formatCrossRef";
 	import type { BibleReaderController } from "./types";
 
 	type PickerMode = "book" | "chapter" | "version" | "history" | "appearance" | null;
 
 	interface Props {
+		plugin?: OpenBiblePlugin;
 		textService: BibleTextService;
 		versionService: BibleVersionService;
 		settings: OpenBibleSettings;
@@ -33,6 +39,7 @@
 	}
 
 	let {
+		plugin,
 		textService,
 		versionService,
 		settings,
@@ -63,12 +70,16 @@
 	let containerWidth = $state<ReaderContainerWidth>("default");
 	let verseSpacing = $state<ReaderSpacing>("normal");
 	let lineSpacing = $state<ReaderSpacing>("normal");
+	let thompsonCrossRefsEnabled = $state(false);
+	let thompsonCrossRefsPosition = $state<"margin" | "center">("margin");
 
 	export function syncSettings(): void {
 		twoColumns = Boolean(settings.readerTwoColumns ?? settings.twoColumnLayout);
 		containerWidth = settings.readerContainerWidth || "default";
 		verseSpacing = settings.readerVerseSpacing || "normal";
 		lineSpacing = settings.readerLineSpacing || "normal";
+		thompsonCrossRefsEnabled = Boolean(settings.thompsonCrossRefsEnabled);
+		thompsonCrossRefsPosition = settings.thompsonCrossRefsPosition || "margin";
 	}
 
 	$effect.pre(() => {
@@ -354,14 +365,40 @@
 		syncSettings();
 	}
 
+	async function toggleThompson(): Promise<void> {
+		thompsonCrossRefsEnabled = !thompsonCrossRefsEnabled;
+		if (thompsonCrossRefsEnabled && plugin?.crossReferenceService && !plugin.crossReferenceService.isReady()) {
+			void plugin.crossReferenceService.load();
+		}
+		await updateSettings({
+			thompsonCrossRefsEnabled,
+		});
+		syncSettings();
+	}
+
+	async function handleSelectCrossRef(verseNumber: number, ref: CrossReference, _event: MouseEvent): Promise<void> {
+		if (!plugin?.crossReferenceService || !currentBook) return;
+		const chainRefs = plugin.crossReferenceService.getRefsForVerse(currentBook.id, currentChapter ?? 1, verseNumber);
+		const chainIndex = indexOfCrossRef(chainRefs, ref);
+		const openedRef = chainIndex >= 0 ? chainRefs[chainIndex]! : ref;
+
+		await openCrossRefPreview(plugin.app, plugin, openedRef, {
+			originLabel: formatCrossRefOrigin(openedRef),
+			chainRefs,
+			chainIndex: chainIndex >= 0 ? chainIndex : 0,
+		});
+	}
+
 	async function handleAppearanceChange(patch: {
 		readerContainerWidth?: ReaderContainerWidth;
 		readerVerseSpacing?: ReaderSpacing;
 		readerLineSpacing?: ReaderSpacing;
+		thompsonCrossRefsPosition?: "margin" | "center";
 	}): Promise<void> {
 		if (patch.readerContainerWidth !== undefined) containerWidth = patch.readerContainerWidth;
 		if (patch.readerVerseSpacing !== undefined) verseSpacing = patch.readerVerseSpacing;
 		if (patch.readerLineSpacing !== undefined) lineSpacing = patch.readerLineSpacing;
+		if (patch.thompsonCrossRefsPosition !== undefined) thompsonCrossRefsPosition = patch.thompsonCrossRefsPosition;
 		await updateSettings(patch);
 		syncSettings();
 	}
@@ -477,12 +514,16 @@
 				{containerWidth}
 				{verseSpacing}
 				{lineSpacing}
+				{thompsonCrossRefsEnabled}
+				{thompsonCrossRefsPosition}
+				crossReferenceService={plugin?.crossReferenceService}
 				onRetry={() => {
 					if (currentBookId !== undefined && currentChapter !== undefined) {
 						void loadChapter(currentBookId, currentChapter);
 					}
 				}}
 				onToggleTwoColumns={() => void toggleTwoColumns()}
+				onSelectCrossRef={handleSelectCrossRef}
 			/>
 		</div>
 
@@ -547,7 +588,10 @@
 					{containerWidth}
 					{verseSpacing}
 					{lineSpacing}
+					thompsonEnabled={thompsonCrossRefsEnabled}
+					thompsonPosition={thompsonCrossRefsPosition}
 					onToggleTwoColumns={() => void toggleTwoColumns()}
+					onToggleThompson={() => void toggleThompson()}
 					onChange={(patch) => void handleAppearanceChange(patch)}
 					onClose={closePicker}
 				/>

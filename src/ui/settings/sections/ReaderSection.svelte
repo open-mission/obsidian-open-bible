@@ -38,6 +38,40 @@
 
 <div class="setting-item">
 	<div class="setting-item-info">
+		<div class="setting-item-name">{t("settings.thompsonCrossRefsName")}</div>
+		<div class="setting-item-description">{t("settings.thompsonCrossRefsDesc")}</div>
+	</div>
+	<div class="setting-item-control">
+		<input
+			type="checkbox"
+			checked={Boolean(settings.thompsonCrossRefsEnabled)}
+			aria-label={t("settings.thompsonCrossRefsName")}
+			onchange={(e) => void updateGeneral({ thompsonCrossRefsEnabled: e.currentTarget.checked })}
+		/>
+	</div>
+</div>
+
+{#if settings.thompsonCrossRefsEnabled}
+	<div class="setting-item">
+		<div class="setting-item-info">
+			<div class="setting-item-name">{t("settings.thompsonCrossRefsPositionName")}</div>
+			<div class="setting-item-description">{t("settings.thompsonCrossRefsPositionDesc")}</div>
+		</div>
+		<div class="setting-item-control">
+			<select
+				value={settings.thompsonCrossRefsPosition || "margin"}
+				aria-label={t("settings.thompsonCrossRefsPositionName")}
+				onchange={(e) => void updateGeneral({ thompsonCrossRefsPosition: e.currentTarget.value as "margin" | "center" })}
+			>
+				<option value="margin">{t("settings.thompsonPositionMargin")}</option>
+				<option value="center">{t("settings.thompsonPositionCenter")}</option>
+			</select>
+		</div>
+	</div>
+{/if}
+
+<div class="setting-item">
+	<div class="setting-item-info">
 		<div class="setting-item-name">{t("settings.readerContainerWidthName")}</div>
 		<div class="setting-item-description">{t("settings.readerContainerWidthDesc")}</div>
 	</div>

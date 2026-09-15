@@ -5,6 +5,7 @@ import type { BibleReaderController } from "./ui/reader/types";
 import type OpenBiblePlugin from "./main";
 import type { OpenBibleSettings } from "./settings";
 import { t } from "./i18n";
+import { addThompsonMenuItems } from "./ui/reader/thompsonMenu";
 
 export const BIBLE_READER_VIEW_TYPE = "open-bible-reader";
 
@@ -97,6 +98,8 @@ export class BibleReaderView extends ItemView {
 				}),
 		);
 
+		addThompsonMenuItems(menu, this.plugin);
+
 		menu.addItem((item) =>
 			item
 				.setTitle(t("readerMenu.readingHistory") || "Histórico de leitura")
@@ -115,6 +118,7 @@ export class BibleReaderView extends ItemView {
 			this.component = mount(BibleReader, {
 				target: this.contentEl,
 				props: {
+					plugin: this.plugin,
 					textService: this.plugin.bibleText,
 					versionService: this.plugin.bibleVersions,
 					settings: this.plugin.settings,

@@ -100,7 +100,7 @@ export class BibleTextService {
 		return db;
 	}
 
-	private async getSql(): Promise<SqlJs> {
+	async getSql(): Promise<SqlJs> {
 		if (!this.sqlPromise) {
 			this.sqlPromise = createSqlEngine(getEmbeddedSqlWasm());
 		}
