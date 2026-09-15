@@ -1,4 +1,4 @@
-import type { MarkdownPostProcessorContext } from "obsidian";
+import { Menu, Notice, MarkdownView, type MarkdownPostProcessorContext } from "obsidian";
 import type OpenBiblePlugin from "../main";
 import type { VerseHoverModifier } from "../settings";
 import { findAllReferencesInText } from "./VerseReferenceParser";
@@ -8,6 +8,12 @@ import {
 	hideVerseTooltip,
 } from "../ui/components/VerseHoverTooltip";
 import { VersePreviewModal } from "../ui/modals/VersePreviewModal";
+import { formatVersesText } from "./verseFormat";
+import { insertScriptureInEditor } from "./editorInsertion";
+import { createNoteFromSelection } from "./NoteService";
+import { getCanonBook } from "../bibleCanon";
+import type { BibleBook } from "../models/bible";
+import { t } from "../i18n";
 
 const IGNORED_TAGS = new Set([
 	"CODE",
@@ -152,6 +158,116 @@ export function processMarkdownVerseReferences(
 				if (preview) {
 					new VersePreviewModal(plugin.app, plugin, preview).open();
 				}
+			});
+
+			// Context menu (right-click) logic
+			link.addEventListener("contextmenu", (e) => {
+				if (plugin.settings.enableVersePreviews === false) return;
+				e.preventDefault();
+				e.stopPropagation();
+				hideVerseTooltip();
+
+				const menu = new Menu();
+				const defaultPos = plugin.settings.verseInsertPosition ?? "below";
+				const defaultLabel = defaultPos === "below"
+					? t("contextMenu.insertBelow")
+					: t("contextMenu.insertAbove");
+
+				menu.addItem((item) => {
+					item.setTitle(defaultLabel)
+						.setIcon("book-open")
+						.onClick(async () => {
+							const preview = await plugin.versePreviewService.getVersePreview(ref);
+							if (!preview || preview.verses.length === 0) {
+								new Notice(t("resources.verseMissing"));
+								return;
+							}
+							const activeView = plugin.app.workspace.getActiveViewOfType(MarkdownView);
+							if (!activeView) {
+								new Notice(t("notices.noActiveMarkdownNote"));
+								return;
+							}
+							const text = formatVersesText(preview.verses, preview.bookName, preview.chapter, preview.versionAbbr);
+							insertScriptureInEditor(activeView.editor, text, defaultPos);
+							new Notice(t("notices.verseInserted"));
+						});
+				});
+
+				const altPos = defaultPos === "below" ? "above" : "below";
+				const altLabel = altPos === "below"
+					? t("contextMenu.insertBelow")
+					: t("contextMenu.insertAbove");
+
+				menu.addItem((item) => {
+					item.setTitle(altLabel)
+						.setIcon("list-plus")
+						.onClick(async () => {
+							const preview = await plugin.versePreviewService.getVersePreview(ref);
+							if (!preview || preview.verses.length === 0) {
+								new Notice(t("resources.verseMissing"));
+								return;
+							}
+							const activeView = plugin.app.workspace.getActiveViewOfType(MarkdownView);
+							if (!activeView) {
+								new Notice(t("notices.noActiveMarkdownNote"));
+								return;
+							}
+							const text = formatVersesText(preview.verses, preview.bookName, preview.chapter, preview.versionAbbr);
+							insertScriptureInEditor(activeView.editor, text, altPos);
+							new Notice(t("notices.verseInserted"));
+						});
+				});
+
+				menu.addItem((item) => {
+					item.setTitle(t("contextMenu.createNote"))
+						.setIcon("file-plus")
+						.onClick(async () => {
+							const preview = await plugin.versePreviewService.getVersePreview(ref);
+							if (!preview || preview.verses.length === 0) {
+								new Notice(t("resources.verseMissing"));
+								return;
+							}
+							const bookCanon = getCanonBook(preview.bookName);
+							const book: BibleBook = {
+								id: bookCanon?.id ?? 0,
+								name: preview.bookName,
+								chapters: [],
+								testament: bookCanon?.testament ?? 1,
+							};
+							await createNoteFromSelection(plugin.app, plugin.settings, {
+								book,
+								chapter: preview.chapter,
+								verses: preview.verses,
+								versionAbbr: preview.versionAbbr,
+							});
+							new Notice(t("notices.noteCreated"));
+						});
+				});
+
+				menu.addItem((item) => {
+					item.setTitle(t("contextMenu.copyQuote"))
+						.setIcon("copy")
+						.onClick(async () => {
+							const preview = await plugin.versePreviewService.getVersePreview(ref);
+							if (!preview || preview.verses.length === 0) return;
+							const text = formatVersesText(preview.verses, preview.bookName, preview.chapter, preview.versionAbbr);
+							await navigator.clipboard.writeText(text);
+							new Notice(t("notices.textCopied"));
+						});
+				});
+
+				menu.addItem((item) => {
+					item.setTitle(t("commands.openReader"))
+						.setIcon("book-marked")
+						.onClick(async () => {
+							const preview = await plugin.versePreviewService.getVersePreview(ref);
+							if (preview) {
+								await plugin.navigateToPassage(preview.bookName, preview.chapter, preview.verseStart, preview.versionAbbr);
+							}
+						});
+				});
+
+				menu.showAtMouseEvent(e);
 			});
 
 			fragment.appendChild(link);

@@ -1,11 +1,15 @@
-import { App, Modal, Notice, setIcon } from "obsidian";
+import { App, MarkdownView, Menu, Modal, Notice, setIcon } from "obsidian";
 import type OpenBiblePlugin from "../../main";
-import { BIBLE_CANON } from "../../bibleCanon";
+import { BIBLE_CANON, getCanonBook } from "../../bibleCanon";
+import type { BibleBook } from "../../models/bible";
 import type { CrossReference } from "../../data/crossRefModel";
 import { getLocale, t } from "../../i18n";
 import type { ResolvedVersePreview } from "../../services/VersePreviewService";
 import { formatCrossRef } from "../resources/formatCrossRef";
 import { crossRefToParsedVerseReference } from "../resources/crossRefPreviewParse";
+import { formatVersesText } from "../../services/verseFormat";
+import { insertScriptureInEditor } from "../../services/editorInsertion";
+import { createNoteFromSelection } from "../../services/NoteService";
 import { createUiButton, createUiDialogBody, createUiFooter, setupOpenBibleDialog } from "../kit/dom";
 
 export interface VersePreviewModalOptions {
@@ -54,9 +58,23 @@ export class VersePreviewModal extends Modal {
 		contentEl.addClass("open-bible-verse-preview-modal");
 
 		const headerEl = contentEl.createDiv("open-bible-preview-modal-header");
-		this.headerTitleEl = headerEl.createEl("h3", {
+		const headerTopRow = headerEl.createDiv("open-bible-preview-modal-header-top");
+		this.headerTitleEl = headerTopRow.createEl("h3", {
 			cls: "open-bible-preview-modal-title",
 		});
+
+		const actionsBtn = headerTopRow.createEl("button", {
+			cls: "open-bible-preview-modal-more-btn clickable-icon",
+			attr: {
+				type: "button",
+				"aria-label": t("contextMenu.moreOptions") || "Mais opções",
+			},
+		});
+		setIcon(actionsBtn, "more-vertical");
+		actionsBtn.addEventListener("click", (e) => {
+			this.openActionsMenu(e);
+		});
+
 		this.versionSubEl = headerEl.createEl("span", {
 			cls: "open-bible-preview-modal-version-sub",
 		});
@@ -290,5 +308,81 @@ export class VersePreviewModal extends Modal {
 			ref.toVerseStart,
 			dbInfo?.abbreviation,
 		);
+	}
+
+	private openActionsMenu(e: MouseEvent): void {
+		if (!this.currentPreview?.verses.length) {
+			return;
+		}
+
+		const menu = new Menu();
+		const preview = this.currentPreview;
+		const defaultPos = this.plugin.settings.verseInsertPosition ?? "below";
+
+		menu.addItem((item) => {
+			item.setTitle(t("contextMenu.insertBelow"))
+				.setIcon("book-open")
+				.onClick(() => {
+					const activeView = this.app.workspace.getActiveViewOfType(MarkdownView);
+					if (!activeView) {
+						new Notice(t("notices.noActiveMarkdownNote"));
+						return;
+					}
+					const text = formatVersesText(preview.verses, preview.bookName, preview.chapter, preview.versionAbbr);
+					insertScriptureInEditor(activeView.editor, text, "below");
+					new Notice(t("notices.verseInserted"));
+					this.close();
+				});
+		});
+
+		menu.addItem((item) => {
+			item.setTitle(t("contextMenu.insertAbove"))
+				.setIcon("list-plus")
+				.onClick(() => {
+					const activeView = this.app.workspace.getActiveViewOfType(MarkdownView);
+					if (!activeView) {
+						new Notice(t("notices.noActiveMarkdownNote"));
+						return;
+					}
+					const text = formatVersesText(preview.verses, preview.bookName, preview.chapter, preview.versionAbbr);
+					insertScriptureInEditor(activeView.editor, text, "above");
+					new Notice(t("notices.verseInserted"));
+					this.close();
+				});
+		});
+
+		menu.addItem((item) => {
+			item.setTitle(t("contextMenu.createNote"))
+				.setIcon("file-plus")
+				.onClick(async () => {
+					const bookCanon = getCanonBook(preview.bookName);
+					const book: BibleBook = {
+						id: bookCanon?.id ?? 0,
+						name: preview.bookName,
+						chapters: [],
+						testament: bookCanon?.testament ?? 1,
+					};
+					await createNoteFromSelection(this.app, this.plugin.settings, {
+						book,
+						chapter: preview.chapter,
+						verses: preview.verses,
+						versionAbbr: preview.versionAbbr,
+					});
+					new Notice(t("notices.noteCreated"));
+					this.close();
+				});
+		});
+
+		menu.addItem((item) => {
+			item.setTitle(t("contextMenu.copyQuote"))
+				.setIcon("copy")
+				.onClick(async () => {
+					const text = formatVersesText(preview.verses, preview.bookName, preview.chapter, preview.versionAbbr);
+					await navigator.clipboard.writeText(text);
+					new Notice(t("notices.textCopied"));
+				});
+		});
+
+		menu.showAtMouseEvent(e);
 	}
 }

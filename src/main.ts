@@ -1,4 +1,4 @@
-import { Notice, Plugin, WorkspaceLeaf, TFile } from "obsidian";
+import { Editor, Notice, Plugin, WorkspaceLeaf, TFile } from "obsidian";
 import { OPEN_BIBLE_VIEW_TYPE, OpenBibleView } from "./OpenBibleView";
 import { BIBLE_READER_VIEW_TYPE, BibleReaderView } from "./BibleReaderView";
 import { BIBLE_HIGHLIGHTS_VIEW_TYPE, HighlightsView } from "./HighlightsView";
@@ -14,6 +14,13 @@ import { openOrRevealView, type ViewSplit } from "./workspace/openPluginView";
 import { applyLocalePreference, t } from "./i18n";
 import { createVerseReferenceEditorExtension } from "./editor/VerseReferenceEditorExtension";
 import { processMarkdownVerseReferences } from "./services/MarkdownVerseProcessor";
+import { findReferenceAtPosition } from "./services/VerseReferenceParser";
+import { formatVersesText } from "./services/verseFormat";
+import { insertScriptureInEditor, insertScriptureAtCursor } from "./services/editorInsertion";
+import { createNoteFromSelection } from "./services/NoteService";
+import { getCanonBook } from "./bibleCanon";
+import type { BibleBook } from "./models/bible";
+import { PassagePickerModal } from "./ui/modals/PassagePickerModal";
 
 export default class OpenBiblePlugin extends Plugin {
 	settings: OpenBibleSettings = DEFAULT_SETTINGS;
@@ -144,6 +151,110 @@ export default class OpenBiblePlugin extends Plugin {
 				return false;
 			},
 		});
+
+		this.addCommand({
+			id: "insert-verse-at-cursor",
+			name: t("commands.insertVerseAtCursor"),
+			editorCallback: (editor: Editor) => {
+				new PassagePickerModal(this.app, this, {
+					mode: "insert",
+					onInsert: (formattedText) => {
+						insertScriptureAtCursor(editor, formattedText);
+						new Notice(t("notices.verseInserted"));
+					},
+				}).open();
+			},
+		});
+
+		this.addCommand({
+			id: "create-bible-note",
+			name: t("commands.createBibleNote"),
+			callback: () => {
+				new PassagePickerModal(this.app, this, {
+					mode: "createNote",
+					onCreateNote: async (data) => {
+						await createNoteFromSelection(this.app, this.settings, data);
+						new Notice(t("notices.noteCreated"));
+					},
+				}).open();
+			},
+		});
+
+		this.registerEvent(
+			this.app.workspace.on("editor-menu", (menu, editor) => {
+				if (this.settings.enableVersePreviews === false) return;
+				const cursor = editor.getCursor();
+				const line = editor.getLine(cursor.line);
+				const ref = findReferenceAtPosition(line, cursor.ch, true);
+				if (!ref) return;
+
+				const defaultPos = this.settings.verseInsertPosition ?? "below";
+				const defaultLabel = defaultPos === "below"
+					? t("contextMenu.insertBelow")
+					: t("contextMenu.insertAbove");
+
+				menu.addItem((item) => {
+					item.setTitle(defaultLabel)
+						.setIcon("book-open")
+						.onClick(async () => {
+							const preview = await this.versePreviewService.getVersePreview(ref);
+							if (!preview || preview.verses.length === 0) {
+								new Notice(t("resources.verseMissing"));
+								return;
+							}
+							const text = formatVersesText(preview.verses, preview.bookName, preview.chapter, preview.versionAbbr);
+							insertScriptureInEditor(editor, text, defaultPos, cursor.line);
+							new Notice(t("notices.verseInserted"));
+						});
+				});
+
+				const altPos = defaultPos === "below" ? "above" : "below";
+				const altLabel = altPos === "below"
+					? t("contextMenu.insertBelow")
+					: t("contextMenu.insertAbove");
+
+				menu.addItem((item) => {
+					item.setTitle(altLabel)
+						.setIcon("list-plus")
+						.onClick(async () => {
+							const preview = await this.versePreviewService.getVersePreview(ref);
+							if (!preview || preview.verses.length === 0) {
+								new Notice(t("resources.verseMissing"));
+								return;
+							}
+							const text = formatVersesText(preview.verses, preview.bookName, preview.chapter, preview.versionAbbr);
+							insertScriptureInEditor(editor, text, altPos, cursor.line);
+							new Notice(t("notices.verseInserted"));
+						});
+				});
+
+				menu.addItem((item) => {
+					item.setTitle(t("contextMenu.createNote"))
+						.setIcon("file-plus")
+						.onClick(async () => {
+							const preview = await this.versePreviewService.getVersePreview(ref);
+							if (!preview || preview.verses.length === 0) {
+								new Notice(t("resources.verseMissing"));
+								return;
+							}
+							const bookCanon = getCanonBook(preview.bookName);
+							const book: BibleBook = {
+								id: bookCanon?.id ?? 0,
+								name: preview.bookName,
+								chapters: [],
+								testament: bookCanon?.testament ?? 1,
+							};
+							await createNoteFromSelection(this.app, this.settings, {
+								book,
+								chapter: preview.chapter,
+								verses: preview.verses,
+								versionAbbr: preview.versionAbbr,
+							});
+							new Notice(t("notices.noteCreated"));
+						});
+				});
+			})
+		);
 
 		this.registerEvent(
 			this.app.vault.on("modify", (file) => {
