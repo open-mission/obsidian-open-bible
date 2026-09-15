@@ -1,6 +1,7 @@
 import { App, Modal, Setting } from "obsidian";
 import type { BibleVersion } from "../../models/bibleVersion";
 import { t } from "../../i18n";
+import { BIBLE_LANGUAGES } from "../../constants";
 
 export interface VersionMetadataEditResult {
 	name: string;
@@ -69,17 +70,67 @@ export class EditVersionModal extends Modal {
 					})
 			);
 
-		// Language
+		// Language (Select dropdown + optional custom input)
+		const findMatchedLanguage = (val: string): string => {
+			const clean = val.trim().toLowerCase();
+			if (!clean) return "";
+			const exactCode = BIBLE_LANGUAGES.find((l) => l.code.toLowerCase() === clean);
+			if (exactCode) return exactCode.code;
+			const exactLabel = BIBLE_LANGUAGES.find((l) => l.label.toLowerCase() === clean);
+			if (exactLabel) return exactLabel.code;
+			const startsWith = BIBLE_LANGUAGES.find(
+				(l) => clean.startsWith(l.code.toLowerCase()) || clean.startsWith(l.label.toLowerCase())
+			);
+			if (startsWith) return startsWith.code;
+			return "__custom__";
+		};
+
+		let selectedDropdown = findMatchedLanguage(this.language);
+		let customLangValue = selectedDropdown === "__custom__" ? this.language : "";
+		let customLanguageSetting: Setting | null = null;
+
 		new Setting(contentEl)
 			.setName(t("settings.versionLanguageLabel"))
+			.addDropdown((dropdown) => {
+				dropdown.addOption("", t("settings.versionLanguageNone"));
+				for (const lang of BIBLE_LANGUAGES) {
+					dropdown.addOption(lang.code, `${lang.label} (${lang.code})`);
+				}
+				dropdown.addOption("__custom__", t("settings.versionLanguageCustom"));
+				dropdown.setValue(selectedDropdown);
+				dropdown.onChange((val) => {
+					selectedDropdown = val;
+					if (val === "__custom__") {
+						this.language = customLangValue;
+						if (customLanguageSetting) {
+							customLanguageSetting.settingEl.style.display = "";
+						}
+					} else {
+						this.language = val;
+						if (customLanguageSetting) {
+							customLanguageSetting.settingEl.style.display = "none";
+						}
+					}
+				});
+			});
+
+		customLanguageSetting = new Setting(contentEl)
+			.setName(t("settings.versionLanguageCustomLabel"))
 			.addText((text) =>
 				text
 					.setPlaceholder(t("settings.versionLanguagePlaceholder"))
-					.setValue(this.language)
+					.setValue(customLangValue)
 					.onChange((v) => {
-						this.language = v;
+						customLangValue = v;
+						if (selectedDropdown === "__custom__") {
+							this.language = v;
+						}
 					})
 			);
+
+		if (selectedDropdown !== "__custom__") {
+			customLanguageSetting.settingEl.style.display = "none";
+		}
 
 		// Primary / Default toggle
 		new Setting(contentEl)

@@ -176,3 +176,31 @@ export function abbreviationFromFilename(filename: string): string {
 	return candidate.replace(/[^a-z0-9]/gi, "").toUpperCase().slice(0, 8) || "BÍBLIA";
 }
 
+export interface BibleLanguageOption {
+	code: string;
+	label: string;
+}
+
+export const BIBLE_LANGUAGES: BibleLanguageOption[] = [
+	{ code: "pt", label: "Português" },
+	{ code: "en", label: "English" },
+	{ code: "es", label: "Español" },
+	{ code: "fr", label: "Français" },
+	{ code: "de", label: "Deutsch" },
+	{ code: "it", label: "Italiano" },
+	{ code: "la", label: "Latina" },
+	{ code: "el", label: "Ελληνικά (Greek)" },
+	{ code: "he", label: "עברית (Hebrew)" },
+	{ code: "ar", label: "العربية (Arabic)" },
+	{ code: "ru", label: "Русский (Russian)" },
+	{ code: "zh", label: "中文 (Chinese)" },
+	{ code: "ja", label: "日本語 (Japanese)" },
+	{ code: "ko", label: "한국어 (Korean)" },
+	{ code: "nl", label: "Nederlands" },
+	{ code: "pl", label: "Polski" },
+	{ code: "ro", label: "Română" },
+	{ code: "sv", label: "Svenska" },
+	{ code: "uk", label: "Українська" },
+];
+
+

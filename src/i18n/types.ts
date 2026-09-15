@@ -93,6 +93,9 @@ export interface TranslationStrings {
 		versionAbbrLabel: string;
 		versionLanguageLabel: string;
 		versionLanguagePlaceholder: string;
+		versionLanguageNone: string;
+		versionLanguageCustom: string;
+		versionLanguageCustomLabel: string;
 		setAsDefaultLabel: string;
 		setAsDefaultDesc: string;
 		setAsDefaultButton: string;

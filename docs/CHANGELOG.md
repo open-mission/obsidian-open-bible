@@ -21,6 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Set a preferred default Bible version via General Settings, the Version Settings star toggle, the Version Edit modal, or the `default: true` property in the `.md` note.
   - Automatically selected by default in the Bible Reader, Verse Previews, and future verse citations.
   - Automatic cleanup of `.sqlite` binary and associated `.md` note when a version is deleted.
+- **Language Selector Dropdown**: Version metadata editing modal now provides a curated `<select>` dropdown of major biblical and world languages (Português, English, Español, Français, Deutsch, Greek, Hebrew, etc.) with support for custom language input.
 
 
 ## [0.1.0] - 2026-09-15
