@@ -9,7 +9,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Added
+- **Scripture Quote Insertion via Context Menu**:
+  - Added editor and reading view right-click context menu on Bible reference links to insert formatted Scripture blockquotes into notes.
+  - Configurable insertion position in Settings: `"below"` (default) or `"above"` the current paragraph/block (`verseInsertPosition`).
+  - Added corner action menu (`more-vertical`) in `VersePreviewModal` with options to insert into active note (below/above), create a Bible note, or copy formatted quote.
+- **Commands to Insert Scripture and Create Notes**:
+  - `open-bible:insert-verse-at-cursor` ("Insert Scripture at cursor"): Opens the Passage Picker and inserts the formatted blockquote at the active editor caret.
+  - `open-bible:create-bible-note` ("Create Bible note"): Opens the Passage Picker from anywhere in Obsidian, allowing selection of book, chapter, verses, and note category, creating a vault-native note with YAML frontmatter in `OpenBible/notes`.
+  - Unified `PassagePickerModal`: Fast smart search with real-time reference parsing, verse preview, category pills, and multi-step (Book → Chapter → Verses) visual picker.
+- **Smart Book & Reference Search in BookPicker**:
+  - Typing references directly into the BookPicker search bar (e.g. `Gn 10`, `Sl 23`, `Jo 3:16`, `Mateus 10`) keeps the book in the filtered list and highlights the target book tile (`.is-reference-target`).
+  - Displays a recognized reference badge banner with keyboard shortcut hint (`Enter` to open).
+  - Pressing `Enter` or clicking the highlighted book tile navigates directly to the detected chapter.
+
 - **Vault-Native Notes & Highlights**:
   - Saved as standard Markdown files in the vault with structured YAML frontmatter (`type: note` and `type: highlight`).
   - Configurable storage folders (default: `OpenBible/notes` and `OpenBible/highlights`).
