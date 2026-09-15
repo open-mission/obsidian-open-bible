@@ -23,6 +23,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Automatic cleanup of `.sqlite` binary and associated `.md` note when a version is deleted.
 - **Language Selector Dropdown**: Version metadata editing modal now provides a curated `<select>` dropdown of major biblical and world languages (Português, English, Español, Français, Deutsch, Greek, Hebrew, etc.) with support for custom language input.
 
+### Removed
+- **Default Reference Setting**: Removed the legacy "Default reference" input from General settings to focus the page solely on primary version configuration.
+
 
 ## [0.1.0] - 2026-09-15
 
