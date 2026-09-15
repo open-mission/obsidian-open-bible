@@ -38,4 +38,82 @@ describe("textSegmentation", () => {
 		assert.equal(segments[2].text, " os céus e a terra.");
 		assert.equal(segments[2].highlights.length, 0);
 	});
+
+	it("splits text for phrase highlights like 'torre que estavam construindo'", () => {
+		const text = "O SENHOR, porém, desceu para ver a cidade e a torre que estavam construindo.";
+		const phrase = "torre que estavam construindo";
+		const charStart = text.indexOf(phrase);
+		const charEnd = charStart + phrase.length;
+
+		const hl: BibleNoteItem = {
+			path: "hl-torre.md",
+			type: "highlight",
+			title: phrase,
+			book: "Gênesis",
+			chapter: 11,
+			verses: [5],
+			versesStr: "5",
+			color: "green",
+			reference: "Gênesis 11:5",
+			charStart,
+			charEnd,
+			selectedText: phrase,
+		};
+
+		const segments = segmentVerseText(text, 5, [hl]);
+		assert.equal(segments.length, 3);
+		assert.equal(segments[0].text, text.substring(0, charStart));
+		assert.equal(segments[0].highlights.length, 0);
+
+		assert.equal(segments[1].text, phrase);
+		assert.equal(segments[1].highlights.length, 1);
+		assert.equal(segments[1].highlights[0].color, "green");
+
+		assert.equal(segments[2].text, ".");
+		assert.equal(segments[2].highlights.length, 0);
+	});
+
+	it("combines full-verse and ranged highlights on the same verse", () => {
+		const text = "O SENHOR, porém, desceu para ver a cidade e a torre que estavam construindo.";
+		const fullHl: BibleNoteItem = {
+			path: "hl-full.md",
+			type: "highlight",
+			title: "Gênesis 11:5",
+			book: "Gênesis",
+			chapter: 11,
+			verses: [5],
+			versesStr: "5",
+			color: "yellow",
+			reference: "Gênesis 11:5",
+		};
+		const wordHl: BibleNoteItem = {
+			path: "hl-senhor.md",
+			type: "highlight",
+			title: "SENHOR",
+			book: "Gênesis",
+			chapter: 11,
+			verses: [5],
+			versesStr: "5",
+			color: "blue",
+			reference: "Gênesis 11:5",
+			charStart: 2,
+			charEnd: 8,
+			selectedText: "SENHOR",
+		};
+
+		const segments = segmentVerseText(text, 5, [fullHl, wordHl]);
+		assert.equal(segments.length, 3);
+		// Before "SENHOR": covers fullHl
+		assert.equal(segments[0].text, "O ");
+		assert.equal(segments[0].highlights.length, 1);
+		assert.equal(segments[0].highlights[0].color, "yellow");
+
+		// "SENHOR": covers both fullHl and wordHl
+		assert.equal(segments[1].text, "SENHOR");
+		assert.equal(segments[1].highlights.length, 2);
+
+		// After "SENHOR": covers fullHl
+		assert.equal(segments[2].highlights.length, 1);
+		assert.equal(segments[2].highlights[0].color, "yellow");
+	});
 });

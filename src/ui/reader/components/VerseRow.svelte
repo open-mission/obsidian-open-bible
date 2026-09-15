@@ -112,7 +112,7 @@
 	{#each textSegments as segment (segment.charStart)}
 		{#if segment.highlights.length > 0}
 			{@render renderUnderlines(segment.highlights, segment.text, 0)}
-			{#each segment.highlights as hl (hl.path)}
+			{#each segment.highlights.filter((h) => h.charStart !== undefined && h.charEnd === segment.charEnd) as hl (hl.path)}
 				<button
 					type="button"
 					class="open-bible-range-marker"

@@ -33,7 +33,7 @@ export function captureTextSelection(
 		return null;
 	}
 
-	const verseText = verseTextElement.textContent || "";
+	const verseText = getPureVerseText(verseTextElement);
 	const charStart = getCharOffset(verseTextElement, range.startContainer, range.startOffset);
 	const charEnd = getCharOffset(verseTextElement, range.endContainer, range.endOffset);
 
@@ -41,17 +41,53 @@ export function captureTextSelection(
 		return null;
 	}
 
-	const extractedText = verseText.substring(charStart, charEnd);
-	if (extractedText.trim() !== selectedText) {
+	let trimmedStart = charStart;
+	let trimmedEnd = charEnd;
+	while (trimmedStart < trimmedEnd && /\s/.test(verseText[trimmedStart])) {
+		trimmedStart++;
+	}
+	while (trimmedEnd > trimmedStart && /\s/.test(verseText[trimmedEnd - 1])) {
+		trimmedEnd--;
+	}
+
+	if (trimmedStart >= trimmedEnd) {
+		return null;
+	}
+
+	const trimmedSelectedText = verseText.substring(trimmedStart, trimmedEnd);
+	if (trimmedSelectedText !== selectedText) {
 		return null;
 	}
 
 	return {
 		verseNumber,
-		charStart,
-		charEnd,
-		selectedText,
+		charStart: trimmedStart,
+		charEnd: trimmedEnd,
+		selectedText: trimmedSelectedText,
 	};
+}
+
+function getPureVerseText(rootElement: HTMLElement): string {
+	let text = "";
+	const walker = document.createTreeWalker(
+		rootElement,
+		NodeFilter.SHOW_TEXT,
+		{
+			acceptNode(node: Node) {
+				if (node.parentElement?.closest(".open-bible-range-marker")) {
+					return NodeFilter.FILTER_REJECT;
+				}
+				return NodeFilter.FILTER_ACCEPT;
+			},
+		}
+	);
+
+	let currentNode = walker.nextNode();
+	while (currentNode) {
+		text += currentNode.textContent || "";
+		currentNode = walker.nextNode();
+	}
+	return text;
 }
 
 function getCharOffset(
@@ -63,7 +99,14 @@ function getCharOffset(
 	const walker = document.createTreeWalker(
 		rootElement,
 		NodeFilter.SHOW_TEXT,
-		null
+		{
+			acceptNode(node: Node) {
+				if (node.parentElement?.closest(".open-bible-range-marker")) {
+					return NodeFilter.FILTER_REJECT;
+				}
+				return NodeFilter.FILTER_ACCEPT;
+			},
+		}
 	);
 
 	let currentNode: Node | null = walker.nextNode();

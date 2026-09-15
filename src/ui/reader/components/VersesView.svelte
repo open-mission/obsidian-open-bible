@@ -242,6 +242,8 @@
 
 	let currentColor = $derived<string | null>(activeHighlight ? activeHighlight.color : null);
 
+	let justCapturedTextRange = false;
+
 	function clearSelection() {
 		selectedVerseNumbers = [];
 		lastClickedVerse = null;
@@ -250,6 +252,10 @@
 	}
 
 	function handleVerseClick(verseNumber: number, event: MouseEvent) {
+		if (justCapturedTextRange) {
+			justCapturedTextRange = false;
+			return;
+		}
 		textRangeSelection = null;
 		const next = applyVerseClick(
 			selectedVerseNumbers,
@@ -279,7 +285,7 @@
 		onSelectVerse?.(selectedVerseNumbers[0]);
 	}
 
-	function handleVerseTextMouseUp(event: MouseEvent) {
+	function handleVerseTextMouseUp(event: MouseEvent | TouchEvent) {
 		const target = event.target as HTMLElement;
 		const verseTextEl = target.closest(".open-bible-reader-verse-text") as HTMLElement | null;
 
@@ -289,11 +295,15 @@
 
 		const rangeData = captureTextSelection(verseTextEl);
 		if (rangeData) {
+			justCapturedTextRange = true;
 			textRangeSelection = rangeData;
 			selectedVerseNumbers = [rangeData.verseNumber];
 			lastClickedVerse = rangeData.verseNumber;
 			onSelectVerse?.(rangeData.verseNumber);
 			clearBrowserSelection();
+			setTimeout(() => {
+				justCapturedTextRange = false;
+			}, 300);
 		}
 	}
 
@@ -545,6 +555,7 @@
 						data-verse-spacing={verseSpacing}
 						data-line-spacing={lineSpacing}
 						onmouseup={handleVerseTextMouseUp}
+						ontouchend={handleVerseTextMouseUp}
 					>
 						<div class="open-bible-thompson-column open-bible-thompson-column-left">
 							{#each thompsonColumns.left as verse (verse.number)}
@@ -606,6 +617,7 @@
 						data-verse-spacing={verseSpacing}
 						data-line-spacing={lineSpacing}
 						onmouseup={handleVerseTextMouseUp}
+						ontouchend={handleVerseTextMouseUp}
 					>
 						{#each verses as verse (verse.number)}
 							<VerseRow
