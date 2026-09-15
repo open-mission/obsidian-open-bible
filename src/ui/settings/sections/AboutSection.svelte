@@ -3,10 +3,11 @@
 	import type { SectionContext } from "../types";
 	import { LOGO_COMPLETE, LOGO_MINIMAL, LOGO_OPEN_MISSION } from "../../../assets/logos";
 	import { lucide } from "../../core/icons";
+	import manifest from "../../../../manifest.json";
 
 	let _context: SectionContext = $props();
 
-	const version = "0.1.0";
+	const version = manifest.version;
 </script>
 
 <div class="ob-about-container">

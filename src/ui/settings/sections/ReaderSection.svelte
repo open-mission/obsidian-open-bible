@@ -2,6 +2,7 @@
 	import { t } from "../../../i18n";
 	import type { ReaderContainerWidth, ReaderSpacing } from "../../../settings";
 	import type { SectionContext } from "../types";
+	import Toggle from "../../kit/Toggle.svelte";
 
 	let { settings, updateGeneral }: SectionContext = $props();
 
@@ -27,11 +28,10 @@
 		<div class="setting-item-description">{t("settings.readerTwoColumnsDesc")}</div>
 	</div>
 	<div class="setting-item-control">
-		<input
-			type="checkbox"
+		<Toggle
 			checked={settings.readerTwoColumns}
-			aria-label={t("settings.readerTwoColumnsName")}
-			onchange={(e) => void updateGeneral({ readerTwoColumns: e.currentTarget.checked })}
+			ariaLabel={t("settings.readerTwoColumnsName")}
+			onchange={(checked) => void updateGeneral({ readerTwoColumns: checked })}
 		/>
 	</div>
 </div>
@@ -42,11 +42,10 @@
 		<div class="setting-item-description">{t("settings.thompsonCrossRefsDesc")}</div>
 	</div>
 	<div class="setting-item-control">
-		<input
-			type="checkbox"
+		<Toggle
 			checked={Boolean(settings.thompsonCrossRefsEnabled)}
-			aria-label={t("settings.thompsonCrossRefsName")}
-			onchange={(e) => void updateGeneral({ thompsonCrossRefsEnabled: e.currentTarget.checked })}
+			ariaLabel={t("settings.thompsonCrossRefsName")}
+			onchange={(checked) => void updateGeneral({ thompsonCrossRefsEnabled: checked })}
 		/>
 	</div>
 </div>
@@ -59,6 +58,7 @@
 		</div>
 		<div class="setting-item-control">
 			<select
+				class="dropdown"
 				value={settings.thompsonCrossRefsPosition || "margin"}
 				aria-label={t("settings.thompsonCrossRefsPositionName")}
 				onchange={(e) => void updateGeneral({ thompsonCrossRefsPosition: e.currentTarget.value as "margin" | "center" })}
@@ -76,11 +76,10 @@
 		<div class="setting-item-description">{t("settings.showCrossRefsBottomPanelDesc")}</div>
 	</div>
 	<div class="setting-item-control">
-		<input
-			type="checkbox"
+		<Toggle
 			checked={settings.showCrossRefsBottomPanel ?? true}
-			aria-label={t("settings.showCrossRefsBottomPanelName")}
-			onchange={(e) => void updateGeneral({ showCrossRefsBottomPanel: e.currentTarget.checked })}
+			ariaLabel={t("settings.showCrossRefsBottomPanelName")}
+			onchange={(checked) => void updateGeneral({ showCrossRefsBottomPanel: checked })}
 		/>
 	</div>
 </div>
@@ -93,6 +92,7 @@
 		</div>
 		<div class="setting-item-control">
 			<select
+				class="dropdown"
 				value={settings.crossRefsBottomPanelFixed ? "fixed" : "inline"}
 				aria-label={t("settings.crossRefsBottomPanelFixedName")}
 				onchange={(e) => void updateGeneral({ crossRefsBottomPanelFixed: e.currentTarget.value === "fixed" })}
@@ -111,6 +111,7 @@
 	</div>
 	<div class="setting-item-control">
 		<select
+			class="dropdown"
 			value={settings.readerContainerWidth}
 			aria-label={t("settings.readerContainerWidthName")}
 			onchange={(e) => void updateGeneral({ readerContainerWidth: e.currentTarget.value as ReaderContainerWidth })}
@@ -129,6 +130,7 @@
 	</div>
 	<div class="setting-item-control">
 		<select
+			class="dropdown"
 			value={settings.readerVerseSpacing}
 			aria-label={t("settings.readerVerseSpacingName")}
 			onchange={(e) => void updateGeneral({ readerVerseSpacing: e.currentTarget.value as ReaderSpacing })}
@@ -147,6 +149,7 @@
 	</div>
 	<div class="setting-item-control">
 		<select
+			class="dropdown"
 			value={settings.readerLineSpacing}
 			aria-label={t("settings.readerLineSpacingName")}
 			onchange={(e) => void updateGeneral({ readerLineSpacing: e.currentTarget.value as ReaderSpacing })}

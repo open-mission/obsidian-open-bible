@@ -25,7 +25,7 @@
 	{#if header}
 		{@render header()}
 	{:else if title && onBack}
-		<SettingsSectionHeader {title} {description} {onBack} {backAriaLabel} />
+		<SettingsSectionHeader {title} {onBack} {backAriaLabel} />
 	{/if}
 
 	<div class="ob-settings-section-content">

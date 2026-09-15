@@ -11,7 +11,7 @@
 		actions?: Snippet;
 	}
 
-	let { title, description, onBack, backAriaLabel, actions }: Props = $props();
+	let { title, onBack, backAriaLabel, actions }: Props = $props();
 
 	// Localized fallback for the back button label (reactive to locale changes).
 	const backLabel = $derived(backAriaLabel ?? t("common.backToSettings"));
@@ -37,12 +37,7 @@
 			<span class="ob-back-icon" use:lucide={"arrow-left"}></span>
 		</button>
 
-		<div class="ob-settings-header-titles">
-			<h3 class="ob-settings-header-title">{title}</h3>
-			{#if description}
-				<p class="ob-settings-header-description">{description}</p>
-			{/if}
-		</div>
+		<h3 class="ob-settings-header-title">{title}</h3>
 	</div>
 
 	{#if actions}
@@ -103,26 +98,12 @@
 		height: 18px;
 	}
 
-	.ob-settings-header-titles {
-		display: flex;
-		flex-direction: column;
-		gap: 2px;
-		min-width: 0;
-	}
-
 	.ob-settings-header-title {
 		margin: 0;
 		font-size: var(--font-ui-large, 1.25rem);
 		font-weight: var(--font-semibold, 600);
 		color: var(--text-normal);
 		line-height: var(--line-height-tight);
-	}
-
-	.ob-settings-header-description {
-		margin: 0;
-		font-size: var(--font-ui-smaller);
-		color: var(--text-muted);
-		line-height: var(--line-height-normal);
 	}
 
 	.ob-settings-section-header-actions {

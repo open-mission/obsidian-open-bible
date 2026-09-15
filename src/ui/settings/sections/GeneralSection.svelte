@@ -46,7 +46,7 @@
 <div class="setting-item">
 	<div class="setting-item-info">
 		<div class="setting-item-name">{t("settings.defaultVersionName")}</div>
-		<div class="setting-item-description">{t("settings.defaultVersionDesc")}</div>
+		<!-- <div class="setting-item-description">{t("settings.defaultVersionDesc")}</div> -->
 	</div>
 	<div class="setting-item-control">
 		<select

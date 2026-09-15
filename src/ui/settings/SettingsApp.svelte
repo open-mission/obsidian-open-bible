@@ -6,6 +6,7 @@
 		SettingsSectionPage,
 	} from "../core/settings";
 	import { t } from "../../i18n";
+	import type { OpenBibleSettings } from "../../settings";
 	import DataSection from "./sections/DataSection.svelte";
 	import GeneralSection from "./sections/GeneralSection.svelte";
 	import LanguageSection from "./sections/LanguageSection.svelte";
@@ -18,6 +19,33 @@
 	}
 
 	let { initialSectionId = null, ...context }: Props = $props();
+
+	// Reactive proxy for settings so Svelte 5 tracks mutations and triggers UI updates across all sections
+	// svelte-ignore state_referenced_locally
+	let settingsState = $state<OpenBibleSettings>({ ...context.settings });
+
+	$effect(() => {
+		Object.assign(settingsState, context.settings);
+	});
+
+	async function updateGeneral(patch: Partial<OpenBibleSettings>): Promise<void> {
+		Object.assign(settingsState, patch);
+		await context.updateGeneral(patch);
+	}
+
+	async function updateDataFolder(value: string): Promise<string> {
+		const result = await context.updateDataFolder(value);
+		settingsState.dataFolder = result;
+		return result;
+	}
+
+	const sectionContext: SectionContext = $derived({
+		app: context.app,
+		service: context.service,
+		settings: settingsState,
+		updateDataFolder,
+		updateGeneral,
+	});
 
 	// Derived (not a constant) so section titles and descriptions follow locale changes.
 	const sections: SectionDef[] = $derived.by(() => [
@@ -90,12 +118,11 @@
 	{:else}
 		<SettingsSectionPage
 			title={activeSection.title}
-			description={activeSection.description}
 			onBack={() => {
 				currentSectionId = null;
 			}}
 		>
-			<ActiveComponent {...context} />
+			<ActiveComponent {...sectionContext} />
 		</SettingsSectionPage>
 	{/if}
 </SettingsLayout>

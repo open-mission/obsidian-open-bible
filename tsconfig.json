@@ -12,6 +12,7 @@
 		"skipLibCheck": true,
 		"sourceMap": false,
 		"strict": true,
+		"resolveJsonModule": true,
 		"target": "ES2018",
 		"verbatimModuleSyntax": true
 	},
