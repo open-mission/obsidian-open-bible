@@ -115,6 +115,16 @@ The UI is constructed using **Svelte 5 runes**:
 - Views can be opened as main workspace tabs, or docked into the right or left sidebars.
 - Layout preferences (single column vs. two-column, text width, verse spacing) are scoped reactively.
 
+### Chapter Transitions & Navigation Motion
+- Implements hardware-accelerated directional transitions (`transform: translateX` and `opacity`) when switching chapters.
+- Svelte 5 `{#key `${book.id}-${chapter}`}` isolates the chapter DOM lifecycle, avoiding double-mounted chapters and scroll jumps.
+- Supports three directional states:
+  - `next`: smooth slide-in from right (`translateX(20px)` → `0`)
+  - `prev`: smooth slide-in from left (`translateX(-20px)` → `0`)
+  - `jump`: gentle fade and slide-up (`translateY(10px)` → `0`) for book/chapter picker selections or verse searches.
+- Full accessibility compliance with `@media (prefers-reduced-motion: reduce)`.
+
+
 ---
 
 ## 4. Internationalization (i18n)

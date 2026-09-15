@@ -1156,6 +1156,69 @@
 	max-width: min(98%, 1500px);
 }
 
+/* Chapter Transition Animations */
+@keyframes ob-chapter-slide-next {
+	from {
+		opacity: 0;
+		transform: translateX(20px);
+	}
+	to {
+		opacity: 1;
+		transform: translateX(0);
+	}
+}
+
+@keyframes ob-chapter-slide-prev {
+	from {
+		opacity: 0;
+		transform: translateX(-20px);
+	}
+	to {
+		opacity: 1;
+		transform: translateX(0);
+	}
+}
+
+@keyframes ob-chapter-fade-jump {
+	from {
+		opacity: 0;
+		transform: translateY(10px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+.open-bible-chapter-transition {
+	width: 100%;
+	display: flex;
+	flex-direction: column;
+	will-change: transform, opacity;
+}
+
+.open-bible-chapter-transition.is-next {
+	animation: ob-chapter-slide-next 0.22s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.open-bible-chapter-transition.is-prev {
+	animation: ob-chapter-slide-prev 0.22s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.open-bible-chapter-transition.is-jump {
+	animation: ob-chapter-fade-jump 0.2s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.open-bible-chapter-transition,
+	.open-bible-chapter-transition.is-next,
+	.open-bible-chapter-transition.is-prev,
+	.open-bible-chapter-transition.is-jump {
+		animation: none !important;
+		transform: none !important;
+	}
+}
+
 .open-bible-reader-header {
 	color: var(--text-normal);
 	font-size: var(--h2-size, 1.65rem);

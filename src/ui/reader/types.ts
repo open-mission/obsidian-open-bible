@@ -1,5 +1,7 @@
 import type { ReaderContainerWidth, ReaderSpacing } from "../../settings";
 
+export type NavigationDirection = "next" | "prev" | "jump";
+
 export interface BibleReaderViewState {
 	bookId?: number;
 	chapter?: number;

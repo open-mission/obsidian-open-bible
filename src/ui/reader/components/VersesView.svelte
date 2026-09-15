@@ -5,6 +5,7 @@
 	import type { ReaderContainerWidth, ReaderSpacing } from "../../../settings";
 	import type { CrossReference, CrossReferenceBlock } from "../../../data/crossRefModel";
 	import type { CrossReferenceService } from "../../../services/CrossReferenceService";
+	import type { NavigationDirection } from "../types";
 	import { shouldUseCenter, splitThompsonColumns, type ThompsonLayoutMode } from "../thompsonLayout";
 	import { THOMPSON_NARROW_BREAKPOINT } from "../thompsonMenu";
 	import { icon } from "../../actions/icon";
@@ -26,6 +27,7 @@
 		thompsonCrossRefsPosition?: "margin" | "center";
 		crossReferenceService?: CrossReferenceService;
 		selectedVerseNumber?: number;
+		navigationDirection?: NavigationDirection;
 		onRetry?: () => void;
 		onToggleTwoColumns?: () => void;
 		onSelectCrossRef?: (verseNumber: number, ref: CrossReference, event: MouseEvent) => void;
@@ -46,6 +48,7 @@
 		thompsonCrossRefsPosition = "margin",
 		crossReferenceService,
 		selectedVerseNumber,
+		navigationDirection = "jump",
 		onRetry,
 		onToggleTwoColumns,
 		onSelectCrossRef,
@@ -174,47 +177,56 @@
 	{:else if !book || chapter === undefined}
 		<EmptyState iconName="book-open" title={t("chapterPicker.noChaptersDesc")} />
 	{:else}
-		<h2 class="open-bible-reader-header">{book.name} {chapter}</h2>
-		<div class="open-bible-reader-divider"></div>
+		{#key `${book.id}-${chapter}`}
+			<div
+				class="open-bible-chapter-transition"
+				class:is-next={navigationDirection === "next"}
+				class:is-prev={navigationDirection === "prev"}
+				class:is-jump={navigationDirection === "jump"}
+			>
+				<h2 class="open-bible-reader-header">{book.name} {chapter}</h2>
+				<div class="open-bible-reader-divider"></div>
 
-		{#if isLoading}
-			<div class="open-bible-reader-loading">
-				<span class="open-bible-reader-spinner"></span>
-				<span class="open-bible-reader-loading-text">{t("reader.loadingVerses")}</span>
+				{#if isLoading}
+					<div class="open-bible-reader-loading">
+						<span class="open-bible-reader-spinner"></span>
+						<span class="open-bible-reader-loading-text">{t("reader.loadingVerses")}</span>
+					</div>
+				{:else if verses.length === 0}
+					<p class="open-bible-reader-status">{t("reader.noVersesFound")}</p>
+				{:else if thompsonMode === "center"}
+					<div
+						bind:this={versesContainerEl}
+						class="open-bible-reader-verses is-thompson-center"
+						data-verse-spacing={verseSpacing}
+						data-line-spacing={lineSpacing}
+					>
+						<div class="open-bible-thompson-column open-bible-thompson-column-left">
+							{#each thompsonColumns.left as verse (verse.number)}
+								{@render renderVerse(verse, false)}
+							{/each}
+						</div>
+						<div class="open-bible-thompson-column open-bible-thompson-column-right">
+							{#each thompsonColumns.right as verse (verse.number)}
+								{@render renderVerse(verse, true)}
+							{/each}
+						</div>
+					</div>
+				{:else}
+					<div
+						bind:this={versesContainerEl}
+						class="open-bible-reader-verses"
+						class:is-two-columns={isTwoColumns}
+						class:has-thompson-margin={showMarginGutter}
+						data-verse-spacing={verseSpacing}
+						data-line-spacing={lineSpacing}
+					>
+						{#each verses as verse (verse.number)}
+							{@render renderVerse(verse, false)}
+						{/each}
+					</div>
+				{/if}
 			</div>
-		{:else if verses.length === 0}
-			<p class="open-bible-reader-status">{t("reader.noVersesFound")}</p>
-		{:else if thompsonMode === "center"}
-			<div
-				bind:this={versesContainerEl}
-				class="open-bible-reader-verses is-thompson-center"
-				data-verse-spacing={verseSpacing}
-				data-line-spacing={lineSpacing}
-			>
-				<div class="open-bible-thompson-column open-bible-thompson-column-left">
-					{#each thompsonColumns.left as verse (verse.number)}
-						{@render renderVerse(verse, false)}
-					{/each}
-				</div>
-				<div class="open-bible-thompson-column open-bible-thompson-column-right">
-					{#each thompsonColumns.right as verse (verse.number)}
-						{@render renderVerse(verse, true)}
-					{/each}
-				</div>
-			</div>
-		{:else}
-			<div
-				bind:this={versesContainerEl}
-				class="open-bible-reader-verses"
-				class:is-two-columns={isTwoColumns}
-				class:has-thompson-margin={showMarginGutter}
-				data-verse-spacing={verseSpacing}
-				data-line-spacing={lineSpacing}
-			>
-				{#each verses as verse (verse.number)}
-					{@render renderVerse(verse, false)}
-				{/each}
-			</div>
-		{/if}
+		{/key}
 	{/if}
 </div>

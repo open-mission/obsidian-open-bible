@@ -24,7 +24,7 @@
 	import { indexOfCrossRef } from "../../data/crossRefModel";
 	import { openCrossRefPreview } from "../resources/openCrossRefPreview";
 	import { formatCrossRefOrigin } from "../resources/formatCrossRef";
-	import type { BibleReaderController, BibleReaderViewState } from "./types";
+	import type { BibleReaderController, BibleReaderViewState, NavigationDirection } from "./types";
 
 	type PickerMode = "book" | "chapter" | "version" | "history" | "appearance" | null;
 
@@ -118,6 +118,7 @@
 	let crossRefsBottomPanelColumns = $state<1 | 2>(initial.crossRefsBottomPanelColumns);
 	let crossRefsBottomPanelCollapsed = $state(initial.crossRefsBottomPanelCollapsed);
 	let activeVerseNumber = $state<number | undefined>();
+	let navigationDirection = $state<NavigationDirection>("jump");
 
 	export function syncSettings(): void {
 		twoColumns = Boolean(settings.readerTwoColumns ?? settings.twoColumnLayout);
@@ -311,9 +312,9 @@
 			verses = loadedVerses;
 
 			if (scrollContainerEl) {
-				scrollContainerEl.scrollTo({ top: 0, behavior: "smooth" });
+				scrollContainerEl.scrollTo({ top: 0, behavior: "auto" });
 			} else if (containerEl) {
-				containerEl.scrollTo({ top: 0, behavior: "smooth" });
+				containerEl.scrollTo({ top: 0, behavior: "auto" });
 			}
 
 			const bookObj = currentInfo.books.find((b) => b.id === bookId);
@@ -373,6 +374,7 @@
 		const targetChapter = targetBook?.chapters[targetChapterIndex];
 		if (!targetBook || targetChapter === undefined) return;
 
+		navigationDirection = direction === 1 ? "next" : "prev";
 		currentBookId = targetBook.id;
 		currentChapter = targetChapter;
 		void loadChapter(targetBook.id, targetChapter);
@@ -406,6 +408,7 @@
 		if (selectedBookForPicker) {
 			currentBookId = selectedBookForPicker.id;
 		}
+		navigationDirection = "jump";
 		currentChapter = chapter;
 		closePicker();
 		if (currentBookId !== undefined) {
@@ -532,6 +535,7 @@
 				  );
 		if (!targetBook) return false;
 
+		navigationDirection = "jump";
 		currentBookId = targetBook.id;
 		currentChapter = chapter;
 		await loadChapter(targetBook.id, chapter);
@@ -629,6 +633,7 @@
 				book={currentBook}
 				chapter={currentChapter}
 				{verses}
+				{navigationDirection}
 				isLoading={isLoadingVerses}
 				error={verseError}
 				isTwoColumns={twoColumns}
@@ -694,6 +699,7 @@
 					{currentBookId}
 					onSelectBook={handleSelectBook}
 					onNavigateToChapter={(bookId, chapter) => {
+						navigationDirection = "jump";
 						currentBookId = bookId;
 						currentChapter = chapter;
 						closePicker();
