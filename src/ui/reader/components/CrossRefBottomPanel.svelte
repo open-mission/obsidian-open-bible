@@ -106,14 +106,6 @@
 		loadBlocks();
 	});
 
-	$effect(() => {
-		if (selectedVerseNumber !== undefined && isExpanded) {
-			const el = document.getElementById(`open-bible-xref-${selectedVerseNumber}`);
-			if (el) {
-				el.scrollIntoView({ behavior: "smooth", block: "nearest" });
-			}
-		}
-	});
 
 	onMount(() => {
 		if (plugin.settings.crossRefsBottomPanelHeight) {
