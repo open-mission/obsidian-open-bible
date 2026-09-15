@@ -11,6 +11,8 @@ export const pt: TranslationStrings = {
 		openHighlightsRightSidebar: "Abrir painel de destaques na barra lateral direita",
 		openHighlightsLeftSidebar: "Abrir painel de destaques na barra lateral esquerda",
 		toggleSelectionMode: "Alternar modo de seleção de versículos",
+		insertVerseAtCursor: "Inserir texto bíblico no cursor",
+		createBibleNote: "Criar nota bíblica",
 	},
 	ribbon: {
 		openReader: "Abrir leitor",
@@ -84,6 +86,11 @@ export const pt: TranslationStrings = {
 		enableVerseClickPreviewName: "Preview ao clicar",
 		enableVerseClickPreviewDesc:
 			"Abre uma janela modal detalhada com o texto bíblico completo e opções para copiar e abrir no leitor.",
+		verseInsertPositionName: "Posição de inserção da citação",
+		verseInsertPositionDesc:
+			"Local onde a citação bíblica será inserida ao utilizar o menu de contexto ou atalhos na nota.",
+		verseInsertPositionBelow: "Abaixo do bloco atual (Padrão)",
+		verseInsertPositionAbove: "Acima do bloco atual",
 		previewDefaultVersionName: "Versão padrão para preview",
 		previewDefaultVersionDesc:
 			"Versão bíblica utilizada para exibir os textos bíblicos nos previews.",
@@ -297,6 +304,14 @@ export const pt: TranslationStrings = {
 		createNote: "Criar nota",
 		close: "Fechar",
 	},
+	contextMenu: {
+		insertBelow: "Inserir citação bíblica (bloco abaixo)",
+		insertAbove: "Inserir citação bíblica (bloco acima)",
+		insertAtCursor: "Inserir citação no cursor",
+		createNote: "Criar nota bíblica",
+		copyQuote: "Copiar citação formatada",
+		moreOptions: "Mais opções bíblicas...",
+	},
 	notices: {
 		textCopied: "Texto copiado para a área de transferência.",
 		referenceCopied: "Referência copiada para a área de transferência.",
@@ -305,6 +320,8 @@ export const pt: TranslationStrings = {
 		highlightAdded: "Versículo destacado!",
 		highlightRemoved: "Destaque removido.",
 		historyCleared: "Histórico limpo.",
+		verseInserted: "Texto bíblico inserido com sucesso.",
+		noActiveMarkdownNote: "Nenhuma nota ativa encontrada.",
 	},
 	modals: {
 		confirmDeleteTitle: "Remover destaque?",
@@ -328,6 +345,23 @@ export const pt: TranslationStrings = {
 		bookAriaSingle: "{name} (1 capítulo)",
 		bookAriaPlural: "{name} ({count} capítulos)",
 		close: "Fechar",
+		pressEnterToOpen: "Pressione Enter para abrir",
+		matchedReferenceBadge: "Referência identificada",
+	},
+	passagePicker: {
+		titleInsert: "Inserir texto bíblico",
+		titleNote: "Criar nota bíblica",
+		searchPlaceholder: "Digite a referência ou livro (ex: João 3:16, Sl 23, Rm 8)...",
+		detectedReference: "Referência detectada",
+		insertAtCursor: "Inserir no cursor",
+		createNoteButton: "Criar nota",
+		selectVerses: "Selecionar versículos",
+		selectAllVerses: "Capítulo inteiro",
+		allChapter: "Todos os versículos",
+		stepBook: "Livro",
+		stepChapter: "Capítulo",
+		stepVerses: "Versículos",
+		noteCategory: "Categoria da nota",
 	},
 	chapterPicker: {
 		noChaptersDesc: "Este livro não possui capítulos disponíveis.",

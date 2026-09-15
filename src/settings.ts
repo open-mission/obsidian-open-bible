@@ -25,6 +25,8 @@ export interface CustomVersionMetadata {
 
 export type VerseHoverModifier = "shift" | "ctrlCmd" | "alt" | "none";
 
+export type VerseInsertPosition = "below" | "above";
+
 export interface HighlightConfig {
 	id: string;
 	label: string;
@@ -90,6 +92,8 @@ export interface OpenBibleSettings {
 	verseHoverRequireShift?: boolean;
 	/** Whether clicking on a verse reference opens the preview modal / drawer. */
 	enableVerseClickPreview: boolean;
+	/** Placement when inserting scripture quotes from context menu into note ("below" | "above"). */
+	verseInsertPosition: VerseInsertPosition;
 	/** Cross-references bottom panel in reader. */
 	showCrossRefsBottomPanel?: boolean;
 	crossRefsBottomPanelFixed?: boolean;
@@ -128,6 +132,7 @@ export const DEFAULT_SETTINGS: OpenBibleSettings = {
 	verseHoverModifier: "shift",
 	verseHoverRequireShift: true,
 	enableVerseClickPreview: true,
+	verseInsertPosition: "below",
 	showCrossRefsBottomPanel: true,
 	crossRefsBottomPanelFixed: false,
 	crossRefsBottomPanelColumns: 2,

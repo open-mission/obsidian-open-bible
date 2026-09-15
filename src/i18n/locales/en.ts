@@ -11,6 +11,8 @@ export const en: TranslationStrings = {
 		openHighlightsRightSidebar: "Open highlights panel in right sidebar",
 		openHighlightsLeftSidebar: "Open highlights panel in left sidebar",
 		toggleSelectionMode: "Toggle verse selection mode",
+		insertVerseAtCursor: "Insert Scripture at cursor",
+		createBibleNote: "Create Bible note",
 	},
 	ribbon: {
 		openReader: "Open reader",
@@ -83,6 +85,11 @@ export const en: TranslationStrings = {
 		enableVerseClickPreviewName: "Preview on click",
 		enableVerseClickPreviewDesc:
 			"Opens a modal dialog with full scripture text, copy options, and a button to open in the reader.",
+		verseInsertPositionName: "Verse quote insertion position",
+		verseInsertPositionDesc:
+			"Where scripture quotes are inserted in the note when using context menus or hotkeys.",
+		verseInsertPositionBelow: "Below current block (Default)",
+		verseInsertPositionAbove: "Above current block",
 		previewDefaultVersionName: "Default preview version",
 		previewDefaultVersionDesc:
 			"Bible version used to display verses in previews.",
@@ -296,6 +303,14 @@ export const en: TranslationStrings = {
 		createNote: "Create note",
 		close: "Close",
 	},
+	contextMenu: {
+		insertBelow: "Insert Scripture quote (block below)",
+		insertAbove: "Insert Scripture quote (block above)",
+		insertAtCursor: "Insert Scripture at cursor",
+		createNote: "Create Bible note",
+		copyQuote: "Copy formatted quote",
+		moreOptions: "More Scripture options...",
+	},
 	notices: {
 		textCopied: "Text copied to clipboard.",
 		referenceCopied: "Reference copied to clipboard.",
@@ -304,6 +319,8 @@ export const en: TranslationStrings = {
 		highlightAdded: "Verse highlighted!",
 		highlightRemoved: "Highlight removed.",
 		historyCleared: "History cleared.",
+		verseInserted: "Scripture text inserted successfully.",
+		noActiveMarkdownNote: "No active Markdown note found.",
 	},
 	modals: {
 		confirmDeleteTitle: "Remove highlight?",
@@ -327,6 +344,23 @@ export const en: TranslationStrings = {
 		bookAriaSingle: "{name} (1 chapter)",
 		bookAriaPlural: "{name} ({count} chapters)",
 		close: "Close",
+		pressEnterToOpen: "Press Enter to open",
+		matchedReferenceBadge: "Recognized reference",
+	},
+	passagePicker: {
+		titleInsert: "Insert Scripture text",
+		titleNote: "Create Bible note",
+		searchPlaceholder: "Type reference or book (e.g. John 3:16, Ps 23, Rom 8)...",
+		detectedReference: "Detected reference",
+		insertAtCursor: "Insert at cursor",
+		createNoteButton: "Create note",
+		selectVerses: "Select verses",
+		selectAllVerses: "Whole chapter",
+		allChapter: "All verses",
+		stepBook: "Book",
+		stepChapter: "Chapter",
+		stepVerses: "Verses",
+		noteCategory: "Note category",
 	},
 	chapterPicker: {
 		noChaptersDesc: "This book has no chapters available.",

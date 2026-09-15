@@ -14,6 +14,8 @@ export interface TranslationStrings {
 		openHighlightsRightSidebar: string;
 		openHighlightsLeftSidebar: string;
 		toggleSelectionMode: string;
+		insertVerseAtCursor: string;
+		createBibleNote: string;
 	};
 	ribbon: {
 		openReader: string;
@@ -76,6 +78,10 @@ export interface TranslationStrings {
 		verseHoverModifierNone: string;
 		enableVerseClickPreviewName: string;
 		enableVerseClickPreviewDesc: string;
+		verseInsertPositionName: string;
+		verseInsertPositionDesc: string;
+		verseInsertPositionBelow: string;
+		verseInsertPositionAbove: string;
 		previewDefaultVersionName: string;
 		previewDefaultVersionDesc: string;
 		previewDefaultVersionSameAsReader: string;
@@ -285,6 +291,14 @@ export interface TranslationStrings {
 		createNote: string;
 		close: string;
 	};
+	contextMenu: {
+		insertBelow: string;
+		insertAbove: string;
+		insertAtCursor: string;
+		createNote: string;
+		copyQuote: string;
+		moreOptions: string;
+	};
 	notices: {
 		textCopied: string;
 		referenceCopied: string;
@@ -293,6 +307,8 @@ export interface TranslationStrings {
 		highlightAdded: string;
 		highlightRemoved: string;
 		historyCleared: string;
+		verseInserted: string;
+		noActiveMarkdownNote: string;
 	};
 	modals: {
 		confirmDeleteTitle: string;
@@ -316,6 +332,23 @@ export interface TranslationStrings {
 		bookAriaSingle: string;
 		bookAriaPlural: string;
 		close: string;
+		pressEnterToOpen: string;
+		matchedReferenceBadge: string;
+	};
+	passagePicker: {
+		titleInsert: string;
+		titleNote: string;
+		searchPlaceholder: string;
+		detectedReference: string;
+		insertAtCursor: string;
+		createNoteButton: string;
+		selectVerses: string;
+		selectAllVerses: string;
+		allChapter: string;
+		stepBook: string;
+		stepChapter: string;
+		stepVerses: string;
+		noteCategory: string;
 	};
 	chapterPicker: {
 		noChaptersDesc: string;

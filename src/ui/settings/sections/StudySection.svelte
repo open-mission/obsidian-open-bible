@@ -2,7 +2,7 @@
 	import { t } from "../../../i18n";
 	import type { SectionContext } from "../types";
 	import type { BibleVersion } from "../../../models/bibleVersion";
-	import type { VerseHoverModifier } from "../../../settings";
+	import type { VerseHoverModifier, VerseInsertPosition } from "../../../settings";
 	import Toggle from "../../kit/Toggle.svelte";
 
 	let { service, settings, updateGeneral }: SectionContext = $props();
@@ -122,6 +122,25 @@
 						{v.abbreviation} — {v.name}
 					</option>
 				{/each}
+			</select>
+		</div>
+	</div>
+
+	<!-- Verse Quote Insertion Position -->
+	<div class="setting-item">
+		<div class="setting-item-info">
+			<div class="setting-item-name">{t("settings.verseInsertPositionName")}</div>
+			<div class="setting-item-description">{t("settings.verseInsertPositionDesc")}</div>
+		</div>
+		<div class="setting-item-control">
+			<select
+				class="dropdown"
+				value={settings.verseInsertPosition ?? "below"}
+				aria-label={t("settings.verseInsertPositionName")}
+				onchange={(e) => void updateGeneral({ verseInsertPosition: e.currentTarget.value as VerseInsertPosition })}
+			>
+				<option value="below">{t("settings.verseInsertPositionBelow")}</option>
+				<option value="above">{t("settings.verseInsertPositionAbove")}</option>
 			</select>
 		</div>
 	</div>
