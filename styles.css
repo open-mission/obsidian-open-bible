@@ -3154,6 +3154,30 @@ body.is-mobile .open-bible-reader-content.has-verse-selection {
 	background-color: transparent !important;
 }
 
+/* Active Word/Phrase Selection Range */
+mark.open-bible-selected-text-range {
+	background-color: rgba(var(--interactive-accent-rgb, 120, 120, 255), 0.35) !important;
+	color: inherit !important;
+	border-radius: var(--radius-s, 4px) !important;
+	box-shadow: 0 0 0 1px var(--interactive-accent) !important;
+	padding: 1px 3px !important;
+	margin: 0 -1px !important;
+	text-decoration: inherit !important;
+	font-weight: inherit !important;
+	display: inline !important;
+}
+
+.open-bible-reader-verse.has-active-range {
+	border-left: 2px solid var(--interactive-accent) !important;
+	background-color: rgba(var(--interactive-accent-rgb, 120, 120, 255), 0.05) !important;
+	border-radius: var(--radius-s, 4px);
+}
+
+.open-bible-reader-verse.has-active-range .open-bible-reader-verse-number {
+	color: var(--interactive-accent) !important;
+	font-weight: 700 !important;
+}
+
 .open-bible-reader-verse.has-checkbox {
 	grid-template-columns: 1.5rem 2.25rem minmax(0, 1fr);
 }

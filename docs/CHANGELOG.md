@@ -43,6 +43,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Natural Text Selection vs. Whole Verse Selection**:
   - Isolated whole-verse selection to clicking the verse number (e.g. `5`) or using Selection Mode checkboxes, freeing the verse text (`cursor: text`, `user-select: text`) for natural word double-clicking and click-and-drag phrase selection.
   - Eliminated premature popovers and whole-verse selection conflicts when attempting to highlight phrases or words.
+  - Rendered prominent active visual highlight (`mark.open-bible-selected-text-range`) on selected words/phrases in the reader, replacing the full-verse bounding box with targeted text selection feedback.
   - Clicking on the text when an action bar is open cleanly dismisses it.
 - **Selected Verse Visibility**:
   - Added a complete 1.5px accent border (`var(--interactive-accent)`) with subtle glow around selected verses, ensuring they remain immediately recognizable even when adjacent to note indicators.

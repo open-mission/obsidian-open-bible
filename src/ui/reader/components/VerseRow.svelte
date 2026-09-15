@@ -8,6 +8,7 @@
 	import { resolveHighlightCssColor } from "../highlightStyles";
 	import type { VerseLaneSlot } from "../noteLanes";
 	import { segmentVerseText } from "../textSegmentation";
+	import type { TextRangeData } from "../textRangeSelection";
 	import ThompsonMarginGutter from "./ThompsonMarginGutter.svelte";
 
 	interface Props {
@@ -21,6 +22,7 @@
 		xrefGutterAlign?: "start" | "end";
 		isSelectionMode?: boolean;
 		hoveredNotePath?: string | null;
+		activeTextSelection?: TextRangeData | null;
 		onVerseClick: (verseNumber: number, event: MouseEvent) => void;
 		onToggleVerseSelection?: (verseNumber: number) => void;
 		onVerseTextClick?: (event: MouseEvent) => void;
@@ -44,6 +46,7 @@
 		xrefGutterAlign = "end",
 		isSelectionMode = false,
 		hoveredNotePath = null,
+		activeTextSelection = null,
 		onVerseClick,
 		onToggleVerseSelection,
 		onVerseTextClick,
@@ -64,7 +67,9 @@
 		highlights.filter((h) => h.charStart !== undefined && h.charEnd !== undefined)
 	);
 
-	const textSegments = $derived(segmentVerseText(verse.text, verse.number, highlights));
+	const textSegments = $derived(
+		segmentVerseText(verse.text, verse.number, highlights, activeTextSelection)
+	);
 
 	function handleRangeMarkerClick(highlight: BibleNoteItem, event: MouseEvent) {
 		event.stopPropagation();
@@ -112,23 +117,31 @@
 
 {#snippet renderRangeSegments()}
 	{#each textSegments as segment (segment.charStart)}
-		{#if segment.highlights.length > 0}
+		{#if segment.isSelected}
+			<mark class="open-bible-selected-text-range">
+				{#if segment.highlights.length > 0}
+					{@render renderUnderlines(segment.highlights, segment.text, 0)}
+				{:else}
+					{segment.text}
+				{/if}
+			</mark>
+		{:else if segment.highlights.length > 0}
 			{@render renderUnderlines(segment.highlights, segment.text, 0)}
-			{#each segment.highlights.filter((h) => h.charStart !== undefined && h.charEnd === segment.charEnd) as hl (hl.path)}
-				<button
-					type="button"
-					class="open-bible-range-marker"
-					style:--marker-color={resolveHighlightCssColor(hl.color)}
-					title={hl.selectedText || hl.title}
-					aria-label={t("reader.rangeHighlightMarker")}
-					onclick={(e) => handleRangeMarkerClick(hl, e)}
-				>
-					<sup class="open-bible-range-marker-icon" use:icon={"bookmark"}></sup>
-				</button>
-			{/each}
 		{:else}
 			{segment.text}
 		{/if}
+		{#each segment.highlights.filter((h) => h.charStart !== undefined && h.charEnd === segment.charEnd) as hl (hl.path)}
+			<button
+				type="button"
+				class="open-bible-range-marker"
+				style:--marker-color={resolveHighlightCssColor(hl.color)}
+				title={hl.selectedText || hl.title}
+				aria-label={t("reader.rangeHighlightMarker")}
+				onclick={(e) => handleRangeMarkerClick(hl, e)}
+			>
+				<sup class="open-bible-range-marker-icon" use:icon={"bookmark"}></sup>
+			</button>
+		{/each}
 	{/each}
 {/snippet}
 
@@ -136,7 +149,8 @@
 <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
 <div
 	class="open-bible-reader-verse"
-	class:is-selected={isSelected}
+	class:is-selected={isSelected && !activeTextSelection}
+	class:has-active-range={Boolean(activeTextSelection)}
 	class:has-checkbox={isSelectionMode}
 	class:is-highlighted={!isSelectionMode && highlights.length > 0}
 	class:has-note-lanes={!isSelectionMode && totalLanes > 0}
@@ -227,7 +241,7 @@
 		role="presentation"
 		onclick={(e) => onVerseTextClick?.(e)}
 	>
-		{#if !isSelectionMode && rangedHighlights.length > 0}
+		{#if !isSelectionMode && (rangedHighlights.length > 0 || Boolean(activeTextSelection))}
 			{@render renderRangeSegments()}
 		{:else if !isSelectionMode && legacyHighlights.length > 0}
 			{@render renderUnderlines(legacyHighlights, verse.text, 0)}

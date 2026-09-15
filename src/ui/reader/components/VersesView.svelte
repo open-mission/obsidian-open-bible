@@ -584,6 +584,7 @@
 									xrefRefs={verseXrefsMap.get(verse.number) ?? []}
 									showXrefGutter={showThompsonXrefs}
 									xrefGutterAlign="end"
+									activeTextSelection={textRangeSelection?.verseNumber === verse.number ? textRangeSelection : null}
 									onVerseClick={handleVerseClick}
 									onToggleVerseSelection={handleToggleVerseSelection}
 									onVerseTextClick={handleVerseTextClick}
@@ -610,6 +611,7 @@
 									xrefRefs={verseXrefsMap.get(verse.number) ?? []}
 									showXrefGutter={showThompsonXrefs}
 									xrefGutterAlign="start"
+									activeTextSelection={textRangeSelection?.verseNumber === verse.number ? textRangeSelection : null}
 									onVerseClick={handleVerseClick}
 									onToggleVerseSelection={handleToggleVerseSelection}
 									onVerseTextClick={handleVerseTextClick}
@@ -646,6 +648,7 @@
 								totalLanes={noteLanesData.totalLanes}
 								xrefRefs={verseXrefsMap.get(verse.number) ?? []}
 								showXrefGutter={showThompsonXrefs}
+								activeTextSelection={textRangeSelection?.verseNumber === verse.number ? textRangeSelection : null}
 								onVerseClick={handleVerseClick}
 								onToggleVerseSelection={handleToggleVerseSelection}
 								onVerseTextClick={handleVerseTextClick}

@@ -116,4 +116,22 @@ describe("textSegmentation", () => {
 		assert.equal(segments[2].highlights.length, 1);
 		assert.equal(segments[2].highlights[0].color, "yellow");
 	});
+
+	it("marks activeTextSelection range as isSelected: true", () => {
+		const text = "O SENHOR, porém, desceu para ver a cidade e a torre que estavam construindo.";
+		const phrase = "torre que estavam construindo";
+		const charStart = text.indexOf(phrase);
+		const charEnd = charStart + phrase.length;
+
+		const segments = segmentVerseText(text, 5, [], { charStart, charEnd });
+		assert.equal(segments.length, 3);
+		assert.equal(segments[0].text, text.substring(0, charStart));
+		assert.equal(segments[0].isSelected, false);
+
+		assert.equal(segments[1].text, phrase);
+		assert.equal(segments[1].isSelected, true);
+
+		assert.equal(segments[2].text, ".");
+		assert.equal(segments[2].isSelected, false);
+	});
 });

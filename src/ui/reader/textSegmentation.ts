@@ -5,12 +5,14 @@ export interface TextSegment {
 	charStart: number;
 	charEnd: number;
 	highlights: BibleNoteItem[];
+	isSelected?: boolean;
 }
 
 export function segmentVerseText(
 	verseText: string,
 	verseNumber: number,
-	allHighlights: BibleNoteItem[]
+	allHighlights: BibleNoteItem[],
+	activeTextSelection?: { charStart: number; charEnd: number } | null
 ): TextSegment[] {
 	const rangedHighlights = allHighlights.filter(
 		(h) => h.charStart !== undefined && h.charEnd !== undefined
@@ -19,13 +21,21 @@ export function segmentVerseText(
 		(h) => h.charStart === undefined || h.charEnd === undefined
 	);
 
-	if (rangedHighlights.length === 0) {
+	const hasActiveSelection = Boolean(
+		activeTextSelection &&
+		activeTextSelection.charStart !== undefined &&
+		activeTextSelection.charEnd !== undefined &&
+		activeTextSelection.charStart < activeTextSelection.charEnd
+	);
+
+	if (rangedHighlights.length === 0 && !hasActiveSelection) {
 		return [
 			{
 				text: verseText,
 				charStart: 0,
 				charEnd: verseText.length,
 				highlights: fullVerseHighlights,
+				isSelected: false,
 			},
 		];
 	}
@@ -38,6 +48,13 @@ export function segmentVerseText(
 			boundaries.add(start);
 			boundaries.add(end);
 		}
+	}
+
+	if (hasActiveSelection && activeTextSelection) {
+		const start = Math.max(0, Math.min(activeTextSelection.charStart, verseText.length));
+		const end = Math.max(0, Math.min(activeTextSelection.charEnd, verseText.length));
+		boundaries.add(start);
+		boundaries.add(end);
 	}
 
 	const sortedBoundaries = Array.from(boundaries).sort((a, b) => a - b);
@@ -59,11 +76,19 @@ export function segmentVerseText(
 			),
 		];
 
+		const isSelected = Boolean(
+			hasActiveSelection &&
+			activeTextSelection &&
+			activeTextSelection.charStart <= start &&
+			activeTextSelection.charEnd >= end
+		);
+
 		segments.push({
 			text,
 			charStart: start,
 			charEnd: end,
 			highlights: overlappingHighlights,
+			isSelected,
 		});
 	}
 
