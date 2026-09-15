@@ -1,0 +1,127 @@
+[
+	{
+		"name": "Almeida Revista e Atualizada",
+		"abbreviation": "ARA",
+		"file": "bibles_ARA.sqlite"
+	},
+	{
+		"name": "Nova Versão Transformadora",
+		"abbreviation": "NVT",
+		"file": "bibles_NVT.sqlite"
+	},
+	{
+		"name": "Nova Versão Internacional",
+		"abbreviation": "NVI",
+		"file": "bibles_NVI.sqlite"
+	},
+	{
+		"name": "Almeida Revista e Corrigida",
+		"abbreviation": "ARC",
+		"file": "bibles_ARC.sqlite"
+	},
+	{
+		"name": "Almeida Corrigida Fiel",
+		"abbreviation": "ACF",
+		"file": "bibles_ACF.sqlite"
+	},
+	{
+		"name": "Nova Almeida Atualizada",
+		"abbreviation": "NAA",
+		"file": "bibles_NAA.sqlite"
+	},
+	{
+		"name": "Nova Tradução na Linguagem de Hoje",
+		"abbreviation": "NTLH",
+		"file": "bibles_NTLH.sqlite"
+	},
+	{
+		"name": "Nova Bíblia Viva",
+		"abbreviation": "NBV",
+		"file": "bibles_NBV.sqlite"
+	},
+	{
+		"name": "A Mensagem",
+		"abbreviation": "MSG",
+		"file": "bibles_MSG.sqlite"
+	},
+	{
+		"name": "Bíblia King James 1611 Fiel",
+		"abbreviation": "BKJ",
+		"file": "bibles_BKJ.sqlite"
+	},
+	{
+		"name": "Tradução Brasileira",
+		"abbreviation": "TB",
+		"file": "bibles_TB.sqlite"
+	},
+	{
+		"name": "Bíblia Sagrada Ave Maria",
+		"abbreviation": "AM",
+		"file": "bibles_AM.sqlite"
+	},
+	{
+		"name": "Bíblia de Jerusalém",
+		"abbreviation": "BJ",
+		"file": "bibles_BJ.sqlite"
+	},
+	{
+		"name": "Bíblia Pastoral (CNBB)",
+		"abbreviation": "CNBB",
+		"file": "bibles_CNBB.sqlite"
+	},
+	{
+		"name": "King James Version",
+		"abbreviation": "KJV",
+		"file": "bibles_KJV.sqlite"
+	},
+	{
+		"name": "New King James Version",
+		"abbreviation": "NKJV",
+		"file": "bibles_NKJV.sqlite"
+	},
+	{
+		"name": "English Standard Version",
+		"abbreviation": "ESV",
+		"file": "bibles_ESV.sqlite"
+	},
+	{
+		"name": "New International Version",
+		"abbreviation": "NIV",
+		"file": "bibles_NIV.sqlite"
+	},
+	{
+		"name": "New American Standard Bible",
+		"abbreviation": "NASB",
+		"file": "bibles_NASB.sqlite"
+	},
+	{
+		"name": "New Living Translation",
+		"abbreviation": "NLT",
+		"file": "bibles_NLT.sqlite"
+	},
+	{
+		"name": "Christian Standard Bible",
+		"abbreviation": "CSB",
+		"file": "bibles_CSB.sqlite"
+	},
+	{
+		"name": "American Standard Version",
+		"abbreviation": "ASV",
+		"file": "bibles_ASV.sqlite"
+	},
+	{
+		"name": "Amplified Bible",
+		"abbreviation": "AMP",
+		"file": "bibles_AMP.sqlite"
+	},
+	{
+		"name": "Reina-Valera 1960",
+		"abbreviation": "RVR60",
+		"file": "bibles_RVR60.sqlite"
+	},
+	{
+		"name": "Reina-Valera 1995",
+		"abbreviation": "RVR95",
+		"file": "bibles_RVR95.sqlite"
+	}
+]
