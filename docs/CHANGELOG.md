@@ -9,6 +9,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.2] - 2026-09-15
+
+### Added
+- **"Open Scripture" Command (`open-bible:open-bible-passage`)**:
+  - Added new command "Open Scripture" ("Abrir texto bíblico") to open the Passage Picker modal and navigate the reader view directly to the chosen book, chapter, or verse.
+  - Added `openPassage` mode to `PassagePickerModal` and `PassagePickerApp` with `"Abrir no leitor"` ("Open in reader") action CTA button.
+
+### Changed
+- **Renamed Insert Scripture Command**:
+  - Renamed `open-bible:insert-verse-at-cursor` to "Insert Scripture" ("Inserir texto bíblico"), removing the redundant "at cursor" ("no cursor") suffix to match the dialog header.
+- **Removed Obsolete Text View Command**:
+  - Removed legacy `open-open-bible` ("Abrir visão de texto" / "Open text view") command from the command palette.
+- **Improved Stepper Navigation Wording**:
+  - Updated breadcrumb and back button label to plural "Livros" ("Books") for consistent step navigation.
+
+### Fixed
+- **Search Icon Overlap in Passage Picker**:
+  - Enclosed search input and magnifying glass icon inside `.open-bible-picker-search-wrap` using flexbox, preventing the icon from overlapping user search input text.
+- **Duplicate Close Button in Passage Picker Modal**:
+  - Removed redundant custom close button inside the modal content header, keeping only Obsidian's native `.modal-close-button`.
+- **Confusing "Livro" Badge on Initial Picker Step**:
+  - Only show the stepper breadcrumbs header when a book has already been selected (`step !== "books"`), removing the solitary "Livro" button floating above the tabs.
+- **Auto-Reset Step on Search**:
+  - Automatically resets to book view when the user begins typing in the search field while browsing chapters or verses.
+
 ## [0.3.0] - 2026-09-15
 
 ### Added
