@@ -7,7 +7,7 @@ import { setupOpenBibleDialog } from "../kit/dom";
 import PassagePickerApp from "./PassagePickerApp.svelte";
 
 export interface PassagePickerModalOptions {
-	mode: "insert" | "createNote";
+	mode: "insert" | "createNote" | "openPassage";
 	onInsert?: (formattedText: string) => void;
 	onCreateNote?: (data: {
 		book: BibleBook;
@@ -16,6 +16,12 @@ export interface PassagePickerModalOptions {
 		versionAbbr: string;
 		color?: string;
 		label?: string;
+	}) => void | Promise<void>;
+	onNavigate?: (data: {
+		book: BibleBook;
+		chapter: number;
+		verse?: number;
+		versionAbbr?: string;
 	}) => void | Promise<void>;
 }
 
@@ -48,6 +54,7 @@ export class PassagePickerModal extends Modal {
 					versionAbbr: string;
 					color?: string;
 					label?: string;
+					verse?: number;
 				}) => {
 					this.close();
 					if (this.options.mode === "insert" && this.options.onInsert) {
@@ -55,6 +62,13 @@ export class PassagePickerModal extends Modal {
 						this.options.onInsert(text);
 					} else if (this.options.mode === "createNote" && this.options.onCreateNote) {
 						void this.options.onCreateNote(data);
+					} else if (this.options.mode === "openPassage" && this.options.onNavigate) {
+						void this.options.onNavigate({
+							book: data.book,
+							chapter: data.chapter,
+							verse: data.verse,
+							versionAbbr: data.versionAbbr,
+						});
 					}
 				},
 				onClose: () => {

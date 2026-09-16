@@ -6,9 +6,9 @@ export type LocalePreference = "auto" | SupportedLocale;
 export interface TranslationStrings {
 	commands: {
 		openReader: string;
-		openBibleText: string;
 		openReaderRightSidebar: string;
 		openReaderLeftSidebar: string;
+		openBiblePassage: string;
 		toggleTwoColumns: string;
 		openHighlights: string;
 		openHighlightsRightSidebar: string;
@@ -338,10 +338,12 @@ export interface TranslationStrings {
 	passagePicker: {
 		titleInsert: string;
 		titleNote: string;
+		titleOpenPassage: string;
 		searchPlaceholder: string;
 		detectedReference: string;
 		insertAtCursor: string;
 		createNoteButton: string;
+		openInReader: string;
 		selectVerses: string;
 		selectAllVerses: string;
 		allChapter: string;

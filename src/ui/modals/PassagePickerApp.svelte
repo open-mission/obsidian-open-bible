@@ -16,7 +16,7 @@
 
 	interface Props {
 		plugin: OpenBiblePlugin;
-		mode: "insert" | "createNote";
+		mode: "insert" | "createNote" | "openPassage";
 		onComplete: (data: {
 			book: BibleBook;
 			chapter: number;
@@ -24,6 +24,7 @@
 			versionAbbr: string;
 			color?: string;
 			label?: string;
+			verse?: number;
 		}) => void;
 		onClose: () => void;
 	}
@@ -149,6 +150,12 @@
 		}
 	});
 
+	$effect(() => {
+		if (searchQuery.trim().length > 0 && step !== "books" && !parsedRef) {
+			step = "books";
+		}
+	});
+
 	async function loadSearchPreview(ref: ParsedVerseReference, book: BibleBook): Promise<void> {
 		loadingSearchPreview = true;
 		try {
@@ -237,6 +244,12 @@
 		}
 	}
 
+	function getCtaLabel(): string {
+		if (mode === "insert") return t("passagePicker.insertAtCursor");
+		if (mode === "openPassage") return t("passagePicker.openInReader");
+		return t("passagePicker.createNoteButton");
+	}
+
 	function submitSearchPreview() {
 		if (!searchRefPreview) return;
 		onComplete({
@@ -246,6 +259,7 @@
 			versionAbbr: searchRefPreview.versionAbbr,
 			color: selectedCategory?.color,
 			label: selectedCategory?.label,
+			verse: parsedRef?.verseStart,
 		});
 	}
 
@@ -254,6 +268,8 @@
 		const filtered = chapterVerses.filter((v) =>
 			selectedVerseNumbers.length === 0 || selectedVerseNumbers.includes(v.number)
 		);
+		const isSingleVerse = selectedVerseNumbers.length === 1;
+		const isAllChapter = selectedVerseNumbers.length === chapterVerses.length || selectedVerseNumbers.length === 0;
 		onComplete({
 			book: selectedBook,
 			chapter: selectedChapter,
@@ -261,6 +277,7 @@
 			versionAbbr: activeDbAbbr,
 			color: selectedCategory?.color,
 			label: selectedCategory?.label,
+			verse: isSingleVerse ? selectedVerseNumbers[0] : (isAllChapter ? undefined : selectedVerseNumbers[0]),
 		});
 	}
 </script>
@@ -269,30 +286,30 @@
 	<!-- Modal Header -->
 	<div class="open-bible-passage-picker-header">
 		<div class="open-bible-passage-picker-header-title">
-			<span class="open-bible-passage-picker-icon" use:icon={mode === "insert" ? "book-open" : "file-plus"}></span>
-			<h3>{mode === "insert" ? t("passagePicker.titleInsert") : t("passagePicker.titleNote")}</h3>
+			<span class="open-bible-passage-picker-icon" use:icon={mode === "createNote" ? "file-plus" : "book-open"}></span>
+			<h3>
+				{mode === "insert"
+					? t("passagePicker.titleInsert")
+					: mode === "openPassage"
+					? t("passagePicker.titleOpenPassage")
+					: t("passagePicker.titleNote")}
+			</h3>
 		</div>
-		<button
-			type="button"
-			class="open-bible-passage-picker-close-btn clickable-icon"
-			aria-label={t("bookPicker.close")}
-			onclick={onClose}
-		>
-			<span use:icon={"x"}></span>
-		</button>
 	</div>
 
 	<!-- Top Search Input -->
 	<div class="open-bible-passage-picker-search-bar">
-		<span class="open-bible-picker-search-icon" use:icon={"search"}></span>
-		<input
-			bind:this={searchInputEl}
-			type="search"
-			class="open-bible-picker-search-input"
-			placeholder={t("passagePicker.searchPlaceholder")}
-			bind:value={searchQuery}
-			onkeydown={handleKeyDown}
-		/>
+		<div class="open-bible-picker-search-wrap">
+			<span class="open-bible-picker-search-icon" use:icon={"search"}></span>
+			<input
+				bind:this={searchInputEl}
+				type="search"
+				class="open-bible-picker-search-input"
+				placeholder={t("passagePicker.searchPlaceholder")}
+				bind:value={searchQuery}
+				onkeydown={handleKeyDown}
+			/>
+		</div>
 	</div>
 
 	<!-- Case 1: Direct Reference Detected from Search Bar -->
@@ -350,7 +367,7 @@
 						class="mod-cta open-bible-passage-picker-cta-btn"
 						onclick={submitSearchPreview}
 					>
-						{mode === "insert" ? t("passagePicker.insertAtCursor") : t("passagePicker.createNoteButton")}
+						{getCtaLabel()}
 						<span class="open-bible-cta-key-hint">↵ Enter</span>
 					</button>
 				</div>
@@ -360,36 +377,35 @@
 		</div>
 	{:else}
 		<!-- Case 2: Stepped Visual Picker (Books -> Chapters -> Verses) -->
-		<div class="open-bible-passage-picker-stepper-header">
-			<div class="open-bible-passage-picker-breadcrumbs">
-				<button
-					type="button"
-					class="open-bible-crumb-btn"
-					class:is-active={step === "books"}
-					onclick={() => (step = "books")}
-				>
-					{t("passagePicker.stepBook")}
-				</button>
-				{#if selectedBook}
-					<span class="open-bible-crumb-sep">›</span>
+		{#if step !== "books"}
+			<div class="open-bible-passage-picker-stepper-header">
+				<div class="open-bible-passage-picker-breadcrumbs">
 					<button
 						type="button"
 						class="open-bible-crumb-btn"
-						class:is-active={step === "chapters"}
-						onclick={() => (step = "chapters")}
+						onclick={() => (step = "books")}
 					>
-						{selectedBook.name}
+						{t("passagePicker.stepBook")}
 					</button>
-				{/if}
-				{#if selectedChapter !== null}
-					<span class="open-bible-crumb-sep">›</span>
-					<span class="open-bible-crumb-text is-active">
-						Cap. {selectedChapter}
-					</span>
-				{/if}
-			</div>
+					{#if selectedBook}
+						<span class="open-bible-crumb-sep">›</span>
+						<button
+							type="button"
+							class="open-bible-crumb-btn"
+							class:is-active={step === "chapters"}
+							onclick={() => (step = "chapters")}
+						>
+							{selectedBook.name}
+						</button>
+					{/if}
+					{#if selectedChapter !== null}
+						<span class="open-bible-crumb-sep">›</span>
+						<span class="open-bible-crumb-text is-active">
+							Cap. {selectedChapter}
+						</span>
+					{/if}
+				</div>
 
-			{#if step === "chapters" || step === "verses"}
 				<button
 					type="button"
 					class="open-bible-back-step-btn"
@@ -401,8 +417,8 @@
 					<span use:icon={"arrow-left"}></span>
 					{step === "verses" ? selectedBook?.name : t("passagePicker.stepBook")}
 				</button>
-			{/if}
-		</div>
+			</div>
+		{/if}
 
 		<!-- Step 1: Books -->
 		{#if step === "books"}
@@ -548,7 +564,7 @@
 						disabled={selectedVerseNumbers.length === 0}
 						onclick={submitStepSelection}
 					>
-						{mode === "insert" ? t("passagePicker.insertAtCursor") : t("passagePicker.createNoteButton")}
+						{getCtaLabel()}
 					</button>
 				</div>
 			</div>

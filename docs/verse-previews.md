@@ -27,7 +27,8 @@ OpenBible automatically scans and detects Scripture references in your Markdown 
   - When opening the preview modal, a corner menu button (`more-vertical`) offers one-click actions to insert the verse quote into the active note (below or above the current paragraph), create a note, or copy the formatted quote.
 
 - **Command Palette Integrations**:
-  - `Insert Scripture at cursor` (`open-bible:insert-verse-at-cursor`): Opens the Passage Picker from any note and inserts the formatted blockquote directly at the active cursor position.
+  - `Open Scripture` (`open-bible:open-bible-passage`): Opens the Passage Picker from anywhere in Obsidian to search or browse books, chapters, and verses, navigating the reader view directly to the chosen passage.
+  - `Insert Scripture` (`open-bible:insert-verse-at-cursor`): Opens the Passage Picker from any note and inserts the formatted blockquote directly at the active cursor position.
   - `Create Bible note` (`open-bible:create-bible-note`): Opens the Passage Picker from anywhere in Obsidian, lets you choose book, chapter, verses, and note category, creates the note in the notes folder, and opens it in an editor tab.
 
 - **Smart Reference Search & Tile Highlighting in BookPicker**:

@@ -61,13 +61,6 @@ export default class OpenBiblePlugin extends Plugin {
 			void this.openReader();
 		});
 
-		this.addCommand({
-			id: "open-open-bible",
-			name: t("commands.openBibleText"),
-			callback: () => {
-				void this.activateView();
-			},
-		});
 
 		this.addCommand({
 			id: "open-bible-reader",
@@ -149,6 +142,24 @@ export default class OpenBiblePlugin extends Plugin {
 					return true;
 				}
 				return false;
+			},
+		});
+
+		this.addCommand({
+			id: "open-bible-passage",
+			name: t("commands.openBiblePassage"),
+			callback: () => {
+				new PassagePickerModal(this.app, this, {
+					mode: "openPassage",
+					onNavigate: async (data) => {
+						await this.navigateToPassage(
+							data.book.id,
+							data.chapter,
+							data.verse,
+							data.versionAbbr
+						);
+					},
+				}).open();
 			},
 		});
 

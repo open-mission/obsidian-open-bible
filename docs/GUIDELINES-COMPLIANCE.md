@@ -14,7 +14,7 @@ This document details how **OpenBible** satisfies the [Obsidian Plugin Guideline
 | **Security (`innerHTML`)** | ✅ Pass | Zero usage of `innerHTML`, `outerHTML`, or `insertAdjacentHTML`. All DOM nodes are generated via Svelte 5 and Obsidian DOM helpers (`createEl`, `createDiv`). |
 | **Network & Telemetry** | ✅ Pass | 100% local and offline. Zero remote telemetry, tracking, or network calls. |
 | **Mobile Compatibility** | ✅ Pass | Runs SQLite entirely in-memory/in-vault via embedded WebAssembly (`sql.js`), with zero top-level Node/Electron dependencies. |
-| **Command Names** | ✅ Pass | No redundant plugin prefix in command titles (`Open reader`, `Open text view`, `Toggle two-column layout`). Obsidian automatically prepends `OpenBible:` in the command palette. |
+| **Command Names** | ✅ Pass | No redundant plugin prefix in command titles (`Open reader`, `Toggle two-column layout`). Obsidian automatically prepends `OpenBible:` in the command palette. |
 | **Default Hotkeys** | ✅ Pass | No default hotkeys assigned, avoiding collisions with user hotkey configurations. |
 | **UI Sentence Case** | ✅ Pass | All settings headings, labels, and descriptions use standard Sentence case rather than Title Case. |
 | **Settings Headings** | ✅ Pass | Headings do not repeat the word "settings" (e.g., "Bible versions and SQLite databases", "Reader and appearance"). |
