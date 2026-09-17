@@ -15,11 +15,6 @@ export class BibleReaderView extends ItemView {
 	private controller: BibleReaderController | null = null;
 	private passageTitle = "";
 	private viewState: BibleReaderViewState = {};
-	private appearanceActionEl: HTMLElement | null = null;
-	private historyActionEl: HTMLElement | null = null;
-	private selectionActionEl: HTMLElement | null = null;
-	private highlightsActionEl: HTMLElement | null = null;
-	private resourcesActionEl: HTMLElement | null = null;
 
 	constructor(
 		leaf: WorkspaceLeaf,
@@ -102,12 +97,12 @@ export class BibleReaderView extends ItemView {
 		this.controller?.openResources?.();
 	}
 
+	openResourceHub(): void {
+		this.controller?.openResourceHub?.();
+	}
+
 	toggleSelectionMode(): boolean {
-		const active = this.controller?.toggleSelectionMode?.() ?? false;
-		if (this.selectionActionEl) {
-			this.selectionActionEl.toggleClass("is-active", active);
-		}
-		return active;
+		return this.controller?.toggleSelectionMode?.() ?? false;
 	}
 
 	async navigateToPassage(
@@ -171,6 +166,15 @@ export class BibleReaderView extends ItemView {
 				.setIcon("link")
 				.onClick(() => {
 					this.openResources();
+				}),
+		);
+
+		menu.addItem((item) =>
+			item
+				.setTitle(t("resources.hubTitle") || "Central de Recursos")
+				.setIcon("layout-grid")
+				.onClick(() => {
+					this.openResourceHub();
 				}),
 		);
 
@@ -243,52 +247,6 @@ export class BibleReaderView extends ItemView {
 	}
 
 	async onOpen(): Promise<void> {
-		if (!this.selectionActionEl) {
-			this.selectionActionEl = this.addAction(
-				"check-square",
-				t("reader.selectionMode") || "Modo de seleção",
-				() => {
-					this.toggleSelectionMode();
-				},
-			);
-		}
-		if (!this.highlightsActionEl) {
-			this.highlightsActionEl = this.addAction(
-				"highlighter",
-				t("highlightsPanel.title") || "Destaques",
-				() => {
-					this.openHighlights();
-				},
-			);
-		}
-		if (!this.resourcesActionEl) {
-			this.resourcesActionEl = this.addAction(
-				"link",
-				t("resourcesPanel.title") || "Recursos",
-				() => {
-					this.openResources();
-				},
-			);
-		}
-		if (!this.appearanceActionEl) {
-			this.appearanceActionEl = this.addAction(
-				"sliders-horizontal",
-				t("readerMenu.appearance") || "Aparência",
-				() => {
-					this.openAppearance();
-				},
-			);
-		}
-		if (!this.historyActionEl) {
-			this.historyActionEl = this.addAction(
-				"history",
-				t("readerMenu.readingHistory") || "Histórico de leitura",
-				() => {
-					this.openHistory();
-				},
-			);
-		}
-
 		this.contentEl.empty();
 		this.contentEl.addClass("open-bible-reader-view");
 
@@ -323,11 +281,6 @@ export class BibleReaderView extends ItemView {
 	}
 
 	async onClose(): Promise<void> {
-		this.appearanceActionEl = null;
-		this.historyActionEl = null;
-		this.selectionActionEl = null;
-		this.highlightsActionEl = null;
-		this.resourcesActionEl = null;
 		if (this.component) {
 			await unmount(this.component);
 			this.component = undefined;
