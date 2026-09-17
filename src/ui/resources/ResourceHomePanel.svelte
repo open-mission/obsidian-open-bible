@@ -229,7 +229,7 @@
 			<button
 				type="button"
 				class="open-bible-ui-btn is-small is-primary open-bible-hub-create-btn"
-				onclick={handleCreateResource}
+				onclick={() => handleCreateResource()}
 				title={t("resources.hubCreateResourceBtn") || "Novo recurso"}
 			>
 				<span use:icon={"plus"}></span>
