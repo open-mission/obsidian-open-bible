@@ -6,7 +6,7 @@
 	"scripts": {
 		"dev": "node esbuild.config.mjs",
 		"build": "tsc -noEmit -skipLibCheck && node esbuild.config.mjs production",
-		"test": "tsx --test src/services/verseFormat.test.ts src/ui/reader/noteLanes.test.ts src/ui/reader/textSegmentation.test.ts src/ui/reader/verseSelection.test.ts src/services/VerseReferenceParser.test.ts src/services/editorInsertion.test.ts",
+		"test": "tsx --test src/services/verseFormat.test.ts src/ui/reader/noteLanes.test.ts src/ui/reader/textSegmentation.test.ts src/ui/reader/verseSelection.test.ts src/services/VerseReferenceParser.test.ts src/services/editorInsertion.test.ts src/ui/reader/wordSelection.test.ts",
 		"svelte-check": "svelte-check --tsconfig tsconfig.json",
 		"deploy": "mkdir -p \"/Users/claudio/Projects/vault-teste/.obsidian/plugins/open-bible\" && cp main.js manifest.json styles.css \"/Users/claudio/Projects/vault-teste/.obsidian/plugins/open-bible/\"",
 		"build:deploy": "npm run build && npm run deploy",

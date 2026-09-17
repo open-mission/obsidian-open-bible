@@ -67,7 +67,82 @@ export function captureTextSelection(
 	};
 }
 
-function getPureVerseText(rootElement: HTMLElement): string {
+export function findWordAtCharOffset(
+	text: string,
+	charOffset: number
+): { start: number; end: number; word: string } | null {
+	if (!text || charOffset < 0 || charOffset >= text.length) return null;
+
+	const isWord = (ch: string | undefined) => Boolean(ch && /[\p{L}\p{N}_]/u.test(ch));
+
+	let targetIndex = charOffset;
+	if (!isWord(text[targetIndex]) && targetIndex > 0 && isWord(text[targetIndex - 1])) {
+		targetIndex = charOffset - 1;
+	}
+
+	if (!isWord(text[targetIndex])) {
+		return null;
+	}
+
+	let start = targetIndex;
+	while (start > 0 && isWord(text[start - 1])) {
+		start--;
+	}
+
+	let end = targetIndex;
+	while (end < text.length && isWord(text[end])) {
+		end++;
+	}
+
+	const word = text.substring(start, end);
+	if (!word) return null;
+
+	return { start, end, word };
+}
+
+export function captureWordAtPosition(
+	verseTextElement: HTMLElement,
+	clientX: number,
+	clientY: number
+): TextRangeData | null {
+	const verseRow = verseTextElement.closest("[data-verse]");
+	if (!verseRow) return null;
+
+	const verseNumber = parseInt(verseRow.getAttribute("data-verse") || "0", 10);
+	if (!verseNumber) return null;
+
+	let range: Range | null = null;
+	if (document.caretRangeFromPoint) {
+		range = document.caretRangeFromPoint(clientX, clientY);
+	} else if ((document as unknown as { caretPositionFromPoint?: (x: number, y: number) => { offsetNode: Node; offset: number } | null }).caretPositionFromPoint) {
+		const pos = (document as unknown as { caretPositionFromPoint: (x: number, y: number) => { offsetNode: Node; offset: number } | null }).caretPositionFromPoint(clientX, clientY);
+		if (pos) {
+			range = document.createRange();
+			range.setStart(pos.offsetNode, pos.offset);
+			range.collapse(true);
+		}
+	}
+
+	if (!range || !verseTextElement.contains(range.startContainer)) {
+		return null;
+	}
+
+	const charOffset = getCharOffset(verseTextElement, range.startContainer, range.startOffset);
+	if (charOffset === -1) return null;
+
+	const verseText = getPureVerseText(verseTextElement);
+	const match = findWordAtCharOffset(verseText, charOffset);
+	if (!match) return null;
+
+	return {
+		verseNumber,
+		charStart: match.start,
+		charEnd: match.end,
+		selectedText: match.word,
+	};
+}
+
+export function getPureVerseText(rootElement: HTMLElement): string {
 	let text = "";
 	const walker = document.createTreeWalker(
 		rootElement,
@@ -90,7 +165,7 @@ function getPureVerseText(rootElement: HTMLElement): string {
 	return text;
 }
 
-function getCharOffset(
+export function getCharOffset(
 	rootElement: HTMLElement,
 	targetNode: Node,
 	targetOffset: number

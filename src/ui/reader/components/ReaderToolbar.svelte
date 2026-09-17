@@ -5,7 +5,7 @@
 	import { icon } from "../../actions/icon";
 	import IconButton from "../../kit/IconButton.svelte";
 
-	type PickerMode = "book" | "chapter" | "version" | "history" | "appearance" | "highlights" | null;
+	type PickerMode = "book" | "chapter" | "version" | "history" | "appearance" | "highlights" | "resources" | null;
 
 	interface Props {
 		currentInfo?: BibleDatabaseInfo;

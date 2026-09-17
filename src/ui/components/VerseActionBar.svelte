@@ -3,7 +3,7 @@
 	import { Menu, Platform } from "obsidian";
 	import { icon } from "../actions/icon";
 	import { t } from "../../i18n";
-	import type { HighlightConfig } from "../../settings";
+	import type { HighlightConfig, ResourceTypeConfig } from "../../settings";
 	import { resolveHighlightCssColor } from "../reader/highlightStyles";
 	import HighlightsDrawer from "../reader/components/HighlightsDrawer.svelte";
 
@@ -13,6 +13,7 @@
 		selectedSnippet?: string;
 		configuredHighlights: HighlightConfig[];
 		configuredNotes?: HighlightConfig[];
+		configuredResources?: ResourceTypeConfig[];
 		currentColor?: string | null;
 		onCopyReference: () => void;
 		onCopyText: () => void;
@@ -20,6 +21,7 @@
 		onHighlightColor?: (color: string) => void;
 		onRemoveHighlight?: () => void;
 		onOpenConfigureHighlights?: () => void;
+		onLinkResource?: (typeId: string) => void;
 		onClose: () => void;
 	}
 
@@ -29,6 +31,7 @@
 		selectedSnippet,
 		configuredHighlights,
 		configuredNotes = [],
+		configuredResources = [],
 		currentColor = null,
 		onCopyReference,
 		onCopyText,
@@ -36,6 +39,7 @@
 		onHighlightColor,
 		onRemoveHighlight,
 		onOpenConfigureHighlights,
+		onLinkResource,
 		onClose,
 	}: Props = $props();
 
@@ -128,6 +132,27 @@
 					.setIcon("file-text")
 					.onClick(() => {
 						onCreateNote(noteCfg.id);
+					});
+			});
+		}
+		menu.showAtMouseEvent(event);
+	}
+
+	function handleLinkResourceClick(event: MouseEvent) {
+		if (!onLinkResource) return;
+		if (!configuredResources || configuredResources.length === 0) return;
+		if (configuredResources.length === 1) {
+			onLinkResource(configuredResources[0].id);
+			return;
+		}
+		const menu = new Menu();
+		for (const resType of configuredResources) {
+			menu.addItem((item) => {
+				item
+					.setTitle(resType.label)
+					.setIcon(resType.icon as never)
+					.onClick(() => {
+						onLinkResource(resType.id);
 					});
 			});
 		}
@@ -273,6 +298,20 @@
 				<span class="open-bible-action-bar-icon" use:icon={"file-plus"}></span>
 				<span class="open-bible-action-bar-label">{t("popover.createNote")}</span>
 			</button>
+
+			{#if onLinkResource && configuredResources.length > 0}
+				<!-- Link Resource -->
+				<button
+					type="button"
+					class="open-bible-action-bar-btn"
+					aria-label={t("popover.linkResource")}
+					title={t("popover.selectResourceType")}
+					onclick={handleLinkResourceClick}
+				>
+					<span class="open-bible-action-bar-icon" use:icon={"link"}></span>
+					<span class="open-bible-action-bar-label">{t("popover.linkResource")}</span>
+				</button>
+			{/if}
 		</div>
 
 		<!-- Pinned Close Button -->

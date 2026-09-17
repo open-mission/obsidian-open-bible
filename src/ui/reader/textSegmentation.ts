@@ -12,7 +12,8 @@ export function segmentVerseText(
 	verseText: string,
 	verseNumber: number,
 	allHighlights: BibleNoteItem[],
-	activeTextSelection?: { charStart: number; charEnd: number } | null
+	activeTextSelection?: { charStart: number; charEnd: number } | null,
+	extraRanges?: Array<{ charStart?: number; charEnd?: number }> | null,
 ): TextSegment[] {
 	const rangedHighlights = allHighlights.filter(
 		(h) => h.charStart !== undefined && h.charEnd !== undefined
@@ -28,7 +29,16 @@ export function segmentVerseText(
 		activeTextSelection.charStart < activeTextSelection.charEnd
 	);
 
-	if (rangedHighlights.length === 0 && !hasActiveSelection) {
+	const hasExtraRanges = Boolean(
+		extraRanges?.some(
+			(r) =>
+				r.charStart !== undefined &&
+				r.charEnd !== undefined &&
+				r.charStart < r.charEnd,
+		),
+	);
+
+	if (rangedHighlights.length === 0 && !hasActiveSelection && !hasExtraRanges) {
 		return [
 			{
 				text: verseText,
@@ -55,6 +65,17 @@ export function segmentVerseText(
 		const end = Math.max(0, Math.min(activeTextSelection.charEnd, verseText.length));
 		boundaries.add(start);
 		boundaries.add(end);
+	}
+
+	if (extraRanges) {
+		for (const r of extraRanges) {
+			if (r.charStart !== undefined && r.charEnd !== undefined) {
+				const start = Math.max(0, Math.min(r.charStart, verseText.length));
+				const end = Math.max(0, Math.min(r.charEnd, verseText.length));
+				boundaries.add(start);
+				boundaries.add(end);
+			}
+		}
 	}
 
 	const sortedBoundaries = Array.from(boundaries).sort((a, b) => a - b);

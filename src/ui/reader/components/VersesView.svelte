@@ -16,12 +16,18 @@
 	import VerseRow from "./VerseRow.svelte";
 	import VerseActionBar from "../../components/VerseActionBar.svelte";
 	import { applyVerseClick } from "../verseSelection";
-	import { captureTextSelection, clearBrowserSelection, type TextRangeData } from "../textRangeSelection";
+	import { captureTextSelection, captureWordAtPosition, clearBrowserSelection, type TextRangeData } from "../textRangeSelection";
 	import { buildNoteLanes, buildVerseLanesMap, resolveNoteTitle } from "../noteLanes";
 	import { formatReference, formatVersesText } from "../../../services/verseFormat";
 	import { createNoteFromSelection, findNotesForPassage } from "../../../services/NoteService";
 	import { NotePreviewModal, openNoteInEditor } from "../../modals/NotePreviewModal";
 	import { ConfirmDeleteHighlightModal } from "../../modals/ConfirmDeleteModal";
+	import { ResourceLinkModal } from "../../modals/ResourceLinkModal";
+	import { ResourceChooserModal } from "../../modals/ResourceChooserModal";
+	import { ResourcePreviewModal } from "../../modals/ResourcePreviewModal";
+	import { HighlightPickerModal } from "../../modals/HighlightPickerModal";
+	import { ResourceTypePickerModal } from "../../modals/ResourceTypePickerModal";
+	import type { BibleResourceLink } from "../../../models/resource";
 
 	interface Props {
 		book?: BibleBook;
@@ -153,6 +159,14 @@
 	});
 
 	$effect(() => {
+		if (!plugin?.resourceService) return;
+		const unsub = plugin.resourceService.subscribe(() => {
+			vaultVersion++;
+		});
+		return unsub;
+	});
+
+	$effect(() => {
 		const targetApp = plugin?.app;
 		if (!targetApp) return;
 		const notify = () => {
@@ -174,6 +188,81 @@
 		void vaultVersion;
 		if (!plugin?.highlightService || !book || chapter === undefined) return [];
 		return plugin.highlightService.getHighlightsForChapter(book.name, chapter);
+	});
+
+	let chapterResourceLinks = $derived.by((): BibleResourceLink[] => {
+		void vaultVersion;
+		if (!plugin?.resourceService || !book || chapter === undefined) return [];
+		return plugin.resourceService.getLinksForChapter(book.name, chapter);
+	});
+
+	let verseResourcesMap = $derived.by(() => {
+		const map = new Map<number, BibleResourceLink[]>();
+		for (const link of chapterResourceLinks) {
+			for (const v of link.verses) {
+				const list = map.get(v) ?? [];
+				if (!list.some((existing) => existing.path === link.path)) {
+					list.push(link);
+				}
+				map.set(v, list);
+			}
+		}
+		return map;
+	});
+
+	let resourceTypes = $derived(plugin?.resourceService?.getResourceTypes() ?? []);
+	let resourceDisplayStyle = $derived(plugin?.settings.resourceDisplayStyle ?? "icon");
+	let resourceColorize = $derived(plugin?.settings.resourceColorize ?? true);
+
+	interface AutoResourceMatch {
+		link: BibleResourceLink;
+		charStart: number;
+		charEnd: number;
+	}
+
+	function isWordChar(ch: string | undefined): boolean {
+		return Boolean(ch && /[\p{L}\p{N}_]/u.test(ch));
+	}
+
+	/**
+	 * A word-linked resource (e.g. "Deus") shows its marker on every whole-word
+	 * occurrence of the linked text across the chapter, not just where it was created.
+	 */
+	let autoMatchesByVerse = $derived.by(() => {
+		const map = new Map<number, AutoResourceMatch[]>();
+		if (!book || chapter === undefined) return map;
+		const ranged = chapterResourceLinks.filter(
+			(l) =>
+				Boolean(l.matchAllOccurrences) &&
+				l.selectedText &&
+				l.selectedText.trim() &&
+				l.charStart !== undefined &&
+				l.charEnd !== undefined,
+		);
+		if (ranged.length === 0) return map;
+		for (const v of verses) {
+			const found: AutoResourceMatch[] = [];
+			const hayLower = v.text.toLowerCase();
+			for (const link of ranged) {
+				const needle = link.selectedText!.trim();
+				const needleLower = needle.toLowerCase();
+				let from = 0;
+				while (from <= hayLower.length - needleLower.length) {
+					const idx = hayLower.indexOf(needleLower, from);
+					if (idx < 0) break;
+					const end = idx + needle.length;
+					const wholeWord = !isWordChar(v.text[idx - 1]) && !isWordChar(v.text[end]);
+					const isOriginal =
+						link.verses.includes(v.number) && link.charStart === idx && link.charEnd === end;
+					if (wholeWord && !isOriginal) {
+						found.push({ link, charStart: idx, charEnd: end });
+					}
+					from = idx + Math.max(1, needle.length);
+				}
+			}
+			if (found.length > 0) map.set(v.number, found);
+		}
+		return map;
 	});
 
 	let chapterNotes = $derived.by(() => {
@@ -242,7 +331,7 @@
 
 	let currentColor = $derived<string | null>(activeHighlight ? activeHighlight.color : null);
 
-	let justCapturedTextRange = false;
+	let justCapturedTextRange = $state(false);
 
 	function clearSelection() {
 		selectedVerseNumbers = [];
@@ -434,6 +523,151 @@
 		}
 	}
 
+	function handleLinkResource(typeId: string) {
+		if (!plugin?.resourceService || !book || chapter === undefined || selectedVerses.length === 0) return;
+		const resType = plugin.resourceService.getResourceType(typeId);
+		if (!resType) return;
+		const snippet = textRangeSelection?.selectedText;
+		const charStart = textRangeSelection?.charStart;
+		const charEnd = textRangeSelection?.charEnd;
+		new ResourceLinkModal(
+			plugin.app,
+			plugin,
+			resType,
+			formattedRef,
+			async (resource, matchAll) => {
+				try {
+					await plugin.resourceService.addOrUpdateLink({
+						typeId,
+						resourcePath: resource.path,
+						resourceName: resource.name,
+						book,
+						chapter,
+						verses: selectedVerses,
+						versionAbbr,
+						selectedText: snippet,
+						charStart,
+						charEnd,
+						matchAllOccurrences: matchAll,
+					});
+					new Notice(t("notices.resourceLinked"));
+					clearSelection();
+				} catch (err) {
+					console.error("OpenBible: error linking resource", err);
+					new Notice(t("notices.resourceLinkError"));
+				}
+			},
+			async (name, matchAll) => {
+				try {
+					const resource = await plugin.resourceService.ensureResource(typeId, name);
+					new Notice(t("notices.resourceCreated"));
+					await plugin.resourceService.addOrUpdateLink({
+						typeId,
+						resourcePath: resource.path,
+						resourceName: resource.name,
+						book,
+						chapter,
+						verses: selectedVerses,
+						versionAbbr,
+						selectedText: snippet,
+						charStart,
+						charEnd,
+						matchAllOccurrences: matchAll,
+					});
+					new Notice(t("notices.resourceLinked"));
+					clearSelection();
+				} catch (err) {
+					console.error("OpenBible: error creating resource", err);
+					new Notice(t("notices.resourceLinkError"));
+				}
+			},
+			snippet,
+		).open();
+	}
+
+	function handleOpenResource(link: BibleResourceLink, event?: MouseEvent) {
+		if (!plugin) return;
+		if (event?.ctrlKey || event?.metaKey) {
+			void openNoteInEditor(plugin.app, link.resourcePath);
+			return;
+		}
+		new ResourcePreviewModal(
+			plugin.app,
+			plugin,
+			link,
+			(bookName, ch, vNum, vAbbr) => {
+				void plugin.navigateToPassage(bookName, ch, vNum, vAbbr);
+			},
+			(linkPath) => {
+				void handleUnlinkResource(linkPath);
+			},
+		).open();
+	}
+
+	/**
+	 * Marker click: a single link opens its preview directly; several links
+	 * at the same anchor open the chooser modal listing the linked items.
+	 */
+	function handleOpenResourceGroup(links: BibleResourceLink[], event?: MouseEvent) {
+		if (!plugin || links.length === 0) return;
+		if (links.length === 1) {
+			handleOpenResource(links[0], event);
+			return;
+		}
+		new ResourceChooserModal(
+			plugin.app,
+			plugin,
+			links,
+			(link) => handleOpenResource(link),
+			(linkPath) => {
+				void handleUnlinkResource(linkPath);
+			},
+		).open();
+	}
+
+	/** Shift (or configured modifier) + hover on a marker/linked word previews the resource. */
+	function handleResourceHover(event: MouseEvent, link: BibleResourceLink, targetEl: HTMLElement) {
+		const targetApp = plugin?.app;
+		if (!targetApp || !link?.resourcePath) return;
+		const mod = plugin?.settings.resourceHoverModifier ?? "shift";
+		const triggered =
+			mod === "none"
+				? true
+				: mod === "alt"
+					? event.altKey
+					: mod === "ctrlCmd"
+						? event.ctrlKey || event.metaKey
+						: event.shiftKey;
+		if (!triggered) return;
+
+		const simulatedEvent = new MouseEvent("mouseover", {
+			bubbles: true,
+			cancelable: true,
+			view: window,
+			clientX: event.clientX,
+			clientY: event.clientY,
+			ctrlKey: true,
+			metaKey: true,
+			shiftKey: true,
+			altKey: event.altKey,
+		});
+
+		targetApp.workspace.trigger("hover-link", {
+			event: simulatedEvent,
+			source: "open-bible",
+			hoverParent: targetApp.workspace.getLeaf(),
+			targetEl,
+			linktext: link.resourcePath,
+			sourcePath: "",
+		});
+	}
+
+	async function handleUnlinkResource(linkPath: string) {
+		if (!plugin?.resourceService) return;
+		await plugin.resourceService.removeLink(linkPath);
+		new Notice(t("notices.resourceLinkRemoved"));
+	}
+
 	function handleOpenNote(notePath: string, event?: MouseEvent) {
 		if (!plugin) return;
 		if (event?.ctrlKey || event?.metaKey) {
@@ -504,21 +738,92 @@
 	function handleContextMenu(event: MouseEvent) {
 		const target = event.target as HTMLElement | null;
 		if (target?.closest("input, select, textarea, button")) return;
+
+		const verseTextEl = target?.closest(".open-bible-reader-verse-text") as HTMLElement | null;
+
+		// 1. If no textRangeSelection yet, check if there's an active browser selection to capture
+		if (!textRangeSelection && verseTextEl) {
+			const browserRange = captureTextSelection(verseTextEl);
+			if (browserRange) {
+				justCapturedTextRange = true;
+				textRangeSelection = browserRange;
+				selectedVerseNumbers = [browserRange.verseNumber];
+				lastClickedVerse = browserRange.verseNumber;
+				onSelectVerse?.(browserRange.verseNumber);
+				clearBrowserSelection();
+				setTimeout(() => {
+					justCapturedTextRange = false;
+				}, 300);
+			}
+		}
+
+		// 2. If still no textRangeSelection and right-clicked directly on verse text, capture the word under cursor
+		if (!textRangeSelection && verseTextEl) {
+			const wordRange = captureWordAtPosition(verseTextEl, event.clientX, event.clientY);
+			if (wordRange) {
+				textRangeSelection = wordRange;
+				selectedVerseNumbers = [wordRange.verseNumber];
+				lastClickedVerse = wordRange.verseNumber;
+				onSelectVerse?.(wordRange.verseNumber);
+			}
+		}
+
+		// If nothing is selected, do not intercept with custom menu
+		if (selectedVerseNumbers.length === 0 && !textRangeSelection) {
+			return;
+		}
+
 		event.preventDefault();
 		event.stopPropagation();
 
 		const menu = new Menu();
-		if (onToggleTwoColumns) {
-			menu.addItem((item) => {
-				item
-					.setTitle(isTwoColumns ? t("reader.singleColumn") : t("reader.twoColumns"))
-					.setIcon(isTwoColumns ? "align-justify" : "columns-2")
-					.setChecked(isTwoColumns)
-					.onClick(() => {
-						onToggleTwoColumns();
-					});
-			});
-		}
+
+		// 1. Criar nota (immediately creates note)
+		menu.addItem((item) => {
+			item.setTitle(t("contextMenu.createNote") || "Criar nota")
+				.setIcon("file-text")
+				.onClick(() => {
+					void handleCreateNote();
+				});
+		});
+
+		// 2. Highlight (opens modal with highlight options)
+		menu.addItem((item) => {
+			item.setTitle(t("contextMenu.highlight") || "Highlight")
+				.setIcon("highlighter")
+				.onClick(() => {
+					if (!plugin) return;
+					new HighlightPickerModal(
+						plugin.app,
+						formattedRef,
+						plugin.settings.configuredHighlights || [],
+						currentColor,
+						(colorId) => void handleHighlightColor(colorId),
+						selectedVerseNumbers.length > 0 ? () => void handleRemoveHighlight() : undefined,
+						() => plugin.openPluginSettings(),
+					).open();
+				});
+		});
+
+		// 3. Vincular recursos (opens modal with resource types)
+		menu.addItem((item) => {
+			item.setTitle(t("contextMenu.linkResource") || "Vincular recursos")
+				.setIcon("link")
+				.onClick(() => {
+					if (!plugin) return;
+					if (resourceTypes.length === 1) {
+						handleLinkResource(resourceTypes[0].id);
+					} else if (resourceTypes.length > 1) {
+						new ResourceTypePickerModal(
+							plugin.app,
+							formattedRef,
+							resourceTypes,
+							(typeId) => handleLinkResource(typeId),
+						).open();
+					}
+				});
+		});
+
 		menu.showAtMouseEvent(event);
 	}
 </script>
@@ -577,6 +882,7 @@
 									{verse}
 									isSelected={selectedVerseNumbers.includes(verse.number)}
 									{isSelectionMode}
+									{justCapturedTextRange}
 									{hoveredNotePath}
 									highlights={verseHighlightsMap.get(verse.number) ?? []}
 									laneSlots={verseLanesMap.get(verse.number) ?? []}
@@ -595,6 +901,14 @@
 									onNoteLineKeyDown={handleNoteLineKeyDown}
 									onXrefSelect={(ref, ev) => onSelectCrossRef?.(verse.number, ref, ev)}
 									onRemoveHighlight={handleRemoveHighlightByPath}
+									resourceLinks={verseResourcesMap.get(verse.number) ?? []}
+									{resourceTypes}
+									autoResourceMatches={autoMatchesByVerse.get(verse.number) ?? []}
+									{resourceDisplayStyle}
+									{resourceColorize}
+									onOpenResourceGroup={handleOpenResourceGroup}
+									onUnlinkResource={handleUnlinkResource}
+									onResourceHover={handleResourceHover}
 								/>
 							{/each}
 						</div>
@@ -604,6 +918,7 @@
 									{verse}
 									isSelected={selectedVerseNumbers.includes(verse.number)}
 									{isSelectionMode}
+									{justCapturedTextRange}
 									{hoveredNotePath}
 									highlights={verseHighlightsMap.get(verse.number) ?? []}
 									laneSlots={verseLanesMap.get(verse.number) ?? []}
@@ -622,6 +937,14 @@
 									onNoteLineKeyDown={handleNoteLineKeyDown}
 									onXrefSelect={(ref, ev) => onSelectCrossRef?.(verse.number, ref, ev)}
 									onRemoveHighlight={handleRemoveHighlightByPath}
+									resourceLinks={verseResourcesMap.get(verse.number) ?? []}
+									{resourceTypes}
+									autoResourceMatches={autoMatchesByVerse.get(verse.number) ?? []}
+									{resourceDisplayStyle}
+									{resourceColorize}
+									onOpenResourceGroup={handleOpenResourceGroup}
+									onUnlinkResource={handleUnlinkResource}
+									onResourceHover={handleResourceHover}
 								/>
 							{/each}
 						</div>
@@ -642,6 +965,7 @@
 								{verse}
 								isSelected={selectedVerseNumbers.includes(verse.number)}
 								{isSelectionMode}
+								{justCapturedTextRange}
 								{hoveredNotePath}
 								highlights={verseHighlightsMap.get(verse.number) ?? []}
 								laneSlots={verseLanesMap.get(verse.number) ?? []}
@@ -659,6 +983,14 @@
 								onNoteLineKeyDown={handleNoteLineKeyDown}
 								onXrefSelect={(ref, ev) => onSelectCrossRef?.(verse.number, ref, ev)}
 								onRemoveHighlight={handleRemoveHighlightByPath}
+								resourceLinks={verseResourcesMap.get(verse.number) ?? []}
+								{resourceTypes}
+								autoResourceMatches={autoMatchesByVerse.get(verse.number) ?? []}
+								{resourceDisplayStyle}
+								{resourceColorize}
+								onOpenResourceGroup={handleOpenResourceGroup}
+								onUnlinkResource={handleUnlinkResource}
+								onResourceHover={handleResourceHover}
 							/>
 						{/each}
 					</div>
@@ -674,12 +1006,14 @@
 			selectedSnippet={textRangeSelection?.selectedText}
 			configuredHighlights={plugin?.settings.configuredHighlights || []}
 			configuredNotes={plugin?.settings.configuredNotes || []}
+			configuredResources={resourceTypes}
 			{currentColor}
 			onCopyReference={copyReference}
 			onCopyText={copyText}
 			onCreateNote={handleCreateNote}
 			onHighlightColor={handleHighlightColor}
 			onRemoveHighlight={handleRemoveHighlight}
+			onLinkResource={handleLinkResource}
 			onOpenConfigureHighlights={() => plugin?.openPluginSettings()}
 			onClose={clearSelection}
 		/>
