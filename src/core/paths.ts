@@ -32,3 +32,17 @@ export function getHighlightsFolder(dataFolder: string, configuredFolder?: strin
 	}
 	return normalizePath(`${dataFolder}/highlights`);
 }
+
+export const DEFAULT_RESOURCES_BASE_FOLDER = "OpenBible/resources";
+
+/** Resolves the vault folder for a resource type (falls back to base + type id). */
+export function getResourceTypeFolder(
+	dataFolder: string,
+	typeId: string,
+	configuredFolder?: string,
+): string {
+	if (configuredFolder && configuredFolder.trim()) {
+		return normalizePath(configuredFolder.trim());
+	}
+	return normalizePath(`${dataFolder}/resources/${typeId}`);
+}

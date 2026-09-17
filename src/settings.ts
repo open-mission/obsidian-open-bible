@@ -33,6 +33,26 @@ export interface HighlightConfig {
 	color: string;
 }
 
+/** Complementary resource type (person, place, etc.) linked from verses. */
+export interface ResourceTypeConfig {
+	id: string;
+	label: string;
+	folder: string;
+	icon: string;
+	color: string;
+}
+
+/** Modifier key required to preview a linked resource on hover. */
+export type ResourceHoverModifier = "shift" | "ctrlCmd" | "alt" | "none";
+
+/** How verse↔resource links are rendered in the reader. */
+export type ResourceDisplayStyle = "icon" | "underline" | "both";
+
+export const DEFAULT_RESOURCE_TYPES: ResourceTypeConfig[] = [
+	{ id: "person", label: "Pessoas", folder: "OpenBible/resources/people", icon: "user", color: "#3b82f6" },
+	{ id: "places", label: "Lugares", folder: "OpenBible/resources/places", icon: "map-pin", color: "#22c55e" },
+];
+
 export const DEFAULT_HIGHLIGHT_CONFIGS: HighlightConfig[] = [
 	{ id: "yellow", label: "Amarelo", color: "yellow" },
 	{ id: "green", label: "Verde", color: "green" },
@@ -57,6 +77,10 @@ export interface OpenBibleSettings {
 	highlightsFolder?: string;
 	configuredHighlights?: HighlightConfig[];
 	configuredNotes?: HighlightConfig[];
+	configuredResources?: ResourceTypeConfig[];
+	resourceHoverModifier?: ResourceHoverModifier;
+	resourceDisplayStyle?: ResourceDisplayStyle;
+	resourceColorize?: boolean;
 	confirmHighlightDeletion?: boolean;
 	defaultReference: string;
 	/** Primary/default Bible version file path for reader, preview, and citations. */
@@ -108,6 +132,10 @@ export const DEFAULT_SETTINGS: OpenBibleSettings = {
 	highlightsFolder: "OpenBible/highlights",
 	configuredHighlights: DEFAULT_HIGHLIGHT_CONFIGS,
 	configuredNotes: DEFAULT_NOTE_CONFIGS,
+	configuredResources: DEFAULT_RESOURCE_TYPES,
+	resourceHoverModifier: "shift",
+	resourceDisplayStyle: "icon",
+	resourceColorize: true,
 	confirmHighlightDeletion: false,
 	defaultReference: "João 3:16",
 	defaultVersionPath: "",
