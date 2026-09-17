@@ -1,4 +1,5 @@
 import type { ReaderContainerWidth, ReaderSpacing } from "../../settings";
+import type { BibleResourceLink } from "../../models/resource";
 
 export type NavigationDirection = "next" | "prev" | "jump";
 
@@ -17,6 +18,10 @@ export interface BibleReaderViewState {
 	crossRefsBottomPanelFixed?: boolean;
 	crossRefsBottomPanelColumns?: 1 | 2;
 	crossRefsBottomPanelCollapsed?: boolean;
+	secondaryPanelOpen?: boolean;
+	secondaryPanelMode?: "detail" | "home";
+	secondaryPanelResourcePath?: string;
+	secondaryPanelWidth?: number;
 }
 
 export interface BibleReaderController {
@@ -32,6 +37,10 @@ export interface BibleReaderController {
 	openAppearancePicker: () => void;
 	openHighlights?: () => void;
 	openResources?: () => void;
+	openResourceHub?: () => void;
+	openSecondaryPanel?: (link: BibleResourceLink) => void;
+	closeSecondaryPanel?: () => void;
+	isSecondaryPanelOpen?: () => boolean;
 	toggleSelectionMode?: () => boolean;
 	isSelectionMode?: () => boolean;
 	refreshSettings: () => void;

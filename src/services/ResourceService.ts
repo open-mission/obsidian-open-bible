@@ -272,6 +272,38 @@ export class ResourceService {
 		});
 	}
 
+	getLinksForResource(resourcePath: string): BibleResourceLink[] {
+		const norm = normalizePath(resourcePath);
+		return this.getAllLinks().filter((link) => normalizePath(link.resourcePath) === norm);
+	}
+
+	/**
+	 * Computes statistics and occurrence counts across all resources in a single pass.
+	 */
+	getResourceStats(): {
+		occurrencesMap: Map<string, number>;
+		countsByType: Map<string, number>;
+		totalOccurrences: number;
+	} {
+		const occurrencesMap = new Map<string, number>();
+		const countsByType = new Map<string, number>();
+		const links = this.getAllLinks();
+		let totalOccurrences = 0;
+
+		for (const link of links) {
+			const normPath = normalizePath(link.resourcePath);
+			occurrencesMap.set(normPath, (occurrencesMap.get(normPath) ?? 0) + 1);
+			countsByType.set(link.resourceType, (countsByType.get(link.resourceType) ?? 0) + 1);
+			totalOccurrences++;
+		}
+
+		return {
+			occurrencesMap,
+			countsByType,
+			totalOccurrences,
+		};
+	}
+
 	async addOrUpdateLink(data: {
 		typeId: string;
 		resourcePath: string;

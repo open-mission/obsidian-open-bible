@@ -48,6 +48,12 @@ export type ResourceHoverModifier = "shift" | "ctrlCmd" | "alt" | "none";
 /** How verse↔resource links are rendered in the reader. */
 export type ResourceDisplayStyle = "icon" | "underline" | "both";
 
+/** Where a linked resource opens when clicked in the Bible reader. */
+export type ResourceOpenMode = "reader" | "workspace" | "modal";
+
+/** Workspace split location when opening a resource in workspace mode. */
+export type ResourceWorkspaceSplit = "right" | "split" | "tab";
+
 export const DEFAULT_RESOURCE_TYPES: ResourceTypeConfig[] = [
 	{ id: "person", label: "Pessoas", folder: "OpenBible/resources/people", icon: "user", color: "#3b82f6" },
 	{ id: "places", label: "Lugares", folder: "OpenBible/resources/places", icon: "map-pin", color: "#22c55e" },
@@ -81,6 +87,12 @@ export interface OpenBibleSettings {
 	resourceHoverModifier?: ResourceHoverModifier;
 	resourceDisplayStyle?: ResourceDisplayStyle;
 	resourceColorize?: boolean;
+	/** Where resources open when clicked: "reader" (secondary panel inside reader), "workspace" (workspace tab/leaf), or "modal" (popup). */
+	resourceOpenMode?: ResourceOpenMode;
+	/** Where the workspace leaf opens when resourceOpenMode is "workspace": "right" (sidebar), "split" (split pane), or "tab" (new tab). */
+	resourceWorkspaceSplit?: ResourceWorkspaceSplit;
+	/** Width in pixels for the reader secondary panel. */
+	readerSecondaryPanelWidth?: number;
 	confirmHighlightDeletion?: boolean;
 	defaultReference: string;
 	/** Primary/default Bible version file path for reader, preview, and citations. */
@@ -136,6 +148,9 @@ export const DEFAULT_SETTINGS: OpenBibleSettings = {
 	resourceHoverModifier: "shift",
 	resourceDisplayStyle: "icon",
 	resourceColorize: true,
+	resourceOpenMode: "reader",
+	resourceWorkspaceSplit: "right",
+	readerSecondaryPanelWidth: 380,
 	confirmHighlightDeletion: false,
 	defaultReference: "João 3:16",
 	defaultVersionPath: "",

@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { onMount } from "svelte";
+	import { Notice } from "obsidian";
 	import { normalizeText } from "../../constants";
 	import type { BibleDatabaseInfo, BibleBook, BibleVerse } from "../../models/bible";
 	import type { BibleVersion } from "../../models/bibleVersion";
@@ -17,13 +18,18 @@
 	import AppearancePanel from "./components/AppearancePanel.svelte";
 	import HighlightsPanel from "./components/HighlightsPanel.svelte";
 	import ResourcesPanel from "./components/ResourcesPanel.svelte";
+	import ResourceDetailPanel from "../resources/ResourceDetailPanel.svelte";
+	import ResourceHomePanel from "../resources/ResourceHomePanel.svelte";
+	import { ResourcePreviewModal } from "../modals/ResourcePreviewModal";
 	import CrossRefBottomPanel from "./components/CrossRefBottomPanel.svelte";
 	import Button from "../kit/Button.svelte";
 	import EmptyState from "../kit/EmptyState.svelte";
 
 	import type OpenBiblePlugin from "../../main";
+	import type { BibleResourceItem, BibleResourceLink } from "../../models/resource";
 	import type { CrossReference } from "../../data/crossRefModel";
-	import { indexOfCrossRef } from "../../data/crossRefModel";	import { openCrossRefPreview } from "../resources/openCrossRefPreview";
+	import { indexOfCrossRef } from "../../data/crossRefModel";
+	import { openCrossRefPreview } from "../resources/openCrossRefPreview";
 	import { formatCrossRefOrigin } from "../resources/formatCrossRef";
 	import type { BibleReaderController, BibleReaderViewState, NavigationDirection } from "./types";
 
@@ -104,6 +110,17 @@
 				initialViewState?.crossRefsBottomPanelCollapsed !== undefined
 					? initialViewState.crossRefsBottomPanelCollapsed
 					: Boolean(settings.crossRefsBottomPanelCollapsed),
+			secondaryPanelWidth:
+				initialViewState?.secondaryPanelWidth || settings.readerSecondaryPanelWidth || 380,
+			secondaryPanelOpen:
+				initialViewState?.secondaryPanelOpen !== undefined
+					? initialViewState.secondaryPanelOpen
+					: false,
+			secondaryPanelMode:
+				initialViewState?.secondaryPanelMode ||
+				(initialViewState?.secondaryPanelResourcePath ? "detail" : "home"),
+			secondaryPanelResourcePath:
+				initialViewState?.secondaryPanelResourcePath || "",
 		};
 	}
 
@@ -118,6 +135,11 @@
 	let crossRefsBottomPanelFixed = $state(initial.crossRefsBottomPanelFixed);
 	let crossRefsBottomPanelColumns = $state<1 | 2>(initial.crossRefsBottomPanelColumns);
 	let crossRefsBottomPanelCollapsed = $state(initial.crossRefsBottomPanelCollapsed);
+	let secondaryResource = $state<BibleResourceLink | null>(null);
+	let secondaryPanelOpen = $state<boolean>(initial.secondaryPanelOpen);
+	let secondaryPanelMode = $state<"detail" | "home">(initial.secondaryPanelMode);
+	let secondaryPanelWidth = $state<number>(initial.secondaryPanelWidth);
+	let isDraggingSplit = $state(false);
 	let activeVerseNumber = $state<number | undefined>();
 	let navigationDirection = $state<NavigationDirection>("jump");
 	let isSelectionMode = $state(false);
@@ -138,6 +160,9 @@
 		crossRefsBottomPanelFixed = Boolean(settings.crossRefsBottomPanelFixed);
 		crossRefsBottomPanelColumns = settings.crossRefsBottomPanelColumns || 2;
 		crossRefsBottomPanelCollapsed = Boolean(settings.crossRefsBottomPanelCollapsed);
+		if (settings.readerSecondaryPanelWidth && !initialViewState?.secondaryPanelWidth) {
+			secondaryPanelWidth = settings.readerSecondaryPanelWidth;
+		}
 	}
 
 	let currentBook = $derived(
@@ -525,6 +550,156 @@
 		});
 	}
 
+	function handleOpenResource(link: BibleResourceLink): void {
+		plugin?.updateResourceDetailViews(link);
+
+		const mode = settings.resourceOpenMode ?? "reader";
+		if (mode === "reader") {
+			secondaryResource = link;
+			secondaryPanelMode = "detail";
+			secondaryPanelOpen = true;
+			onViewConfigChange?.({
+				secondaryPanelOpen: true,
+				secondaryPanelMode: "detail",
+				secondaryPanelResourcePath: link.resourcePath,
+				secondaryPanelWidth,
+			});
+		} else if (mode === "workspace") {
+			void plugin?.openResourceDetailView(link);
+		} else {
+			if (!plugin) return;
+			new ResourcePreviewModal(
+				plugin.app,
+				plugin,
+				link,
+				(bookName, ch, vNum, vAbbr) => {
+					void navigateTo(bookName, ch, vNum, vAbbr);
+				},
+				(linkPath) => {
+					void plugin?.resourceService.removeLink(linkPath).then(() => {
+						new Notice(t("notices.resourceLinkRemoved") || "Vínculo removido.");
+					});
+				},
+			).open();
+		}
+	}
+
+	function openSecondaryHub(): void {
+		const mode = settings.resourceOpenMode ?? "reader";
+		if (mode === "workspace") {
+			void plugin?.openResourceHubView();
+		} else {
+			secondaryPanelMode = "home";
+			secondaryPanelOpen = true;
+			onViewConfigChange?.({
+				secondaryPanelOpen: true,
+				secondaryPanelMode: "home",
+				secondaryPanelResourcePath: secondaryResource?.resourcePath,
+				secondaryPanelWidth,
+			});
+		}
+	}
+
+	function handleSelectResourceFromHub(item: BibleResourceItem): void {
+		const links = plugin?.resourceService?.getLinksForResource(item.path) ?? [];
+		const targetLink: BibleResourceLink = links.length > 0 ? links[0] : {
+			path: "",
+			resourceType: item.resourceType,
+			resourcePath: item.path,
+			resourceName: item.name || item.title,
+			book: "",
+			chapter: 1,
+			verses: [],
+			versesStr: "",
+			color: "blue",
+			reference: "",
+		};
+		secondaryResource = targetLink;
+		secondaryPanelMode = "detail";
+		secondaryPanelOpen = true;
+		onViewConfigChange?.({
+			secondaryPanelOpen: true,
+			secondaryPanelMode: "detail",
+			secondaryPanelResourcePath: item.path,
+			secondaryPanelWidth,
+		});
+	}
+
+	function handleBackToHub(): void {
+		secondaryPanelMode = "home";
+		onViewConfigChange?.({
+			secondaryPanelOpen: true,
+			secondaryPanelMode: "home",
+		});
+	}
+
+	function closeSecondaryPanel(): void {
+		secondaryPanelOpen = false;
+		secondaryResource = null;
+		onViewConfigChange?.({
+			secondaryPanelOpen: false,
+			secondaryPanelResourcePath: undefined,
+		});
+	}
+
+	function startResizing(e: MouseEvent) {
+		e.preventDefault();
+		isDraggingSplit = true;
+		const startX = e.clientX;
+		const startWidth = secondaryPanelWidth;
+
+		function onMouseMove(moveEvent: MouseEvent) {
+			const delta = startX - moveEvent.clientX;
+			const maxAllowed = containerEl ? Math.floor(containerEl.clientWidth * 0.65) : 650;
+			const newWidth = Math.max(260, Math.min(maxAllowed, startWidth + delta));
+			secondaryPanelWidth = newWidth;
+		}
+
+		function onMouseUp() {
+			isDraggingSplit = false;
+			window.removeEventListener("mousemove", onMouseMove);
+			window.removeEventListener("mouseup", onMouseUp);
+			onViewConfigChange?.({ secondaryPanelWidth });
+		}
+
+		window.addEventListener("mousemove", onMouseMove);
+		window.addEventListener("mouseup", onMouseUp);
+	}
+
+	function resetResizing() {
+		secondaryPanelWidth = 380;
+		onViewConfigChange?.({ secondaryPanelWidth: 380 });
+	}
+
+	function restoreSecondaryResourceIfSaved() {
+		if (initialViewState?.secondaryPanelOpen && plugin) {
+			secondaryPanelOpen = true;
+			secondaryPanelMode = initialViewState.secondaryPanelMode || (initialViewState.secondaryPanelResourcePath ? "detail" : "home");
+			if (initialViewState.secondaryPanelResourcePath) {
+				const path = initialViewState.secondaryPanelResourcePath;
+				const links = plugin.resourceService.getLinksForResource(path);
+				if (links.length > 0) {
+					secondaryResource = links[0];
+				} else {
+					const file = plugin.app.vault.getAbstractFileByPath(path);
+					const baseName = file ? file.name.replace(/\.md$/i, "") : path.split("/").pop()?.replace(/\.md$/i, "") || path;
+					secondaryResource = {
+						path: "",
+						resourceType: "custom",
+						resourcePath: path,
+						resourceName: baseName,
+						book: "",
+						chapter: 1,
+						verses: [],
+						versesStr: "",
+						color: "blue",
+						reference: "",
+					};
+				}
+			}
+		}
+	}
+
 	export async function navigateTo(
 		bookIdOrName: number | string,
 		chapter: number,
@@ -575,6 +750,7 @@
 
 	onMount(() => {
 		void initDatabases();
+		restoreSecondaryResourceIfSaved();
 		registerController?.({
 			navigateToPassage: async (
 				bookId: number | string,
@@ -590,6 +766,10 @@
 			openAppearancePicker: () => openPicker("appearance"),
 			openHighlights: () => openPicker("highlights"),
 			openResources: () => openPicker("resources"),
+			openResourceHub: () => openSecondaryHub(),
+			openSecondaryPanel: (l: BibleResourceLink) => handleOpenResource(l),
+			closeSecondaryPanel: () => closeSecondaryPanel(),
+			isSecondaryPanelOpen: () => secondaryPanelOpen,
 			toggleSelectionMode: () => toggleSelectionMode(),
 			isSelectionMode: () => isSelectionMode,
 			refreshSettings: () => syncSettings(),
@@ -607,6 +787,10 @@
 				crossRefsBottomPanelFixed,
 				crossRefsBottomPanelColumns,
 				crossRefsBottomPanelCollapsed,
+				secondaryPanelOpen,
+				secondaryPanelMode,
+				secondaryPanelResourcePath: secondaryResource?.resourcePath,
+				secondaryPanelWidth,
 			}),
 			toggleTwoColumns: () => toggleTwoColumns(),
 			toggleThompson: () => toggleThompson(),
@@ -620,6 +804,7 @@
 	bind:this={containerEl}
 	class="open-bible-reader"
 	class:has-active-picker={activePicker !== null}
+	class:has-secondary-panel={secondaryPanelOpen && (secondaryPanelMode === "home" || secondaryResource !== null)}
 >
 	{#if isLoadingVersions}
 		<div class="open-bible-reader-loading">
@@ -637,84 +822,156 @@
 			</Button>
 		</EmptyState>
 	{:else}
-		<div class="open-bible-reader-scrollable" bind:this={scrollContainerEl}>
-			<ReaderToolbar
-				{currentInfo}
-				{currentBookName}
-				{currentChapter}
-				{activePicker}
-				{canNavigatePrevious}
-				{canNavigateNext}
-				{isSelectionMode}
-				onToggleSelectionMode={toggleSelectionMode}
-				onNavigate={navigateChapter}
-				onTogglePicker={togglePicker}
-			/>
+		<div class="open-bible-reader-body">
+			<div class="open-bible-reader-main">
+				<div class="open-bible-reader-scrollable" bind:this={scrollContainerEl}>
+					<ReaderToolbar
+						{currentInfo}
+						{currentBookName}
+						{currentChapter}
+						{activePicker}
+						{canNavigatePrevious}
+						{canNavigateNext}
+						{isSelectionMode}
+						onToggleSelectionMode={toggleSelectionMode}
+						onOpenResourceHub={openSecondaryHub}
+						onNavigate={navigateChapter}
+						onTogglePicker={togglePicker}
+					/>
 
-			<VersesView
-				book={currentBook}
-				chapter={currentChapter}
-				{verses}
-				{navigationDirection}
-				isLoading={isLoadingVerses}
-				error={verseError}
-				isTwoColumns={twoColumns}
-				{containerWidth}
-				{verseSpacing}
-				{lineSpacing}
-				{thompsonCrossRefsEnabled}
-				{thompsonCrossRefsPosition}
-				crossReferenceService={plugin?.crossReferenceService}
-				{plugin}
-				versionAbbr={currentInfo?.abbreviation ?? ""}
-				selectedVerseNumber={activeVerseNumber}
-				{isSelectionMode}
-				onRetry={() => {
-					if (currentBookId !== undefined && currentChapter !== undefined) {
-						void loadChapter(currentBookId, currentChapter);
-					}
-				}}
-				onToggleTwoColumns={() => void toggleTwoColumns()}
-				onSelectCrossRef={handleSelectCrossRef}
-				onSelectVerse={(v) => (activeVerseNumber = v)}
-			/>
+					<VersesView
+						book={currentBook}
+						chapter={currentChapter}
+						{verses}
+						{navigationDirection}
+						isLoading={isLoadingVerses}
+						error={verseError}
+						isTwoColumns={twoColumns}
+						{containerWidth}
+						{verseSpacing}
+						{lineSpacing}
+						{thompsonCrossRefsEnabled}
+						{thompsonCrossRefsPosition}
+						crossReferenceService={plugin?.crossReferenceService}
+						{plugin}
+						versionAbbr={currentInfo?.abbreviation ?? ""}
+						selectedVerseNumber={activeVerseNumber}
+						{isSelectionMode}
+						onRetry={() => {
+							if (currentBookId !== undefined && currentChapter !== undefined) {
+								void loadChapter(currentBookId, currentChapter);
+							}
+						}}
+						onToggleTwoColumns={() => void toggleTwoColumns()}
+						onSelectCrossRef={handleSelectCrossRef}
+						onSelectVerse={(v) => (activeVerseNumber = v)}
+						onOpenResource={handleOpenResource}
+					/>
 
-			{#if showCrossRefsBottomPanel && !crossRefsBottomPanelFixed && plugin && currentBookId !== undefined && currentChapter !== undefined}
-				<CrossRefBottomPanel
-					{plugin}
-					bookId={currentBookId}
-					bookName={currentBookName}
-					chapter={currentChapter}
-					{containerWidth}
-					selectedVerseNumber={activeVerseNumber}
-					isFixed={false}
-					isExpanded={!crossRefsBottomPanelCollapsed}
-					columns={crossRefsBottomPanelColumns}
-					onToggleFixed={() => void toggleBottomPanelFixed()}
-					onToggleExpanded={() => void toggleBottomPanelCollapsed()}
-					onToggleColumns={() => void toggleBottomPanelColumns()}
-					onScrollToVerse={scrollToVerse}
-				/>
+					{#if showCrossRefsBottomPanel && !crossRefsBottomPanelFixed && plugin && currentBookId !== undefined && currentChapter !== undefined}
+						<CrossRefBottomPanel
+							{plugin}
+							bookId={currentBookId}
+							bookName={currentBookName}
+							chapter={currentChapter}
+							{containerWidth}
+							selectedVerseNumber={activeVerseNumber}
+							isFixed={false}
+							isExpanded={!crossRefsBottomPanelCollapsed}
+							columns={crossRefsBottomPanelColumns}
+							onToggleFixed={() => void toggleBottomPanelFixed()}
+							onToggleExpanded={() => void toggleBottomPanelCollapsed()}
+							onToggleColumns={() => void toggleBottomPanelColumns()}
+							onScrollToVerse={scrollToVerse}
+						/>
+					{/if}
+				</div>
+
+				{#if showCrossRefsBottomPanel && crossRefsBottomPanelFixed && plugin && currentBookId !== undefined && currentChapter !== undefined}
+					<CrossRefBottomPanel
+						{plugin}
+						bookId={currentBookId}
+						bookName={currentBookName}
+						chapter={currentChapter}
+						{containerWidth}
+						selectedVerseNumber={activeVerseNumber}
+						isFixed={true}
+						isExpanded={!crossRefsBottomPanelCollapsed}
+						columns={crossRefsBottomPanelColumns}
+						onToggleFixed={() => void toggleBottomPanelFixed()}
+						onToggleExpanded={() => void toggleBottomPanelCollapsed()}
+						onToggleColumns={() => void toggleBottomPanelColumns()}
+						onScrollToVerse={scrollToVerse}
+					/>
+				{/if}
+			</div>
+
+			{#if secondaryPanelOpen && (secondaryPanelMode === "home" || secondaryResource)}
+				<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
+				<!-- svelte-ignore a11y_no_noninteractive_tabindex -->
+				<div
+					class="open-bible-split-resizer"
+					class:is-dragging={isDraggingSplit}
+					role="separator"
+					tabindex="0"
+					aria-orientation="vertical"
+					aria-valuenow={secondaryPanelWidth}
+					aria-valuemin={260}
+					aria-valuemax={650}
+					aria-label={t("resources.resizeSecondaryPanel") || "Redimensionar painel secundário"}
+					onmousedown={startResizing}
+					ondblclick={resetResizing}
+				>
+					<div class="open-bible-split-resizer-handle"></div>
+				</div>
+
+				<div
+					class="open-bible-reader-secondary-container"
+					style:width="{secondaryPanelWidth}px"
+				>
+					{#if secondaryPanelMode === "home" && plugin}
+						<ResourceHomePanel
+							{plugin}
+							embedded={true}
+							onSelectResource={handleSelectResourceFromHub}
+							onClose={closeSecondaryPanel}
+							onOpenInWorkspace={() => {
+								if (plugin) {
+									void plugin.openResourceHubView();
+								}
+							}}
+							onNavigateToPassage={(bName, ch, vNum, vAbbr) => {
+								void navigateTo(bName, ch, vNum, vAbbr);
+							}}
+						/>
+					{:else if secondaryResource}
+						<ResourceDetailPanel
+							{plugin}
+							link={secondaryResource}
+							embedded={true}
+							onNavigate={(bName, ch, vNum, vAbbr) => {
+								void navigateTo(bName, ch, vNum, vAbbr);
+							}}
+							onClose={closeSecondaryPanel}
+							onBackToHub={handleBackToHub}
+							onOpenInWorkspace={() => {
+								if (plugin && secondaryResource) {
+									void plugin.openResourceDetailView(secondaryResource);
+								}
+							}}
+							onUnlink={(linkPath) => {
+								if (plugin) {
+									void plugin.resourceService.removeLink(linkPath).then(() => {
+										new Notice(t("notices.resourceLinkRemoved") || "Vínculo removido.");
+										closeSecondaryPanel();
+									});
+								}
+							}}
+						/>
+					{/if}
+				</div>
 			{/if}
 		</div>
-
-		{#if showCrossRefsBottomPanel && crossRefsBottomPanelFixed && plugin && currentBookId !== undefined && currentChapter !== undefined}
-			<CrossRefBottomPanel
-				{plugin}
-				bookId={currentBookId}
-				bookName={currentBookName}
-				chapter={currentChapter}
-				{containerWidth}
-				selectedVerseNumber={activeVerseNumber}
-				isFixed={true}
-				isExpanded={!crossRefsBottomPanelCollapsed}
-				columns={crossRefsBottomPanelColumns}
-				onToggleFixed={() => void toggleBottomPanelFixed()}
-				onToggleExpanded={() => void toggleBottomPanelCollapsed()}
-				onToggleColumns={() => void toggleBottomPanelColumns()}
-				onScrollToVerse={scrollToVerse}
-			/>
-		{/if}
 
 		<!-- Pickers / Drawers -->
 		{#if activePicker === "book" && currentInfo}

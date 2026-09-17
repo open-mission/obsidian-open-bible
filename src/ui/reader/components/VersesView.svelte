@@ -51,6 +51,7 @@
 		onToggleTwoColumns?: () => void;
 		onSelectCrossRef?: (verseNumber: number, ref: CrossReference, event: MouseEvent) => void;
 		onSelectVerse?: (verseNumber: number | undefined) => void;
+		onOpenResource?: (link: BibleResourceLink) => void;
 	}
 
 	let {
@@ -74,6 +75,7 @@
 		onToggleTwoColumns,
 		onSelectCrossRef,
 		onSelectVerse,
+		onOpenResource,
 	}: Props = $props();
 
 	let selectedVerseNumbers = $state<number[]>([]);
@@ -589,6 +591,10 @@
 		if (!plugin) return;
 		if (event?.ctrlKey || event?.metaKey) {
 			void openNoteInEditor(plugin.app, link.resourcePath);
+			return;
+		}
+		if (onOpenResource) {
+			onOpenResource(link);
 			return;
 		}
 		new ResourcePreviewModal(

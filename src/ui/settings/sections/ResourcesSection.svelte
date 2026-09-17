@@ -6,6 +6,8 @@
 		DEFAULT_RESOURCE_TYPES,
 		type ResourceDisplayStyle,
 		type ResourceHoverModifier,
+		type ResourceOpenMode,
+		type ResourceWorkspaceSplit,
 		type ResourceTypeConfig,
 	} from "../../../settings";
 	import { ALL_RESOURCE_ICONS, RESOURCE_ICON_GROUPS } from "../resourceIcons";
@@ -78,6 +80,48 @@
 </script>
 
 <div class="open-bible-settings-notes-section">
+	<div class="setting-item">
+		<div class="setting-item-info">
+			<div class="setting-item-name">{t("settings.resourceOpenModeName")}</div>
+			<div class="setting-item-description">{t("settings.resourceOpenModeDesc")}</div>
+		</div>
+		<div class="setting-item-control">
+			<select
+				class="dropdown"
+				value={settings.resourceOpenMode ?? "reader"}
+				aria-label={t("settings.resourceOpenModeName")}
+				onchange={(e) =>
+					void updateGeneral({ resourceOpenMode: e.currentTarget.value as ResourceOpenMode })}
+			>
+				<option value="reader">{t("settings.resourceOpenModeReader")}</option>
+				<option value="workspace">{t("settings.resourceOpenModeWorkspace")}</option>
+				<option value="modal">{t("settings.resourceOpenModeModal")}</option>
+			</select>
+		</div>
+	</div>
+
+	{#if (settings.resourceOpenMode ?? "reader") === "workspace"}
+		<div class="setting-item">
+			<div class="setting-item-info">
+				<div class="setting-item-name">{t("settings.resourceWorkspaceSplitName")}</div>
+				<div class="setting-item-description">{t("settings.resourceWorkspaceSplitDesc")}</div>
+			</div>
+			<div class="setting-item-control">
+				<select
+					class="dropdown"
+					value={settings.resourceWorkspaceSplit ?? "right"}
+					aria-label={t("settings.resourceWorkspaceSplitName")}
+					onchange={(e) =>
+						void updateGeneral({ resourceWorkspaceSplit: e.currentTarget.value as ResourceWorkspaceSplit })}
+				>
+					<option value="right">{t("settings.resourceWorkspaceSplitRight")}</option>
+					<option value="split">{t("settings.resourceWorkspaceSplitSplit")}</option>
+					<option value="tab">{t("settings.resourceWorkspaceSplitTab")}</option>
+				</select>
+			</div>
+		</div>
+	{/if}
+
 	<div class="setting-item">
 		<div class="setting-item-info">
 			<div class="setting-item-name">{t("settings.resourceDisplayStyleName")}</div>
