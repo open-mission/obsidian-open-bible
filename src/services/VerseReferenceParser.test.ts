@@ -168,4 +168,15 @@ describe("findReferenceAtPosition", () => {
 		assert.equal(ref.raw, "Jo 3:16");
 		assert.equal(findReferenceAtPosition(text, 0), null);
 	});
+
+	it("does not match when caret is at the end boundary without inclusiveEnd", () => {
+		const text = "Mateus 10";
+		// Default inclusiveEnd is false: index text.length is past the reference
+		assert.equal(findReferenceAtPosition(text, text.length), null);
+		assert.equal(findReferenceAtPosition(text, text.length, false), null);
+		// Inside the reference
+		const insideRef = findReferenceAtPosition(text, text.length - 1);
+		assert.ok(insideRef);
+		assert.equal(insideRef.raw, "Mateus 10");
+	});
 });

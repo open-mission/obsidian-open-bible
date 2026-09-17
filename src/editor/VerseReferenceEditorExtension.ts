@@ -142,6 +142,17 @@ function getActiveModifier(plugin: OpenBiblePlugin): VerseHoverModifier {
 	return "shift";
 }
 
+function isPointInsideElement(el: HTMLElement, x: number, y: number): boolean {
+	const rects = el.getClientRects();
+	for (let i = 0; i < rects.length; i++) {
+		const r = rects[i];
+		if (x >= r.left - 1 && x <= r.right + 1 && y >= r.top - 1 && y <= r.bottom + 1) {
+			return true;
+		}
+	}
+	return false;
+}
+
 function createViewPlugin(plugin: OpenBiblePlugin) {
 	return ViewPlugin.fromClass(
 		class {
@@ -213,13 +224,21 @@ function createViewPlugin(plugin: OpenBiblePlugin) {
 				mousemove(event, view) {
 					if (plugin.settings.enableVersePreviews === false) return false;
 
-					const pos = view.posAtCoords({ x: event.clientX, y: event.clientY });
-					if (pos == null) {
-						this.clearHoverState();
+					const targetEl =
+						event.target instanceof HTMLElement
+							? event.target
+							: (event.target as Node | null)?.parentElement;
+					const markEl = targetEl?.closest<HTMLElement>(`.${MARK_CLASS}`);
+					if (!markEl || !isPointInsideElement(markEl, event.clientX, event.clientY)) {
+						if (this.hoverTimeout != null) {
+							window.clearTimeout(this.hoverTimeout);
+							this.hoverTimeout = null;
+						}
+						this.activeHoverKey = null;
+						scheduleHideVerseTooltip();
 						this.currentMousePos = null;
 						return false;
 					}
-					this.currentMousePos = pos;
 
 					// Check if hover previews are enabled
 					if (plugin.settings.enableVerseHoverPreview === false) {
@@ -234,14 +253,20 @@ function createViewPlugin(plugin: OpenBiblePlugin) {
 						return false;
 					}
 
-					const hit = findReferenceAtViewPos(view, pos);
+					let startPos: number;
+					try {
+						startPos = view.posAtDOM(markEl);
+					} catch {
+						this.clearHoverState();
+						this.currentMousePos = null;
+						return false;
+					}
+
+					this.currentMousePos = startPos;
+
+					const hit = findReferenceAtViewPos(view, startPos);
 					if (!hit) {
-						if (this.hoverTimeout != null) {
-							window.clearTimeout(this.hoverTimeout);
-							this.hoverTimeout = null;
-						}
-						this.activeHoverKey = null;
-						scheduleHideVerseTooltip();
+						this.clearHoverState();
 						return false;
 					}
 
@@ -285,10 +310,23 @@ function createViewPlugin(plugin: OpenBiblePlugin) {
 					if (plugin.settings.enableVerseClickPreview === false) return false;
 					if (event.button !== 0) return false;
 
-					const pos = view.posAtCoords({ x: event.clientX, y: event.clientY });
-					if (pos == null) return false;
+					const targetEl =
+						event.target instanceof HTMLElement
+							? event.target
+							: (event.target as Node | null)?.parentElement;
+					const markEl = targetEl?.closest<HTMLElement>(`.${MARK_CLASS}`);
+					if (!markEl || !isPointInsideElement(markEl, event.clientX, event.clientY)) {
+						return false;
+					}
 
-					const hit = findReferenceAtViewPos(view, pos, true);
+					let startPos: number;
+					try {
+						startPos = view.posAtDOM(markEl);
+					} catch {
+						return false;
+					}
+
+					const hit = findReferenceAtViewPos(view, startPos);
 					if (!hit) return false;
 
 					event.preventDefault();
