@@ -14,7 +14,7 @@ type SqlDatabase = InstanceType<SqlJs["Database"]>;
  */
 export class BibleTextService {
 	private sqlPromise?: Promise<SqlJs>;
-	private active: { path: string; db: SqlDatabase } | null = null;
+	private openDbs = new Map<string, SqlDatabase>();
 	private infoCache = new Map<string, BibleDatabaseInfo>();
 
 	constructor(
@@ -28,13 +28,14 @@ export class BibleTextService {
 	}
 
 	closeActiveDatabase(): void {
-		if (!this.active) return;
-		try {
-			this.active.db.close();
-		} catch (error) {
-			console.error("OpenBible: could not close the SQLite database", error);
+		for (const [path, db] of this.openDbs.entries()) {
+			try {
+				db.close();
+			} catch (error) {
+				console.error(`OpenBible: could not close the SQLite database for ${path}`, error);
+			}
 		}
-		this.active = null;
+		this.openDbs.clear();
 	}
 
 	/** Display name, abbreviation and available books/chapters of an installed version. */
@@ -91,12 +92,12 @@ export class BibleTextService {
 	}
 
 	private async getDatabase(path: string): Promise<SqlDatabase> {
-		if (this.active?.path === path) return this.active.db;
-		this.closeActiveDatabase();
+		const existing = this.openDbs.get(path);
+		if (existing) return existing;
 		const sql = await this.getSql();
 		const bytes = await this.app.vault.adapter.readBinary(path);
 		const db = new sql.Database(new Uint8Array(bytes));
-		this.active = { path, db };
+		this.openDbs.set(path, db);
 		return db;
 	}
 

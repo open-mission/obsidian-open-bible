@@ -1,6 +1,6 @@
-import type { Workspace, WorkspaceLeaf } from "obsidian";
+import { ItemView, type Workspace, type WorkspaceLeaf } from "obsidian";
 
-export type ViewSplit = "tab" | "left" | "right";
+export type ViewSplit = "tab" | "new-tab" | "split" | "left" | "right";
 
 /** Expands a collapsed side dock so the revealed leaf is visible. */
 function expandSplitIfNeeded(workspace: Workspace, leaf: WorkspaceLeaf): void {
@@ -14,7 +14,7 @@ function expandSplitIfNeeded(workspace: Workspace, leaf: WorkspaceLeaf): void {
 
 /**
  * Reveals an existing leaf of the given view type or creates one in the requested
- * location. Keeps a single instance per split instead of spawning duplicates.
+ * location. Supports new-tab and split for multi-pane reader workflows.
  */
 export async function openOrRevealView(
 	workspace: Workspace,
@@ -23,7 +23,24 @@ export async function openOrRevealView(
 ): Promise<WorkspaceLeaf | null> {
 	const leaves = workspace.getLeavesOfType(type);
 
+	if (split === "new-tab" || split === "split") {
+		const activeView = workspace.getActiveViewOfType(ItemView);
+		const currentState =
+			activeView && activeView.getViewType() === type ? activeView.getState?.() : undefined;
+
+		const leaf = split === "split" ? workspace.getLeaf("split", "vertical") : workspace.getLeaf("tab");
+		await leaf.setViewState({ type, active: true, state: currentState });
+		await workspace.revealLeaf(leaf);
+		return leaf;
+	}
+
 	if (split === "tab") {
+		const activeView = workspace.getActiveViewOfType(ItemView);
+		if (activeView && activeView.getViewType() === "empty") {
+			await activeView.leaf.setViewState({ type, active: true });
+			await workspace.revealLeaf(activeView.leaf);
+			return activeView.leaf;
+		}
 		const existing = leaves[0];
 		if (existing) {
 			await workspace.revealLeaf(existing);

@@ -16,18 +16,18 @@
 	import HistoryPicker from "./components/HistoryPicker.svelte";
 	import AppearancePanel from "./components/AppearancePanel.svelte";
 	import HighlightsPanel from "./components/HighlightsPanel.svelte";
+	import ResourcesPanel from "./components/ResourcesPanel.svelte";
 	import CrossRefBottomPanel from "./components/CrossRefBottomPanel.svelte";
 	import Button from "../kit/Button.svelte";
 	import EmptyState from "../kit/EmptyState.svelte";
 
 	import type OpenBiblePlugin from "../../main";
 	import type { CrossReference } from "../../data/crossRefModel";
-	import { indexOfCrossRef } from "../../data/crossRefModel";
-	import { openCrossRefPreview } from "../resources/openCrossRefPreview";
+	import { indexOfCrossRef } from "../../data/crossRefModel";	import { openCrossRefPreview } from "../resources/openCrossRefPreview";
 	import { formatCrossRefOrigin } from "../resources/formatCrossRef";
 	import type { BibleReaderController, BibleReaderViewState, NavigationDirection } from "./types";
 
-	type PickerMode = "book" | "chapter" | "version" | "history" | "appearance" | "highlights" | null;
+	type PickerMode = "book" | "chapter" | "version" | "history" | "appearance" | "highlights" | "resources" | null;
 
 	interface Props {
 		plugin?: OpenBiblePlugin;
@@ -589,6 +589,7 @@
 			openVersionPicker: () => openPicker("version"),
 			openAppearancePicker: () => openPicker("appearance"),
 			openHighlights: () => openPicker("highlights"),
+			openResources: () => openPicker("resources"),
 			toggleSelectionMode: () => toggleSelectionMode(),
 			isSelectionMode: () => isSelectionMode,
 			refreshSettings: () => syncSettings(),
@@ -793,6 +794,16 @@
 		{:else if activePicker === "highlights" && plugin}
 			<DrawerModal mode="highlights" onClose={closePicker}>
 				<HighlightsPanel
+					{plugin}
+					onNavigate={(bName, ch, vNum, vAbbr) => {
+						void navigateTo(bName, ch, vNum, vAbbr);
+					}}
+					onClose={closePicker}
+				/>
+			</DrawerModal>
+		{:else if activePicker === "resources" && plugin}
+			<DrawerModal mode="highlights" onClose={closePicker}>
+				<ResourcesPanel
 					{plugin}
 					onNavigate={(bName, ch, vNum, vAbbr) => {
 						void navigateTo(bName, ch, vNum, vAbbr);

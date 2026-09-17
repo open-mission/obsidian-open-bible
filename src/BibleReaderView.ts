@@ -19,12 +19,14 @@ export class BibleReaderView extends ItemView {
 	private historyActionEl: HTMLElement | null = null;
 	private selectionActionEl: HTMLElement | null = null;
 	private highlightsActionEl: HTMLElement | null = null;
+	private resourcesActionEl: HTMLElement | null = null;
 
 	constructor(
 		leaf: WorkspaceLeaf,
 		private readonly plugin: OpenBiblePlugin,
 	) {
 		super(leaf);
+		this.navigation = true;
 	}
 
 	get readerController(): BibleReaderController | null {
@@ -96,6 +98,10 @@ export class BibleReaderView extends ItemView {
 		this.controller?.openHighlights?.();
 	}
 
+	openResources(): void {
+		this.controller?.openResources?.();
+	}
+
 	toggleSelectionMode(): boolean {
 		const active = this.controller?.toggleSelectionMode?.() ?? false;
 		if (this.selectionActionEl) {
@@ -122,6 +128,26 @@ export class BibleReaderView extends ItemView {
 
 		menu.addItem((item) =>
 			item
+				.setTitle(t("readerMenu.splitRight") || "Dividir leitor (lado a lado)")
+				.setIcon("split")
+				.onClick(() => {
+					void this.plugin.openReader("split");
+				}),
+		);
+
+		menu.addItem((item) =>
+			item
+				.setTitle(t("readerMenu.newTab") || "Abrir leitor em nova aba")
+				.setIcon("file-plus")
+				.onClick(() => {
+					void this.plugin.openReader("new-tab");
+				}),
+		);
+
+		menu.addSeparator();
+
+		menu.addItem((item) =>
+			item
 				.setTitle(t("reader.selectionMode") || "Modo de seleção")
 				.setIcon("check-square")
 				.setChecked(this.controller?.isSelectionMode?.() ?? false)
@@ -136,6 +162,15 @@ export class BibleReaderView extends ItemView {
 				.setIcon("highlighter")
 				.onClick(() => {
 					this.openHighlights();
+				}),
+		);
+
+		menu.addItem((item) =>
+			item
+				.setTitle(t("resourcesPanel.title") || "Recursos")
+				.setIcon("link")
+				.onClick(() => {
+					this.openResources();
 				}),
 		);
 
@@ -226,6 +261,15 @@ export class BibleReaderView extends ItemView {
 				},
 			);
 		}
+		if (!this.resourcesActionEl) {
+			this.resourcesActionEl = this.addAction(
+				"link",
+				t("resourcesPanel.title") || "Recursos",
+				() => {
+					this.openResources();
+				},
+			);
+		}
 		if (!this.appearanceActionEl) {
 			this.appearanceActionEl = this.addAction(
 				"sliders-horizontal",
@@ -283,6 +327,7 @@ export class BibleReaderView extends ItemView {
 		this.historyActionEl = null;
 		this.selectionActionEl = null;
 		this.highlightsActionEl = null;
+		this.resourcesActionEl = null;
 		if (this.component) {
 			await unmount(this.component);
 			this.component = undefined;

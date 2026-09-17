@@ -31,6 +31,7 @@ export interface BibleReaderController {
 	openVersionPicker: () => void;
 	openAppearancePicker: () => void;
 	openHighlights?: () => void;
+	openResources?: () => void;
 	toggleSelectionMode?: () => boolean;
 	isSelectionMode?: () => boolean;
 	refreshSettings: () => void;

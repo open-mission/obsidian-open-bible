@@ -1,7 +1,13 @@
-import { Editor, Notice, Plugin, WorkspaceLeaf, TFile } from "obsidian";
+import { Editor, Menu, Notice, Plugin, WorkspaceLeaf, TFile } from "obsidian";
 import { OPEN_BIBLE_VIEW_TYPE, OpenBibleView } from "./OpenBibleView";
 import { BIBLE_READER_VIEW_TYPE, BibleReaderView } from "./BibleReaderView";
 import { BIBLE_HIGHLIGHTS_VIEW_TYPE, HighlightsView } from "./HighlightsView";
+import {
+	BIBLE_RESOURCES_VIEW_TYPE,
+	RESOURCES_VIEW_TYPE_PREFIX,
+	ResourcesView,
+	getResourceViewType,
+} from "./ResourcesView";
 import { DEFAULT_SETTINGS, type OpenBibleSettings } from "./settings";
 import { normalizeDataFolder } from "./core/paths";
 import { BibleVersionService } from "./services/bibleVersionService";
@@ -9,6 +15,7 @@ import { BibleTextService } from "./services/bibleTextService";
 import { CrossReferenceService } from "./services/CrossReferenceService";
 import { VersePreviewService } from "./services/VersePreviewService";
 import { HighlightService } from "./services/HighlightService";
+import { ResourceService } from "./services/ResourceService";
 import { OpenBibleSettingTab } from "./settings/SettingsTab";
 import { openOrRevealView, type ViewSplit } from "./workspace/openPluginView";
 import { applyLocalePreference, t } from "./i18n";
@@ -29,7 +36,9 @@ export default class OpenBiblePlugin extends Plugin {
 	crossReferenceService!: CrossReferenceService;
 	versePreviewService!: VersePreviewService;
 	highlightService!: HighlightService;
+	resourceService!: ResourceService;
 	private ribbonIconEl?: HTMLElement;
+	private registeredResourceViews: Set<string> = new Set();
 
 	async onload(): Promise<void> {
 		await this.loadSettings();
@@ -39,6 +48,7 @@ export default class OpenBiblePlugin extends Plugin {
 		this.crossReferenceService = new CrossReferenceService(() => this.bibleText.getSql());
 		this.versePreviewService = new VersePreviewService(this);
 		this.highlightService = new HighlightService(this.app, () => this.settings);
+		this.resourceService = new ResourceService(this.app, () => this.settings);
 
 		this.registerEditorExtension(createVerseReferenceEditorExtension(this));
 		this.registerMarkdownPostProcessor((el, ctx) => {
@@ -56,17 +66,66 @@ export default class OpenBiblePlugin extends Plugin {
 		this.registerView(OPEN_BIBLE_VIEW_TYPE, (leaf) => new OpenBibleView(leaf, this.app, this.settings));
 		this.registerView(BIBLE_READER_VIEW_TYPE, (leaf) => new BibleReaderView(leaf, this));
 		this.registerView(BIBLE_HIGHLIGHTS_VIEW_TYPE, (leaf) => new HighlightsView(leaf, this));
+		this.ensureResourceViews();
 
-		this.ribbonIconEl = this.addRibbonIcon("book-open", t("ribbon.openReader"), () => {
-			void this.openReader();
+		this.ribbonIconEl = this.addRibbonIcon("book-open", t("ribbon.openReader"), (evt: MouseEvent) => {
+			if (evt.button === 1 || evt.metaKey || evt.ctrlKey) {
+				void this.openReader("new-tab");
+			} else {
+				void this.openReader();
+			}
 		});
 
+		this.ribbonIconEl.addEventListener("contextmenu", (evt: MouseEvent) => {
+			const menu = new Menu();
+			menu.addItem((item) =>
+				item
+					.setTitle(t("commands.openReader"))
+					.setIcon("book-open")
+					.onClick(() => {
+						void this.openReader("tab");
+					}),
+			);
+			menu.addItem((item) =>
+				item
+					.setTitle(t("commands.openReaderNewTab"))
+					.setIcon("file-plus")
+					.onClick(() => {
+						void this.openReader("new-tab");
+					}),
+			);
+			menu.addItem((item) =>
+				item
+					.setTitle(t("commands.openReaderSplit"))
+					.setIcon("split")
+					.onClick(() => {
+						void this.openReader("split");
+					}),
+			);
+			menu.showAtMouseEvent(evt);
+		});
 
 		this.addCommand({
 			id: "open-bible-reader",
 			name: t("commands.openReader"),
 			callback: () => {
 				void this.openReader();
+			},
+		});
+
+		this.addCommand({
+			id: "open-bible-reader-new-tab",
+			name: t("commands.openReaderNewTab"),
+			callback: () => {
+				void this.openReader("new-tab");
+			},
+		});
+
+		this.addCommand({
+			id: "open-bible-reader-split",
+			name: t("commands.openReaderSplit"),
+			callback: () => {
+				void this.openReader("split");
 			},
 		});
 
@@ -127,6 +186,30 @@ export default class OpenBiblePlugin extends Plugin {
 			name: t("commands.openHighlightsLeftSidebar"),
 			callback: () => {
 				void this.openHighlightsView("left");
+			},
+		});
+
+		this.addCommand({
+			id: "open-bible-resources",
+			name: t("commands.openResources"),
+			callback: () => {
+				void this.openResourcesView("right");
+			},
+		});
+
+		this.addCommand({
+			id: "open-bible-resources-right-sidebar",
+			name: t("commands.openResourcesRightSidebar"),
+			callback: () => {
+				void this.openResourcesView("right");
+			},
+		});
+
+		this.addCommand({
+			id: "open-bible-resources-left-sidebar",
+			name: t("commands.openResourcesLeftSidebar"),
+			callback: () => {
+				void this.openResourcesView("left");
 			},
 		});
 
@@ -291,6 +374,7 @@ export default class OpenBiblePlugin extends Plugin {
 
 	override onunload(): void {
 		this.highlightService?.destroy();
+		this.resourceService?.destroy();
 		this.bibleText?.closeActiveDatabase();
 	}
 
@@ -310,6 +394,38 @@ export default class OpenBiblePlugin extends Plugin {
 	/** Opens (or reveals) the Highlights view in the requested location (tab, right sidebar, or left sidebar). */
 	async openHighlightsView(split: ViewSplit = "right"): Promise<void> {
 		const leaf = await openOrRevealView(this.app.workspace, BIBLE_HIGHLIGHTS_VIEW_TYPE, split);
+		if (!leaf) {
+			new Notice(t("view.errorOpening"));
+			return;
+		}
+	}
+
+	/** Registers the general resources view plus one dynamic view per resource type. */
+	ensureResourceViews(): void {
+		const registerOnce = (viewType: string, lockedTypeId: string | null) => {
+			if (this.registeredResourceViews.has(viewType)) return;
+			try {
+				this.registerView(viewType, (leaf) => new ResourcesView(leaf, this, lockedTypeId));
+				this.registeredResourceViews.add(viewType);
+			} catch (err) {
+				console.warn(`OpenBible: could not register view ${viewType}`, err);
+			}
+		};
+		registerOnce(BIBLE_RESOURCES_VIEW_TYPE, null);
+		for (const resType of this.resourceService?.getResourceTypes() ?? []) {
+			registerOnce(getResourceViewType(resType.id), resType.id);
+		}
+	}
+
+	/** Opens the general resources panel, or a per-type dynamic panel when typeId is given. */
+	async openResourcesView(split: ViewSplit = "right", typeId?: string): Promise<void> {
+		this.ensureResourceViews();
+		const viewType = typeId ? getResourceViewType(typeId) : BIBLE_RESOURCES_VIEW_TYPE;
+		if (!viewType.startsWith(BIBLE_RESOURCES_VIEW_TYPE) && !viewType.startsWith(RESOURCES_VIEW_TYPE_PREFIX)) {
+			new Notice(t("view.errorOpening"));
+			return;
+		}
+		const leaf = await openOrRevealView(this.app.workspace, viewType, split);
 		if (!leaf) {
 			new Notice(t("view.errorOpening"));
 			return;
@@ -358,6 +474,9 @@ export default class OpenBiblePlugin extends Plugin {
 		}
 		Object.assign(this.settings, patch);
 		await this.saveSettings();
+		if (patch.configuredResources !== undefined) {
+			this.ensureResourceViews();
+		}
 		// Re-resolve the UI language whenever the preference changes.
 		if (patch.language !== undefined) {
 			this.applyLanguage();
@@ -378,6 +497,14 @@ export default class OpenBiblePlugin extends Plugin {
 		if (leaves.length === 0) {
 			await this.openReader();
 			leaves = this.app.workspace.getLeavesOfType(BIBLE_READER_VIEW_TYPE);
+		}
+
+		const activeLeaf = this.app.workspace.getActiveViewOfType(BibleReaderView)?.leaf;
+		const targetLeaf = activeLeaf ?? leaves[0];
+
+		if (targetLeaf?.view instanceof BibleReaderView) {
+			await this.app.workspace.revealLeaf(targetLeaf);
+			return await targetLeaf.view.navigateToPassage(bookIdOrName, chapter, verseNumber, versionAbbr);
 		}
 
 		for (const leaf of leaves) {

@@ -6,6 +6,8 @@ export type LocalePreference = "auto" | SupportedLocale;
 export interface TranslationStrings {
 	commands: {
 		openReader: string;
+		openReaderNewTab: string;
+		openReaderSplit: string;
 		openReaderRightSidebar: string;
 		openReaderLeftSidebar: string;
 		openBiblePassage: string;
@@ -16,6 +18,9 @@ export interface TranslationStrings {
 		toggleSelectionMode: string;
 		insertVerseAtCursor: string;
 		createBibleNote: string;
+		openResources: string;
+		openResourcesRightSidebar: string;
+		openResourcesLeftSidebar: string;
 	};
 	ribbon: {
 		openReader: string;
@@ -163,6 +168,29 @@ export interface TranslationStrings {
 		noteRemovedNotice: string;
 		notesResetNotice: string;
 		cannotDeleteLastNote: string;
+		pageStudyResources: string;
+		pageStudyResourcesDesc: string;
+		resourceTypesHeading: string;
+		resourceTypesDesc: string;
+		addResourceTypeBtn: string;
+		resetResourceTypesBtn: string;
+		resourceLabelPlaceholder: string;
+		resourceFolderPlaceholder: string;
+		resourceIconPlaceholder: string;
+		newResourceTypeDefaultLabel: string;
+		resourceAddedNotice: string;
+		resourceRemovedNotice: string;
+		resourcesResetNotice: string;
+		cannotDeleteLastResourceType: string;
+		resourceDisplayStyleName: string;
+		resourceDisplayStyleDesc: string;
+		resourceDisplayIcon: string;
+		resourceDisplayUnderline: string;
+		resourceDisplayBoth: string;
+		resourceHoverModifierName: string;
+		resourceHoverModifierDesc: string;
+		resourceColorizeName: string;
+		resourceColorizeDesc: string;
 	};
 	errors: {
 		invalidFolderPath: string;
@@ -222,9 +250,11 @@ export interface TranslationStrings {
 		singleColumn: string;
 		loadingVerses: string;
 		rangeHighlightMarker: string;
+		resourceLinkMarker: string;
 		selectVerseTooltip: string;
 		noVersesFound: string;
 		retry: string;
+		selectionMode: string;
 	};
 	readerMenu: {
 		containerWidthHeader: string;
@@ -244,7 +274,10 @@ export interface TranslationStrings {
 		appearance: string;
 		readingHistory: string;
 		selectionMode: string;
+		splitRight: string;
+		newTab: string;
 		highlights: string;
+		resources: string;
 	};
 	highlightsPanel: {
 		title: string;
@@ -257,6 +290,20 @@ export interface TranslationStrings {
 		openNoteTooltip: string;
 		countSingle: string;
 		countPlural: string;
+	};
+	resourcesPanel: {
+		title: string;
+		searchPlaceholder: string;
+		allTypes: string;
+		emptyTitle: string;
+		emptyDesc: string;
+		noResults: string;
+		openResourceTooltip: string;
+		unlinkTooltip: string;
+		countSingle: string;
+		countPlural: string;
+		viewInChapter: string;
+		linkedPassage: string;
 	};
 	resources: {
 		crossReferences: string;
@@ -289,6 +336,8 @@ export interface TranslationStrings {
 		copyReference: string;
 		copyText: string;
 		createNote: string;
+		linkResource: string;
+		selectResourceType: string;
 		close: string;
 	};
 	contextMenu: {
@@ -298,6 +347,8 @@ export interface TranslationStrings {
 		createNote: string;
 		copyQuote: string;
 		moreOptions: string;
+		linkResource: string;
+		highlight: string;
 	};
 	notices: {
 		textCopied: string;
@@ -309,11 +360,25 @@ export interface TranslationStrings {
 		historyCleared: string;
 		verseInserted: string;
 		noActiveMarkdownNote: string;
+		resourceLinked: string;
+		resourceLinkRemoved: string;
+		resourceCreated: string;
+		resourceLinkError: string;
 	};
 	modals: {
 		confirmDeleteTitle: string;
 		confirmDeleteDesc: string;
 		confirmDeleteAlwaysAsk: string;
+		linkResourceTitle: string;
+		resourceNamePlaceholder: string;
+		createResourceBtn: string;
+		existingResources: string;
+		noResourcesFound: string;
+		confirmUnlinkTitle: string;
+		confirmUnlinkDesc: string;
+		linkScopeLabel: string;
+		linkScopeThisOnly: string;
+		linkScopeAllOccurrences: string;
 	};
 	note: {
 		openInEditor: string;
