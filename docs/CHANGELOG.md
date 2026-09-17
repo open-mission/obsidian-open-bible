@@ -9,6 +9,53 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.3] - 2026-09-17
+
+### Added
+- **Study Resources System & Encyclopedic Previews**:
+  - Introduced biblical study resources architecture with user-definable resource types (e.g., People, Places, Events) with customizable folder locations, Lucide icons, and theme accent colors.
+  - Integrated resource links directly into Bible verse text with configurable display modes (icon marker, text underline, or both) and colorization.
+  - Interactive resource clicking: click any underlined text or marker icon to open the redesigned encyclopedic preview card (`ResourcePreviewModal`) or chooser modal (`ResourceChooserModal`).
+  - Support for `image`, `cover`, and `banner` metadata in resource frontmatter with automatic resolution of vault-relative files, wikilinks (`[[image.png]]`), and web URLs.
+  - Dedicated study resources explorer view (`ResourcesView`) registered globally and per-resource-type in sidebar docks.
+- **Multiple Bible Reader Panes and Split Views**:
+  - Enabled native Obsidian pane navigation by setting `this.navigation = true` in `BibleReaderView`, allowing native "Split right", "Split down", "Open in new window", and drag-and-drop tab splitting.
+  - Added commands: "Open reader in new tab" (`commands.openReaderNewTab`) and "Split reader (side-by-side)" (`commands.openReaderSplit`).
+  - Added "Split reader (side-by-side)" and "Open reader in new tab" actions directly in the reader pane menu (`...`).
+  - Added ribbon icon right-click context menu and modifier click (`Ctrl` / `Cmd` or middle-click) to open the reader in a new tab.
+  - Updated `openOrRevealView` to support `"new-tab"` and `"split"` splits while automatically copying current passage state into newly opened tabs/splits, and reusing empty tabs.
+  - Refactored `BibleTextService` to maintain a pool of open SQLite databases (`openDbs: Map<string, SqlDatabase>`) instead of a single active database, preventing SQLite database reload thrashing when reading multiple Bible versions side-by-side.
+  - Updated `navigateToPassage` to prioritize the currently active reader leaf when multiple reader panes are open.
+- **Word-Selection Right-Click Context Menu in Reader**:
+  - Replaced the previous two-column layout toggle from the right-click context menu with three focused actions: "Create Note" (`contextMenu.createNote`), "Highlight" (`contextMenu.highlight`), and "Link Resources" (`contextMenu.linkResource`).
+  - Clicking "Create Note" directly creates the note from the selection.
+  - Clicking "Highlight" opens `HighlightPickerModal` with configured color options.
+  - Clicking "Link Resources" opens `ResourceTypePickerModal` to choose the resource type before linking.
+  - Added support for right-clicking directly on an unselected word in verse text to automatically detect and highlight the word under the cursor and open the context menu.
+- **Resource Occurrence Scope Selection (This Occurrence vs All Occurrences)**:
+  - Added an occurrence scope selector in `ResourceLinkModal` when linking a selected word or phrase: choose between "Only this occurrence" (`matchAllOccurrences: false`, default) and "All occurrences of this word" (`matchAllOccurrences: true`).
+  - Updated `autoMatchesByVerse` so resource markers only propagate across the chapter when `matchAllOccurrences` is explicitly set to `true`, preventing unwanted markers on polysemous words (e.g. "céus" in Genesis 1:1 referring to the heavens vs later verses referring to the sky/firmament).
+  - Added frontmatter persistence for `match_all_occurrences: true` in resource link notes and updated `ResourceService.detectLink` and `ResourceService.addOrUpdateLink`.
+- **Redesigned Resource Preview Modal & Image Metadata Support**:
+  - Added support for `image` (as well as `cover` and `banner`) in resource frontmatter with automatic resolution of vault relative paths, wikilinks (`[[image.png]]`), and external web URLs (`https://...`).
+  - Redesigned `ResourcePreviewModal` with a modern encyclopedic card layout:
+    - Panoramic hero image banner with smooth bottom gradient overlay and frosted glass close button.
+    - Resource type pill badge with icon and custom theme color.
+    - Clean, spacious typography for resource title and scrollable markdown content.
+    - Dedicated linked passage context card displaying the scripture reference and quote snippet, with 1-click navigation to the passage in reader.
+    - Refined 2-sided footer actions: unlink on the left, "View in chapter" and primary CTA "Open in editor" on the right.
+
+### Fixed
+- **Missing i18n Translation Key**:
+  - Added missing `reader.selectionMode` translation key to `TranslationStrings`, `locales/pt.ts`, and `locales/en.ts`.
+- **Study Resources Click on Underlined Verse Text**:
+  - Made `.open-bible-resource-text` fully interactive: clicking underlined linked text now opens `ResourcePreviewModal` (single link) or `ResourceChooserModal` (multiple links), bringing parity with clicking marker icons (`.open-bible-resource-marker`).
+  - Added support for `Ctrl/Cmd + Click` on underlined resource text to open the resource directly in the Obsidian editor.
+  - Added accessibility roles (`role="button"`, `tabindex="0"`) and keyboard activation (`Enter` / `Space`).
+  - Added `cursor: pointer` and subtle hover transitions to `.open-bible-resource-text` in `styles.css`.
+  - Added mouse drag and text selection guards (`justCapturedTextRange`, `segment.isSelected`, and window selection checks) so selecting text across linked words for highlights or copying remains smooth without accidentally opening modals.
+  - Declared `justCapturedTextRange` as `$state(false)` in `VersesView.svelte` and passed it down to `VerseRow.svelte`.
+
 ## [0.3.2] - 2026-09-15
 
 ### Added
