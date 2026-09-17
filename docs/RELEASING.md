@@ -86,12 +86,16 @@ git push origin --tags
 ## 4. Publishing the Release on GitHub
 
 1. Once the tag is pushed, go to the [GitHub Actions Tab](https://github.com/open-mission/obsidian-open-bible/actions).
-2. The `Release Obsidian plugin` workflow will build the bundle, generate the signed provenance attestation, and upload:
-   - `main.js`
-   - `manifest.json`
-   - `styles.css`
+2. The `Release Obsidian plugin` workflow will:
+   - Build the production bundle.
+   - Generate the signed provenance attestation.
+   - Automatically extract the version's release notes from `CHANGELOG.md` (at repo root and `docs/CHANGELOG.md`).
+   - Create a draft GitHub release with the release notes and upload:
+     - `main.js`
+     - `manifest.json`
+     - `styles.css`
 3. Navigate to [Releases](https://github.com/open-mission/obsidian-open-bible/releases).
-4. Edit the newly created draft release, review the release notes, and click **Publish release**.
+4. Review the drafted release (its description will already contain the parsed changelog), and click **Publish release**.
 
 ---
 

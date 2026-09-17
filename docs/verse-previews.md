@@ -62,6 +62,7 @@ Users can configure these options under **Settings → OpenBible → Study Resou
 - Scans `view.visibleRanges` for optimal performance with large documents.
 - Dispatches decorations dynamically on `update.docChanged` and `update.viewportChanged`.
 - Handles `mousemove`, `mouseleave`, `keydown`, `keyup`, and `mousedown` events directly within CodeMirror.
+- Strictly bounds click and hover interactions to the `.open-bible-verse-preview-link` decoration element and its `DOMRect` bounding client rectangles, preventing clicks on blank line space or line ends from accidentally intercepting cursor positioning.
 - Validates modifier keys (`Shift`, `Control`, `Meta`, `Alt`) dynamically based on user settings.
 - Tracks `currentMousePos` and `activeHoverKey` to provide responsive hover transitions with debounce and memory leak prevention.
 

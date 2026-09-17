@@ -31,6 +31,7 @@ OpenBible is engineered to be **100% offline-first**, running inside Obsidian's 
   │ UI Layer (Svelte 5 with Runes)                          │
   │  • BibleReaderView (ItemView leaf)                      │
   │  • BibleReader (Main reading UI, 1 or 2 columns)        │
+  │  • ResourceDetailPanel (Secondary Study Panel)          │
   │  • BookPicker (Fuzzy book/chapter navigation)           │
   │  • CrossRefBottomPanel (Backlinks-style references)     │
   │  • SettingsApp (Hierarchical multi-page settings)       │
@@ -53,6 +54,9 @@ obsidian-open-bible/
 ├── src/
 │   ├── main.ts                    # Plugin entry point & lifecycle registration
 │   ├── BibleReaderView.ts         # Obsidian ItemView wrapper for the Svelte reader
+│   ├── HighlightsView.ts          # Highlights browser workspace view
+│   ├── ResourcesView.ts           # General and per-type resources list view
+│   ├── ResourceDetailView.ts      # Dedicated study resource secondary workspace view
 │   ├── OpenBibleView.ts           # Secondary view wrapper
 │   ├── bibleCanon.ts              # Canonical book metadata (testaments, chapters, verses)
 │   ├── constants.ts               # Shared constants, book abbreviation mappings, paths
@@ -155,6 +159,19 @@ The UI is constructed using **Svelte 5 runes**:
   - **Verse Preview & Citations**: Used by `VersePreviewService` whenever references do not declare an explicit translation.
 - **Search & Filtering**: Real-time filtering in both Settings and the Reader's Version Picker drawer matches normalized search queries against version name, abbreviation, language, and file path.
 - **Clean Removal**: Deleting a version safely removes both the SQLite binary file and the associated `.md` metadata note.
+
+### Study Resources, Secondary Panel & Home Hub
+- **Entity & Link Storage**:
+  - `type: resource`: Markdown notes representing people, places, and study concepts.
+  - `type: resource-link`: Markdown notes binding verse ranges or specific text spans (`char_start`/`char_end`) to resources.
+- **Dual Presentation**:
+  - **Embedded Secondary Panel**: Integrated into `BibleReader.svelte` beside scripture text with a draggable divider (`.open-bible-split-resizer`). Supports dual internal modes:
+    - `"home"`: Renders `ResourceHomePanel.svelte` (the catalog Hub with search, type filter chips, occurrence badges, and sorting).
+    - `"detail"`: Renders `ResourceDetailPanel.svelte` (the encyclopedic detail view with rendered markdown and biblical occurrences). Provides a 1-click **Back to Hub** button.
+  - **Standalone Workspace Views**:
+    - `ResourceHubView` (`open-bible-resource-hub-view`): Dedicated workspace leaf hosting the Resource Home Hub.
+    - `ResourceDetailView` (`open-bible-resource-detail-view`): Dedicated workspace leaf hosting resource details.
+- **Single-Pass Occurrence Optimization**: `ResourceService.getResourceStats()` computes occurrence mappings in $O(N)$ time across all resource notes, preventing multi-query disk bottlenecks.
 
 ---
 

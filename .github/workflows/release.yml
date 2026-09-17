@@ -33,13 +33,36 @@ jobs:
             manifest.json
             styles.css
 
+      - name: Extract release notes
+        run: |
+          tag="${GITHUB_REF#refs/tags/}"
+          node -e '
+            const fs = require("fs");
+            const changelogPath = fs.existsSync("CHANGELOG.md") ? "CHANGELOG.md" : "docs/CHANGELOG.md";
+            const content = fs.readFileSync(changelogPath, "utf8");
+            const tag = process.argv[1];
+            const escaped = tag.replace(/\./g, "\\.");
+            const regex = new RegExp(`## \\[[v]?${escaped}\\][^\\n]*\\n([\\s\\S]*?)(?=\\n## \\[|$)`);
+            const match = content.match(regex);
+            const notes = match ? match[1].trim() : "";
+            fs.writeFileSync("RELEASE_NOTES.md", notes);
+          ' "$tag"
+
       - name: Create release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           tag="${GITHUB_REF#refs/tags/}"
 
+          NOTES_ARGS=""
+          if [ -s "RELEASE_NOTES.md" ]; then
+            NOTES_ARGS="--notes-file RELEASE_NOTES.md"
+          else
+            NOTES_ARGS="--generate-notes"
+          fi
+
           gh release create "$tag" \
             --title="$tag" \
             --draft \
+            $NOTES_ARGS \
             main.js manifest.json styles.css
