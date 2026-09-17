@@ -8,6 +8,9 @@ import {
 	ResourcesView,
 	getResourceViewType,
 } from "./ResourcesView";
+import { BIBLE_RESOURCE_DETAIL_VIEW_TYPE, ResourceDetailView } from "./ResourceDetailView";
+import { BIBLE_RESOURCE_HUB_VIEW_TYPE, ResourceHubView } from "./ResourceHubView";
+import type { BibleResourceLink } from "./models/resource";
 import { DEFAULT_SETTINGS, type OpenBibleSettings } from "./settings";
 import { normalizeDataFolder } from "./core/paths";
 import { BibleVersionService } from "./services/bibleVersionService";
@@ -66,6 +69,8 @@ export default class OpenBiblePlugin extends Plugin {
 		this.registerView(OPEN_BIBLE_VIEW_TYPE, (leaf) => new OpenBibleView(leaf, this.app, this.settings));
 		this.registerView(BIBLE_READER_VIEW_TYPE, (leaf) => new BibleReaderView(leaf, this));
 		this.registerView(BIBLE_HIGHLIGHTS_VIEW_TYPE, (leaf) => new HighlightsView(leaf, this));
+		this.registerView(BIBLE_RESOURCE_DETAIL_VIEW_TYPE, (leaf) => new ResourceDetailView(leaf, this));
+		this.registerView(BIBLE_RESOURCE_HUB_VIEW_TYPE, (leaf) => new ResourceHubView(leaf, this));
 		this.ensureResourceViews();
 
 		this.ribbonIconEl = this.addRibbonIcon("book-open", t("ribbon.openReader"), (evt: MouseEvent) => {
@@ -210,6 +215,62 @@ export default class OpenBiblePlugin extends Plugin {
 			name: t("commands.openResourcesLeftSidebar"),
 			callback: () => {
 				void this.openResourcesView("left");
+			},
+		});
+
+		this.addCommand({
+			id: "open-bible-resource-detail",
+			name: t("commands.openResourceDetail"),
+			callback: () => {
+				void this.openResourceDetailView();
+			},
+		});
+
+		this.addCommand({
+			id: "open-bible-resource-detail-right-sidebar",
+			name: t("commands.openResourceDetailRightSidebar"),
+			callback: () => {
+				void this.openResourceDetailView(undefined, "right");
+			},
+		});
+
+		this.addCommand({
+			id: "open-bible-resource-hub",
+			name: t("commands.openResourceHub"),
+			callback: async () => {
+				const mode = this.settings.resourceOpenMode ?? "reader";
+				if (mode === "workspace") {
+					void this.openResourceHubView();
+				} else {
+					let leaves = this.app.workspace.getLeavesOfType(BIBLE_READER_VIEW_TYPE);
+					if (leaves.length === 0) {
+						await this.openReader();
+						leaves = this.app.workspace.getLeavesOfType(BIBLE_READER_VIEW_TYPE);
+					}
+					for (const leaf of leaves) {
+						if (leaf.view instanceof BibleReaderView) {
+							await this.app.workspace.revealLeaf(leaf);
+							leaf.view.openResourceHub();
+							break;
+						}
+					}
+				}
+			},
+		});
+
+		this.addCommand({
+			id: "open-bible-resource-hub-right-sidebar",
+			name: t("commands.openResourceHubRightSidebar"),
+			callback: () => {
+				void this.openResourceHubView("right");
+			},
+		});
+
+		this.addCommand({
+			id: "open-bible-resource-hub-new-tab",
+			name: t("commands.openResourceHubNewTab"),
+			callback: () => {
+				void this.openResourceHubView("new-tab");
 			},
 		});
 
@@ -429,6 +490,42 @@ export default class OpenBiblePlugin extends Plugin {
 		if (!leaf) {
 			new Notice(t("view.errorOpening"));
 			return;
+		}
+	}
+
+	/** Opens (or reveals) the secondary resource detail view in the requested workspace location. */
+	async openResourceDetailView(link?: BibleResourceLink, split?: ViewSplit): Promise<WorkspaceLeaf | null> {
+		const targetSplit = split ?? (this.settings.resourceWorkspaceSplit as ViewSplit) ?? "right";
+		const leaf = await openOrRevealView(this.app.workspace, BIBLE_RESOURCE_DETAIL_VIEW_TYPE, targetSplit);
+		if (!leaf) {
+			new Notice(t("view.errorOpening"));
+			return null;
+		}
+		if (leaf.view instanceof ResourceDetailView) {
+			if (link) {
+				leaf.view.setResource(link);
+			}
+		}
+		return leaf;
+	}
+
+	/** Opens (or reveals) the Resource Home Hub view in the requested workspace location. */
+	async openResourceHubView(split?: ViewSplit): Promise<WorkspaceLeaf | null> {
+		const targetSplit = split ?? (this.settings.resourceWorkspaceSplit as ViewSplit) ?? "right";
+		const leaf = await openOrRevealView(this.app.workspace, BIBLE_RESOURCE_HUB_VIEW_TYPE, targetSplit);
+		if (!leaf) {
+			new Notice(t("view.errorOpening"));
+			return null;
+		}
+		return leaf;
+	}
+
+	/** Pushes a newly selected resource to all active ResourceDetailView workspace leaves. */
+	updateResourceDetailViews(link: BibleResourceLink): void {
+		for (const leaf of this.app.workspace.getLeavesOfType(BIBLE_RESOURCE_DETAIL_VIEW_TYPE)) {
+			if (leaf.view instanceof ResourceDetailView) {
+				leaf.view.setResource(link);
+			}
 		}
 	}
 

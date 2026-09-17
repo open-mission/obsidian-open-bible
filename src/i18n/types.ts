@@ -21,6 +21,11 @@ export interface TranslationStrings {
 		openResources: string;
 		openResourcesRightSidebar: string;
 		openResourcesLeftSidebar: string;
+		openResourceDetail: string;
+		openResourceDetailRightSidebar: string;
+		openResourceHub: string;
+		openResourceHubRightSidebar: string;
+		openResourceHubNewTab: string;
 	};
 	ribbon: {
 		openReader: string;
@@ -191,6 +196,16 @@ export interface TranslationStrings {
 		resourceHoverModifierDesc: string;
 		resourceColorizeName: string;
 		resourceColorizeDesc: string;
+		resourceOpenModeName: string;
+		resourceOpenModeDesc: string;
+		resourceOpenModeReader: string;
+		resourceOpenModeWorkspace: string;
+		resourceOpenModeModal: string;
+		resourceWorkspaceSplitName: string;
+		resourceWorkspaceSplitDesc: string;
+		resourceWorkspaceSplitRight: string;
+		resourceWorkspaceSplitSplit: string;
+		resourceWorkspaceSplitTab: string;
 	};
 	errors: {
 		invalidFolderPath: string;
@@ -326,6 +341,35 @@ export interface TranslationStrings {
 		pinInline: string;
 		collapsePanel: string;
 		expandPanel: string;
+		secondaryPanelTitle: string;
+		openInWorkspaceTab: string;
+		closeSecondaryPanel: string;
+		resizeSecondaryPanel: string;
+		allOccurrences: string;
+		noOccurrences: string;
+		noResourceSelected: string;
+		noResourceSelectedDesc: string;
+		backToHub: string;
+		hubTitle: string;
+		hubSubtitleSingle: string;
+		hubSubtitlePlural: string;
+		hubSearchPlaceholder: string;
+		hubAllTypes: string;
+		hubSortAz: string;
+		hubSortZa: string;
+		hubSortOccurrences: string;
+		hubSortRecent: string;
+		hubNoResults: string;
+		hubEmptyTitle: string;
+		hubEmptyDesc: string;
+		hubCreateResourceBtn: string;
+		hubOccurrencesCountSingle: string;
+		hubOccurrencesCountPlural: string;
+		hubNoOccurrencesYet: string;
+		openResourceHubTooltip: string;
+		hubViewGrouped: string;
+		hubViewFlat: string;
+		hubAddType: string;
 	};
 	popover: {
 		highlights: string;
@@ -379,6 +423,8 @@ export interface TranslationStrings {
 		linkScopeLabel: string;
 		linkScopeThisOnly: string;
 		linkScopeAllOccurrences: string;
+		createResourceModalTitle: string;
+		resourceTypeLabel: string;
 	};
 	note: {
 		openInEditor: string;

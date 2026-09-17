@@ -18,6 +18,7 @@
 		onNavigate: (direction: -1 | 1) => void;
 		onTogglePicker: (picker: Exclude<PickerMode, null>) => void;
 		onToggleSelectionMode?: () => void;
+		onOpenResourceHub?: () => void;
 	}
 
 	let {
@@ -31,6 +32,7 @@
 		onNavigate,
 		onTogglePicker,
 		onToggleSelectionMode,
+		onOpenResourceHub,
 	}: Props = $props();
 
 	let isMobile = Platform.isMobile;
@@ -128,7 +130,18 @@
 		/>
 	{/if}
 
-	<!-- 7. Next Button (>) -->
+	<!-- 7. Resource Hub Button -->
+	{#if onOpenResourceHub}
+		<IconButton
+			iconName="layout-grid"
+			class="open-bible-reader-nav open-bible-reader-toolbar-hub"
+			title={t("resources.openResourceHubTooltip") || "Central de Recursos"}
+			ariaLabel={t("resources.openResourceHubTooltip") || "Central de Recursos"}
+			onclick={onOpenResourceHub}
+		/>
+	{/if}
+
+	<!-- 8. Next Button (>) -->
 	<IconButton
 		iconName="chevron-right"
 		class="open-bible-reader-nav open-bible-reader-next-btn"
