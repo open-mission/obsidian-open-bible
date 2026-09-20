@@ -830,7 +830,25 @@
 				});
 		});
 
+		// 4. Comparar versões
+		menu.addItem((item) => {
+			item.setTitle(t("contextMenu.compare") || "Comparar versões")
+				.setIcon("columns")
+				.onClick(() => {
+					handleCompare();
+				});
+		});
+
 		menu.showAtMouseEvent(event);
+	}
+
+	function handleCompare() {
+		if (!plugin || !book) return;
+		plugin.openCompareModal({
+			bookId: book.id,
+			chapter,
+			verseNumbers: selectedVerseNumbers.length > 0 ? selectedVerseNumbers : [],
+		});
 	}
 </script>
 
@@ -1020,6 +1038,7 @@
 			onHighlightColor={handleHighlightColor}
 			onRemoveHighlight={handleRemoveHighlight}
 			onLinkResource={handleLinkResource}
+			onCompare={handleCompare}
 			onOpenConfigureHighlights={() => plugin?.openPluginSettings()}
 			onClose={clearSelection}
 		/>

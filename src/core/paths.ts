@@ -46,3 +46,13 @@ export function getResourceTypeFolder(
 	}
 	return normalizePath(`${dataFolder}/resources/${typeId}`);
 }
+
+export const DEFAULT_COMPARISONS_FOLDER = "OpenBible/comparisons";
+
+export function getComparisonsFolder(dataFolder: string, configuredFolder?: string): string {
+	if (configuredFolder && configuredFolder.trim()) {
+		return normalizePath(configuredFolder.trim());
+	}
+	return normalizePath(`${dataFolder}/comparisons`);
+}
+

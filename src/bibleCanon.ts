@@ -100,9 +100,19 @@ export const BIBLE_CANON: BibleCanonBook[] = [
 ];
 
 /**
+ * Looks up a book in the canon by its numeric ID (1-66).
+ */
+export function getCanonBookById(id: number): BibleCanonBook | null {
+	return BIBLE_CANON.find((b) => b.id === id) ?? null;
+}
+
+/**
  * Normalizes and looks up a book candidate against canon book names and abbreviations.
  */
-export function getCanonBook(candidate: string): BibleCanonBook | null {
+export function getCanonBook(candidate: string | number): BibleCanonBook | null {
+	if (typeof candidate === "number") {
+		return getCanonBookById(candidate);
+	}
 	const norm = normalizeText(candidate);
 	if (!norm) return null;
 
@@ -124,3 +134,4 @@ export function getCanonBook(candidate: string): BibleCanonBook | null {
 
 	return null;
 }
+

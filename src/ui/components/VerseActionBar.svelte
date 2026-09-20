@@ -22,6 +22,7 @@
 		onRemoveHighlight?: () => void;
 		onOpenConfigureHighlights?: () => void;
 		onLinkResource?: (typeId: string) => void;
+		onCompare?: () => void;
 		onClose: () => void;
 	}
 
@@ -40,6 +41,7 @@
 		onRemoveHighlight,
 		onOpenConfigureHighlights,
 		onLinkResource,
+		onCompare,
 		onClose,
 	}: Props = $props();
 
@@ -310,6 +312,20 @@
 				>
 					<span class="open-bible-action-bar-icon" use:icon={"link"}></span>
 					<span class="open-bible-action-bar-label">{t("popover.linkResource")}</span>
+				</button>
+			{/if}
+
+			{#if onCompare}
+				<!-- Compare Translations -->
+				<button
+					type="button"
+					class="open-bible-action-bar-btn"
+					aria-label={t("popover.compare")}
+					title={t("popover.compare")}
+					onclick={onCompare}
+				>
+					<span class="open-bible-action-bar-icon" use:icon={"columns"}></span>
+					<span class="open-bible-action-bar-label">{t("popover.compare")}</span>
 				</button>
 			{/if}
 		</div>

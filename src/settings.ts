@@ -136,6 +136,12 @@ export interface OpenBibleSettings {
 	crossRefsBottomPanelColumns?: 1 | 2;
 	crossRefsBottomPanelCollapsed?: boolean;
 	crossRefsBottomPanelHeight?: number;
+	/** Selected Bible versions for comparison modal. */
+	compareSelectedVersions?: string[];
+	/** Folder where generated Canvas (.canvas) and Excalidraw comparison files are saved. */
+	compareExportFolder?: string;
+	/** Preferred layout for comparison modal ("columns" or "verses"). */
+	comparePreferredLayout?: "columns" | "verses";
 }
 
 export const DEFAULT_SETTINGS: OpenBibleSettings = {
@@ -181,4 +187,7 @@ export const DEFAULT_SETTINGS: OpenBibleSettings = {
 	crossRefsBottomPanelColumns: 2,
 	crossRefsBottomPanelCollapsed: false,
 	crossRefsBottomPanelHeight: 220,
+	compareSelectedVersions: [],
+	compareExportFolder: "OpenBible/Comparisons",
+	comparePreferredLayout: "columns",
 };

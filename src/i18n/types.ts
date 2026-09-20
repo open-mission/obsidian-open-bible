@@ -26,6 +26,9 @@ export interface TranslationStrings {
 		openResourceHub: string;
 		openResourceHubRightSidebar: string;
 		openResourceHubNewTab: string;
+		compareVerses: string;
+		openCompareTab: string;
+		openCompareSplit: string;
 	};
 	ribbon: {
 		openReader: string;
@@ -382,6 +385,7 @@ export interface TranslationStrings {
 		createNote: string;
 		linkResource: string;
 		selectResourceType: string;
+		compare: string;
 		close: string;
 	};
 	contextMenu: {
@@ -393,6 +397,29 @@ export interface TranslationStrings {
 		moreOptions: string;
 		linkResource: string;
 		highlight: string;
+		compare: string;
+	};
+	compare: {
+		modalTitle: string;
+		selectVersionsPrompt: string;
+		selectAll: string;
+		clearAll: string;
+		layoutColumns: string;
+		layoutVerses: string;
+		copyMarkdown: string;
+		copiedMarkdownNotice: string;
+		exportCanvas: string;
+		exportExcalidraw: string;
+		exporting: string;
+		exportedCanvasNotice: string;
+		exportedExcalidrawNotice: string;
+		excalidrawNotInstalledNotice: string;
+		noVersionsSelected: string;
+		selectAtLeastOneVersion: string;
+		changeReference: string;
+		verseRowHeader: string;
+		readingError: string;
+		openInTab: string;
 	};
 	notices: {
 		textCopied: string;

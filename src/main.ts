@@ -31,6 +31,13 @@ import { createNoteFromSelection } from "./services/NoteService";
 import { getCanonBook } from "./bibleCanon";
 import type { BibleBook } from "./models/bible";
 import { PassagePickerModal } from "./ui/modals/PassagePickerModal";
+import { BibleComparisonService } from "./services/BibleComparisonService";
+import { BibleCompareModal, type BibleCompareModalOptions } from "./ui/modals/BibleCompareModal";
+import {
+	BIBLE_COMPARE_VIEW_TYPE,
+	BibleCompareView,
+	type BibleCompareViewState,
+} from "./BibleCompareView";
 
 export default class OpenBiblePlugin extends Plugin {
 	settings: OpenBibleSettings = DEFAULT_SETTINGS;
@@ -40,6 +47,7 @@ export default class OpenBiblePlugin extends Plugin {
 	versePreviewService!: VersePreviewService;
 	highlightService!: HighlightService;
 	resourceService!: ResourceService;
+	comparisonService!: BibleComparisonService;
 	private ribbonIconEl?: HTMLElement;
 	private registeredResourceViews: Set<string> = new Set();
 
@@ -52,6 +60,7 @@ export default class OpenBiblePlugin extends Plugin {
 		this.versePreviewService = new VersePreviewService(this);
 		this.highlightService = new HighlightService(this.app, () => this.settings);
 		this.resourceService = new ResourceService(this.app, () => this.settings);
+		this.comparisonService = new BibleComparisonService(this.app, this.bibleText, this.bibleVersions, () => this.settings);
 
 		this.registerEditorExtension(createVerseReferenceEditorExtension(this));
 		this.registerMarkdownPostProcessor((el, ctx) => {
@@ -71,6 +80,7 @@ export default class OpenBiblePlugin extends Plugin {
 		this.registerView(BIBLE_HIGHLIGHTS_VIEW_TYPE, (leaf) => new HighlightsView(leaf, this));
 		this.registerView(BIBLE_RESOURCE_DETAIL_VIEW_TYPE, (leaf) => new ResourceDetailView(leaf, this));
 		this.registerView(BIBLE_RESOURCE_HUB_VIEW_TYPE, (leaf) => new ResourceHubView(leaf, this));
+		this.registerView(BIBLE_COMPARE_VIEW_TYPE, (leaf) => new BibleCompareView(leaf, this));
 		this.ensureResourceViews();
 
 		this.ribbonIconEl = this.addRibbonIcon("book-open", t("ribbon.openReader"), (evt: MouseEvent) => {
@@ -335,6 +345,30 @@ export default class OpenBiblePlugin extends Plugin {
 			},
 		});
 
+		this.addCommand({
+			id: "open-bible-compare",
+			name: t("commands.compareVerses"),
+			callback: () => {
+				this.openCompareModal();
+			},
+		});
+
+		this.addCommand({
+			id: "open-bible-compare-tab",
+			name: t("commands.openCompareTab"),
+			callback: () => {
+				void this.openCompareView("tab");
+			},
+		});
+
+		this.addCommand({
+			id: "open-bible-compare-split",
+			name: t("commands.openCompareSplit"),
+			callback: () => {
+				void this.openCompareView("split");
+			},
+		});
+
 		this.registerEvent(
 			this.app.workspace.on("editor-menu", (menu, editor) => {
 				if (this.settings.enableVersePreviews === false) return;
@@ -406,6 +440,18 @@ export default class OpenBiblePlugin extends Plugin {
 								versionAbbr: preview.versionAbbr,
 							});
 							new Notice(t("notices.noteCreated"));
+						});
+				});
+
+				menu.addItem((item) => {
+					item.setTitle(t("contextMenu.compare"))
+						.setIcon("columns")
+						.onClick(() => {
+							this.openCompareModal({
+								bookId: ref.canonicalBookId,
+								chapter: ref.chapter,
+								verseNumbers: ref.verseStart ? [ref.verseStart] : [],
+							});
 						});
 				});
 			})
@@ -518,6 +564,24 @@ export default class OpenBiblePlugin extends Plugin {
 			return null;
 		}
 		return leaf;
+	}
+
+	/** Opens (or reveals) the Bible text comparison view in the requested location (tab or split). */
+	async openCompareView(split: ViewSplit = "tab", state?: BibleCompareViewState): Promise<WorkspaceLeaf | null> {
+		const leaf = await openOrRevealView(this.app.workspace, BIBLE_COMPARE_VIEW_TYPE, split);
+		if (!leaf) {
+			new Notice(t("view.errorOpening"));
+			return null;
+		}
+		if (state && leaf.view instanceof BibleCompareView) {
+			leaf.view.setPassageState(state);
+		}
+		return leaf;
+	}
+
+	/** Opens the Bible text comparison modal for side-by-side study and canvas export. */
+	openCompareModal(options?: BibleCompareModalOptions): void {
+		new BibleCompareModal(this.app, this, options).open();
 	}
 
 	/** Pushes a newly selected resource to all active ResourceDetailView workspace leaves. */

@@ -180,6 +180,19 @@ export class BibleReaderView extends ItemView {
 
 		menu.addItem((item) =>
 			item
+				.setTitle(t("compare.modalTitle") || "Comparar versões")
+				.setIcon("columns")
+				.onClick(() => {
+					const state = this.getState() as Record<string, unknown>;
+					this.plugin.openCompareModal({
+						bookId: typeof state?.bookId === "number" ? state.bookId : undefined,
+						chapter: typeof state?.chapter === "number" ? state.chapter : undefined,
+					});
+				}),
+		);
+
+		menu.addItem((item) =>
+			item
 				.setTitle(t("commands.openHighlightsRightSidebar"))
 				.setIcon("layout-sidebar-right")
 				.onClick(() => {
