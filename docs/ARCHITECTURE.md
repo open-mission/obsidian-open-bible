@@ -23,6 +23,7 @@ OpenBible is engineered to be **100% offline-first**, running inside Obsidian's 
   │ Services    ▼                             ▼             │
   │  • BibleVersionService  ──▶ Scans SQLite DBs in Vault   │
   │  • BibleTextService     ──▶ Executes SQL queries (Wasm) │
+  │  • BibleComparisonService──▶ Text comparison & Canvas   │
   │  • CrossReferenceService──▶ Binary Thompson references  │
   │  • VersePreviewService  ──▶ Modals and passage preview  │
   └─────────────┬───────────────────────────────────────────┘
@@ -50,6 +51,7 @@ obsidian-open-bible/
 │       └── release.yml            # Automated GitHub releases with attestations
 ├── docs/                          # Developer & architecture documentation
 │   ├── ARCHITECTURE.md            # System architecture and directory map
+│   ├── text-comparison.md         # Multi-version comparison, Canvas & Excalidraw exports
 │   └── verse-previews.md          # Scripture reference auto-detection & previews
 ├── src/
 │   ├── main.ts                    # Plugin entry point & lifecycle registration
