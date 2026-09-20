@@ -162,9 +162,11 @@
 {/if}
 
 <!-- Tabs: Todos, AT, NT -->
-<div class="open-bible-picker-tabs">
+<div class="open-bible-picker-tabs" role="tablist">
 	<button
 		type="button"
+		role="tab"
+		aria-selected={activeTab === "all"}
 		class="open-bible-picker-tab"
 		class:is-active={activeTab === "all"}
 		onclick={() => (activeTab = "all")}
@@ -173,6 +175,8 @@
 	</button>
 	<button
 		type="button"
+		role="tab"
+		aria-selected={activeTab === "ot"}
 		class="open-bible-picker-tab"
 		class:is-active={activeTab === "ot"}
 		onclick={() => (activeTab = "ot")}
@@ -181,6 +185,8 @@
 	</button>
 	<button
 		type="button"
+		role="tab"
+		aria-selected={activeTab === "nt"}
 		class="open-bible-picker-tab"
 		class:is-active={activeTab === "nt"}
 		onclick={() => (activeTab = "nt")}
@@ -204,6 +210,7 @@
 							class="open-bible-book-tile"
 							class:is-active={book.id === currentBookId}
 							class:is-reference-target={matchedRefBook?.id === book.id}
+							aria-current={book.id === currentBookId ? "true" : undefined}
 							aria-label={book.chapters.length === 1
 								? t("bookPicker.bookAriaSingle", { name: book.name })
 								: t("bookPicker.bookAriaPlural", { name: book.name, count: book.chapters.length })}
@@ -231,6 +238,7 @@
 							class="open-bible-book-tile"
 							class:is-active={book.id === currentBookId}
 							class:is-reference-target={matchedRefBook?.id === book.id}
+							aria-current={book.id === currentBookId ? "true" : undefined}
 							aria-label={book.chapters.length === 1
 								? t("bookPicker.bookAriaSingle", { name: book.name })
 								: t("bookPicker.bookAriaPlural", { name: book.name, count: book.chapters.length })}
@@ -255,6 +263,7 @@
 					class="open-bible-book-tile"
 					class:is-active={book.id === currentBookId}
 					class:is-reference-target={matchedRefBook?.id === book.id}
+					aria-current={book.id === currentBookId ? "true" : undefined}
 					aria-label={book.chapters.length === 1
 						? t("bookPicker.bookAriaSingle", { name: book.name })
 						: t("bookPicker.bookAriaPlural", { name: book.name, count: book.chapters.length })}

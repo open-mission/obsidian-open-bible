@@ -52,6 +52,9 @@
 		onSelectCrossRef?: (verseNumber: number, ref: CrossReference, event: MouseEvent) => void;
 		onSelectVerse?: (verseNumber: number | undefined) => void;
 		onOpenResource?: (link: BibleResourceLink) => void;
+		canNavigatePrevious?: boolean;
+		canNavigateNext?: boolean;
+		onNavigateChapter?: (direction: -1 | 1) => void;
 	}
 
 	let {
@@ -76,6 +79,9 @@
 		onSelectCrossRef,
 		onSelectVerse,
 		onOpenResource,
+		canNavigatePrevious = false,
+		canNavigateNext = false,
+		onNavigateChapter,
 	}: Props = $props();
 
 	let selectedVerseNumbers = $state<number[]>([]);
@@ -1018,6 +1024,43 @@
 							/>
 						{/each}
 					</div>
+				{/if}
+
+				{#if onNavigateChapter && verses.length > 0}
+					<nav class="open-bible-reader-bottom-nav" aria-label={t("toolbar.chooseChapter") || "Navegação de capítulo"}>
+						<button
+							type="button"
+							class="open-bible-bottom-nav-btn is-prev"
+							disabled={!canNavigatePrevious}
+							onclick={() => onNavigateChapter(-1)}
+							title={t("toolbar.prevChapter")}
+							aria-label={t("toolbar.prevChapter")}
+						>
+							<span class="open-bible-bottom-nav-icon" use:icon={"chevron-left"}></span>
+							<span class="open-bible-bottom-nav-label">{t("toolbar.prevChapter")}</span>
+						</button>
+
+						<div class="open-bible-bottom-nav-passage">
+							<span class="open-bible-bottom-nav-current">{book.name} {chapter}</span>
+							{#if book.chapters && book.chapters.length > 0}
+								<span class="open-bible-bottom-nav-count">
+									{chapter} / {book.chapters.length}
+								</span>
+							{/if}
+						</div>
+
+						<button
+							type="button"
+							class="open-bible-bottom-nav-btn is-next"
+							disabled={!canNavigateNext}
+							onclick={() => onNavigateChapter(1)}
+							title={t("toolbar.nextChapter")}
+							aria-label={t("toolbar.nextChapter")}
+						>
+							<span class="open-bible-bottom-nav-label">{t("toolbar.nextChapter")}</span>
+							<span class="open-bible-bottom-nav-icon" use:icon={"chevron-right"}></span>
+						</button>
+					</nav>
 				{/if}
 			</div>
 		{/key}

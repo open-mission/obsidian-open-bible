@@ -40,6 +40,7 @@
 				type="button"
 				class="open-bible-chapter-tile"
 				class:is-active={book.id === currentBookId && chapter === currentChapter}
+				aria-current={book.id === currentBookId && chapter === currentChapter ? "true" : undefined}
 				aria-label={t("chapterPicker.chapterAria", { chapter })}
 				onclick={() => onSelectChapter(chapter)}
 			>

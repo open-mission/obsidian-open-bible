@@ -75,6 +75,7 @@
 				type="button"
 				class="open-bible-version-tile"
 				class:is-active={isCurrent}
+				aria-current={isCurrent ? "true" : undefined}
 				aria-label={t("versionPicker.selectVersionAria", { name: v.name })}
 				onclick={() => {
 					onClose();

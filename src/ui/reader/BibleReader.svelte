@@ -857,6 +857,9 @@
 						versionAbbr={currentInfo?.abbreviation ?? ""}
 						selectedVerseNumber={activeVerseNumber}
 						{isSelectionMode}
+						{canNavigatePrevious}
+						{canNavigateNext}
+						onNavigateChapter={navigateChapter}
 						onRetry={() => {
 							if (currentBookId !== undefined && currentChapter !== undefined) {
 								void loadChapter(currentBookId, currentChapter);
@@ -933,6 +936,7 @@
 						<ResourceHomePanel
 							{plugin}
 							embedded={true}
+							currentResourcePath={secondaryResource?.path}
 							onSelectResource={handleSelectResourceFromHub}
 							onClose={closeSecondaryPanel}
 							onOpenInWorkspace={() => {

@@ -482,7 +482,7 @@
 				type="checkbox"
 				class="open-bible-reader-verse-checkbox"
 				checked={isSelected}
-				aria-label={`Selecionar versículo ${verse.number}`}
+				aria-label={t("reader.selectVerseAria", { verse: verse.number })}
 				onchange={(e) => {
 					e.stopPropagation();
 					onToggleVerseSelection?.(verse.number);
