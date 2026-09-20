@@ -15,6 +15,7 @@
 	interface Props {
 		plugin: OpenBiblePlugin;
 		embedded?: boolean;
+		currentResourcePath?: string;
 		onSelectResource: (resource: BibleResourceItem) => void;
 		onOpenInWorkspace?: () => void;
 		onClose?: () => void;
@@ -24,6 +25,7 @@
 	let {
 		plugin,
 		embedded = false,
+		currentResourcePath,
 		onSelectResource,
 		onOpenInWorkspace,
 		onClose,
@@ -38,6 +40,13 @@
 	let occurrencesMap = $state<Map<string, number>>(new Map());
 	let countsByType = $state<Map<string, number>>(new Map());
 	let thumbnails = $state<Map<string, string>>(new Map());
+	let failedImages = $state<Set<string>>(new Set());
+
+	function handleImageError(path: string) {
+		const next = new Set(failedImages);
+		next.add(path);
+		failedImages = next;
+	}
 
 	function loadData() {
 		if (!plugin?.resourceService) return;
@@ -214,12 +223,12 @@
 		<div class="open-bible-resource-hub-header-main">
 			<div class="open-bible-resource-hub-header-icon" use:icon={"layout-grid"}></div>
 			<div class="open-bible-resource-hub-header-text">
-				<h2 class="open-bible-resource-hub-title">{t("resources.hubTitle") || "Central de Recursos"}</h2>
+				<h2 class="open-bible-resource-hub-title">{t("resources.hubTitle")}</h2>
 				<span class="open-bible-resource-hub-subtitle">
 					{#if resources.length === 1}
-						{t("resources.hubSubtitleSingle", { count: 1 }) || "1 recurso cadastrado"}
+						{t("resources.hubSubtitleSingle", { count: 1 })}
 					{:else}
-						{t("resources.hubSubtitlePlural", { count: resources.length, types: resourceTypes.length }) || `${resources.length} recursos em ${resourceTypes.length} categorias`}
+						{t("resources.hubSubtitlePlural", { count: resources.length, types: resourceTypes.length })}
 					{/if}
 				</span>
 			</div>
@@ -230,18 +239,18 @@
 				type="button"
 				class="open-bible-ui-btn is-small is-primary open-bible-hub-create-btn"
 				onclick={() => handleCreateResource()}
-				title={t("resources.hubCreateResourceBtn") || "Novo recurso"}
+				title={t("resources.hubCreateResourceBtn")}
 			>
 				<span use:icon={"plus"}></span>
-				<span class="open-bible-btn-text">{t("resources.hubCreateResourceBtn") || "Novo recurso"}</span>
+				<span class="open-bible-btn-text">{t("resources.hubCreateResourceBtn")}</span>
 			</button>
 
 			{#if embedded && onOpenInWorkspace}
 				<button
 					type="button"
 					class="clickable-icon open-bible-secondary-action-btn"
-					aria-label={t("resources.openInWorkspaceTab") || "Abrir em aba separada"}
-					title={t("resources.openInWorkspaceTab") || "Abrir em aba separada"}
+					aria-label={t("resources.openInWorkspaceTab")}
+					title={t("resources.openInWorkspaceTab")}
 					onclick={onOpenInWorkspace}
 				>
 					<span use:icon={"external-link"}></span>
@@ -252,8 +261,8 @@
 				<button
 					type="button"
 					class="clickable-icon open-bible-secondary-action-btn mod-close"
-					aria-label={t("resources.closeSecondaryPanel") || "Fechar painel"}
-					title={t("resources.closeSecondaryPanel") || "Fechar painel"}
+					aria-label={t("resources.closeSecondaryPanel")}
+					title={t("resources.closeSecondaryPanel")}
 					onclick={onClose}
 				>
 					<span use:icon={"x"}></span>
@@ -267,20 +276,20 @@
 		<!-- Search Field -->
 		<div class="open-bible-resource-hub-search">
 			<SearchField
-				placeholder={t("resources.hubSearchPlaceholder") || "Buscar por nome, título ou tags..."}
+				placeholder={t("resources.hubSearchPlaceholder")}
 				bind:value={searchQuery}
 			/>
 		</div>
 
 		<!-- Category Chips -->
-		<div class="open-bible-resource-hub-chips" role="toolbar" aria-label="Filtro por tipo de recurso">
+		<div class="open-bible-resource-hub-chips" role="toolbar" aria-label={t("resources.hubFilterByType")}>
 			<button
 				type="button"
 				class="open-bible-hub-chip"
 				class:is-active={selectedType === null}
 				onclick={() => (selectedType = null)}
 			>
-				<span>{t("resources.hubAllTypes") || "Todos"}</span>
+				<span>{t("resources.hubAllTypes")}</span>
 				<span class="open-bible-hub-chip-count">{resources.length}</span>
 			</button>
 
@@ -306,7 +315,7 @@
 		<div class="open-bible-resource-hub-sort-row">
 			<span class="open-bible-resource-hub-sort-label">
 				<span use:icon={"arrow-up-down"}></span>
-				<span>{filteredResources.length} {filteredResources.length === 1 ? "recurso" : "recursos"}</span>
+				<span>{t("resources.hubResourcesCount", { count: filteredResources.length })}</span>
 			</span>
 
 			<div class="open-bible-resource-hub-sort-actions">
@@ -314,22 +323,22 @@
 					<select
 						class="dropdown open-bible-resource-hub-sort-select"
 						bind:value={sortBy}
-						aria-label="Ordenar recursos"
+						aria-label={t("resources.hubSortAria")}
 					>
-						<option value="occurrences">{t("resources.hubSortOccurrences") || "Mais citados na Bíblia"}</option>
-						<option value="az">{t("resources.hubSortAz") || "Nome (A-Z)"}</option>
-						<option value="za">{t("resources.hubSortZa") || "Nome (Z-A)"}</option>
-						<option value="recent">{t("resources.hubSortRecent") || "Atualizados recentemente"}</option>
+						<option value="occurrences">{t("resources.hubSortOccurrences")}</option>
+						<option value="az">{t("resources.hubSortAz")}</option>
+						<option value="za">{t("resources.hubSortZa")}</option>
+						<option value="recent">{t("resources.hubSortRecent")}</option>
 					</select>
 				</div>
 
-				<div class="open-bible-hub-layout-toggle" role="group" aria-label="Modo de visualização">
+				<div class="open-bible-hub-layout-toggle" role="group" aria-label={t("resources.hubViewLayoutAria")}>
 					<button
 						type="button"
 						class="open-bible-hub-layout-btn"
 						class:is-active={viewLayout === "grouped"}
-						title={t("resources.hubViewGrouped") || "Agrupado por categoria"}
-						aria-label={t("resources.hubViewGrouped") || "Agrupado por categoria"}
+						title={t("resources.hubViewGrouped")}
+						aria-label={t("resources.hubViewGrouped")}
 						onclick={() => (viewLayout = "grouped")}
 					>
 						<span use:icon={"layers"}></span>
@@ -338,8 +347,8 @@
 						type="button"
 						class="open-bible-hub-layout-btn"
 						class:is-active={viewLayout === "flat"}
-						title={t("resources.hubViewFlat") || "Grade contínua"}
-						aria-label={t("resources.hubViewFlat") || "Grade contínua"}
+						title={t("resources.hubViewFlat")}
+						aria-label={t("resources.hubViewFlat")}
 						onclick={() => (viewLayout = "flat")}
 					>
 						<span use:icon={"layout-grid"}></span>
@@ -350,8 +359,8 @@
 					<button
 						type="button"
 						class="clickable-icon open-bible-hub-collapse-all-btn"
-						title={collapsedGroups.size > 0 ? (t("resources.expandAll") || "Expandir todos") : (t("resources.collapseAll") || "Recolher todos")}
-						aria-label={collapsedGroups.size > 0 ? (t("resources.expandAll") || "Expandir todos") : (t("resources.collapseAll") || "Recolher todos")}
+						title={collapsedGroups.size > 0 ? t("resources.expandAll") : t("resources.collapseAll")}
+						aria-label={collapsedGroups.size > 0 ? t("resources.expandAll") : t("resources.collapseAll")}
 						onclick={toggleAllGroups}
 					>
 						<span use:icon={collapsedGroups.size > 0 ? "chevrons-down-up" : "chevrons-up-down"}></span>
@@ -365,17 +374,25 @@
 	{#snippet resourceCard(item: BibleResourceItem)}
 		{@const typeConfig = getTypeConfig(item.resourceType)}
 		{@const thumbUrl = thumbnails.get(item.path)}
+		{@const hasValidThumb = Boolean(thumbUrl && !failedImages.has(item.path))}
 		{@const occCount = occurrencesMap.get(normalizePath(item.path)) ?? 0}
 		{@const typeColor = typeConfig?.color || "var(--interactive-accent)"}
 		{@const typeIcon = typeConfig?.icon || "link"}
+		{@const occText = occCount === 1 ? t("resources.hubOccurrencesCountSingle") : occCount > 1 ? t("resources.hubOccurrencesCountPlural", { count: occCount }) : t("resources.hubNoOccurrencesYet")}
+		{@const cardAriaLabel = `${item.name}, ${typeConfig?.label || item.resourceType} (${occText})`}
 
 		<!-- svelte-ignore a11y_click_events_have_key_events -->
 		<div
 			class="open-bible-resource-hub-card"
+			class:is-active={Boolean(currentResourcePath && normalizePath(item.path) === normalizePath(currentResourcePath))}
 			role="button"
 			tabindex="0"
+			aria-label={cardAriaLabel}
 			onclick={() => onSelectResource(item)}
 			onkeydown={(e) => {
+				if (e.target !== e.currentTarget && (e.target as HTMLElement)?.closest(".open-bible-resource-hub-card-actions")) {
+					return;
+				}
 				if (e.key === "Enter" || e.key === " ") {
 					e.preventDefault();
 					onSelectResource(item);
@@ -384,12 +401,13 @@
 		>
 			<!-- Media / Avatar -->
 			<div class="open-bible-resource-hub-card-media">
-				{#if thumbUrl}
+				{#if hasValidThumb}
 					<img
 						src={thumbUrl}
-						alt={item.name}
+						alt=""
 						class="open-bible-resource-hub-card-img"
 						loading="lazy"
+						onerror={() => handleImageError(item.path)}
 					/>
 					<div class="open-bible-resource-hub-card-img-overlay"></div>
 				{:else}
@@ -397,18 +415,9 @@
 						class="open-bible-resource-hub-card-placeholder"
 						style="--card-color: {typeColor};"
 					>
-						<span use:icon={typeIcon}></span>
+						<span class="open-bible-resource-hub-card-placeholder-icon" use:icon={typeIcon}></span>
 					</div>
 				{/if}
-
-				<div
-					class="open-bible-resource-hub-card-type-badge"
-					style="--badge-color: {typeColor};"
-					title={typeConfig?.label || item.resourceType}
-				>
-					<span use:icon={typeIcon}></span>
-					<span>{typeConfig?.label || item.resourceType}</span>
-				</div>
 			</div>
 
 			<!-- Content -->
@@ -418,14 +427,17 @@
 				</h4>
 
 				<div class="open-bible-resource-hub-card-meta">
-					<span class="open-bible-resource-hub-card-occ">
+					<span
+						class="open-bible-resource-hub-card-occ"
+						class:has-occurrences={occCount > 0}
+					>
 						<span use:icon={"book-open"}></span>
 						{#if occCount === 1}
-							<span>{t("resources.hubOccurrencesCountSingle") || "1 passagem"}</span>
+							<span>{t("resources.hubOccurrencesCountSingle")}</span>
 						{:else if occCount > 1}
-							<span>{t("resources.hubOccurrencesCountPlural", { count: occCount }) || `${occCount} passagens`}</span>
+							<span>{t("resources.hubOccurrencesCountPlural", { count: occCount })}</span>
 						{:else}
-							<span class="is-zero">{t("resources.hubNoOccurrencesYet") || "Sem vínculos"}</span>
+							<span class="is-zero">{t("resources.hubNoOccurrencesYet")}</span>
 						{/if}
 					</span>
 				</div>
@@ -436,8 +448,8 @@
 				<IconButton
 					iconName="file-text"
 					class="open-bible-resource-hub-card-btn"
-					title={t("note.openInEditor") || "Abrir nota"}
-					ariaLabel={t("note.openInEditor") || "Abrir nota"}
+					title={t("note.openInEditor")}
+					ariaLabel={t("note.openInEditor")}
 					onclick={(e: MouseEvent) => handleOpenEditor(e, item)}
 				/>
 			</div>
@@ -450,8 +462,8 @@
 			<div class="open-bible-resource-hub-empty">
 				<EmptyState
 					iconName="layout-grid"
-					title={t("resources.hubEmptyTitle") || "Nenhum recurso de estudo criado"}
-					description={t("resources.hubEmptyDesc") || "Cadastre pessoas, lugares ou tópicos bíblicos para enriquecer seu estudo da Palavra."}
+					title={t("resources.hubEmptyTitle")}
+					description={t("resources.hubEmptyDesc")}
 				/>
 				<button
 					type="button"
@@ -459,12 +471,12 @@
 					onclick={() => handleCreateResource()}
 				>
 					<span use:icon={"plus"}></span>
-					<span>{t("resources.hubCreateResourceBtn") || "Criar primeiro recurso"}</span>
+					<span>{t("resources.hubCreateResourceBtn")}</span>
 				</button>
 			</div>
 		{:else if filteredResources.length === 0}
 			<div class="open-bible-resource-hub-no-results">
-				<p>{t("resources.hubNoResults") || "Nenhum recurso encontrado para esta busca."}</p>
+				<p>{t("resources.hubNoResults")}</p>
 			</div>
 		{:else if viewLayout === "grouped"}
 			<div class="open-bible-resource-hub-groups">
@@ -499,14 +511,14 @@
 							<button
 								type="button"
 								class="open-bible-resource-hub-group-add-btn"
-								title={t("resources.hubAddType", { type: group.label }) || `Adicionar ${group.label}`}
+								title={t("resources.hubAddType", { type: group.label })}
 								onclick={(e: MouseEvent) => {
 									e.stopPropagation();
 									handleCreateResource(group.typeId);
 								}}
 							>
 								<span use:icon={"plus"}></span>
-								<span>{t("resources.hubCreateResourceBtn") || "Adicionar"}</span>
+								<span>{t("resources.hubCreateResourceBtn")}</span>
 							</button>
 						</div>
 

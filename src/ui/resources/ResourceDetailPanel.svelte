@@ -102,7 +102,7 @@
 		} else {
 			markdownContainerEl.createEl("p", {
 				cls: "open-bible-secondary-panel-empty-text",
-				text: t("common.empty") || "Nenhum conteúdo adicional nesta nota.",
+				text: t("common.empty"),
 			});
 		}
 	}
@@ -146,8 +146,8 @@
 		<div class="open-bible-secondary-panel-empty">
 			<EmptyState
 				iconName="book-open-check"
-				title={t("resources.noResourceSelected") || "Nenhum recurso selecionado"}
-				description={t("resources.noResourceSelectedDesc") || "Clique em um recurso no leitor para visualizar seus detalhes e notas aqui."}
+				title={t("resources.noResourceSelected")}
+				description={t("resources.noResourceSelectedDesc")}
 			/>
 		</div>
 	{:else}
@@ -158,8 +158,8 @@
 					<button
 						type="button"
 						class="clickable-icon open-bible-secondary-action-btn mod-back"
-						aria-label={t("resources.backToHub") || "Voltar à Central"}
-						title={t("resources.backToHub") || "Voltar à Central"}
+						aria-label={t("resources.backToHub")}
+						title={t("resources.backToHub")}
 						onclick={onBackToHub}
 					>
 						<span use:icon={"arrow-left"}></span>
@@ -178,8 +178,8 @@
 				<button
 					type="button"
 					class="clickable-icon open-bible-secondary-action-btn"
-					aria-label={t("note.openInEditor") || "Abrir no editor"}
-					title={t("note.openInEditor") || "Abrir no editor"}
+					aria-label={t("note.openInEditor")}
+					title={t("note.openInEditor")}
 					onclick={handleOpenEditor}
 				>
 					<span use:icon={"file-text"}></span>
@@ -189,8 +189,8 @@
 					<button
 						type="button"
 						class="clickable-icon open-bible-secondary-action-btn"
-						aria-label={t("resources.openInWorkspaceTab") || "Abrir em aba separada"}
-						title={t("resources.openInWorkspaceTab") || "Abrir em aba separada"}
+						aria-label={t("resources.openInWorkspaceTab")}
+						title={t("resources.openInWorkspaceTab")}
 						onclick={onOpenInWorkspace}
 					>
 						<span use:icon={"external-link"}></span>
@@ -201,8 +201,8 @@
 					<button
 						type="button"
 						class="clickable-icon open-bible-secondary-action-btn mod-close"
-						aria-label={t("resources.closeSecondaryPanel") || "Fechar painel"}
-						title={t("resources.closeSecondaryPanel") || "Fechar painel"}
+						aria-label={t("resources.closeSecondaryPanel")}
+						title={t("resources.closeSecondaryPanel")}
 						onclick={onClose}
 					>
 						<span use:icon={"x"}></span>
@@ -251,7 +251,7 @@
 					<div class="open-bible-secondary-passage-header">
 						<span class="open-bible-secondary-passage-icon" use:icon={"book-open"}></span>
 						<span class="open-bible-secondary-passage-title">
-							{t("resourcesPanel.linkedPassage") || "Passagem vinculada"}: {link.reference}
+							{t("resourcesPanel.linkedPassage")}: {link.reference}
 						</span>
 					</div>
 					{#if link.selectedText}
@@ -267,7 +267,7 @@
 				<div class="open-bible-secondary-occurrences-section">
 					<div class="open-bible-secondary-occurrences-title">
 						<span use:icon={"layers"}></span>
-						<span>{t("resources.allOccurrences") || "Passagens bíblicas vinculadas"} ({otherOccurrences.length})</span>
+						<span>{t("resources.allOccurrences")} ({otherOccurrences.length})</span>
 					</div>
 
 					<div class="open-bible-secondary-occurrences-list">
@@ -311,7 +311,7 @@
 					disabled={isUnlinking}
 				>
 					<span use:icon={"unlink"}></span>
-					<span>{t("resourcesPanel.unlinkTooltip") || "Desvincular deste versículo"}</span>
+					<span>{t("resourcesPanel.unlinkTooltip")}</span>
 				</button>
 			</div>
 		{/if}

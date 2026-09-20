@@ -137,6 +137,11 @@ The UI is constructed using **Svelte 5 runes**:
   - `jump`: gentle fade and slide-up (`translateY(10px)` → `0`) for book/chapter picker selections or verse searches.
 - Full accessibility compliance with `@media (prefers-reduced-motion: reduce)`.
 
+### Continuous Reading Flow & Chapter Navigation
+- **Sticky Reader Toolbar**: The top navigation pill bar (`.open-bible-reader-toolbar`) is positioned sticky with `backdrop-filter: blur(8px)` and elevation shadow, keeping book, chapter, and version selectors readily accessible while scrolling through lengthy passages.
+- **Chapter Bottom Navigation**: At the conclusion of each chapter, an integrated footer bar (`.open-bible-reader-bottom-nav`) provides previous and next chapter buttons, target chapter labels, and total chapter counters (e.g. `1 / 50`). This allows unbroken, continuous reading without needing to manually scroll back to the top of the pane.
+- **Layout Performance**: Content containers operate with zero-layout-transition overhead to prevent forced browser reflows during responsive window resizing.
+
 
 ### Bible Version Management & Markdown Properties Notes
 - **Physical SQLite Integrity**: User-imported SQLite files (`.sqlite`, `.db`, `.sqlite3`) are stored in the configured versions folder (e.g. `OpenBible/versions/`).
@@ -175,6 +180,21 @@ The UI is constructed using **Svelte 5 runes**:
     - `ResourceDetailView` (`open-bible-resource-detail-view`): Dedicated workspace leaf hosting resource details.
 - **Single-Pass Occurrence Optimization**: `ResourceService.getResourceStats()` computes occurrence mappings in $O(N)$ time across all resource notes, preventing multi-query disk bottlenecks.
 
+### Reader Appearance & Navigation Pickers
+- **Appearance Controls**:
+  - `AppearancePanel.svelte` provides quick in-reader configuration for container width, verse spacing, line spacing, two-column mode, Thompson cross-references layout, and bottom panel layout.
+  - Replaced native OS select dropdowns with tactile segmented pill groups via `SegmentedControl.svelte` (`role="radiogroup"`, `role="radio"`, `aria-checked`).
+  - Mirrors identical options in settings (`ReaderSection.svelte`), ensuring a seamless transition between settings and quick reading view tweaks.
+- **Passage Navigation Pickers**:
+  - `BookPicker.svelte`: Real-time fuzzy search, testament tabs (`All`, `OT`, `NT`) with ARIA tablist semantics, and instant reference parsing badge to jump straight to chapter and verse.
+  - `ChapterPicker.svelte`: Compact numeric grid with `aria-current` tracking and distinct active indicator for the current chapter.
+  - `VersionPicker.svelte`: Searchable installed translations grid with abbreviation pill badges, default version highlight, and active version checkmarks.
+  - `PassagePickerApp.svelte`: 3-step visual picker and instant reference search modal supporting insertion, note creation, and passage navigation.
+- **Accessibility & Craft Standards**:
+  - Complete `:focus-visible` dual-ring focus outline across all tiles (`.open-bible-book-tile`, `.open-bible-chapter-tile`, `.open-bible-version-tile`, `.open-bible-segmented-item`, `.open-bible-picker-tab`).
+  - Responsive layout adapts from desktop popovers to mobile bottom sheet drawers with safe-area insets.
+  - Zero hardcoded localized strings; fully connected through `t()` with comprehensive keys in `en` and `pt`.
+
 ---
 
 ## 4. Internationalization (i18n)
@@ -186,4 +206,5 @@ UI copy is strictly decoupled from components:
   - `en` (English - default)
   - `pt` (Portuguese)
   - `auto` (follows Obsidian's interface language setting)
+
 

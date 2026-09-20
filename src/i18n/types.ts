@@ -270,6 +270,7 @@ export interface TranslationStrings {
 		rangeHighlightMarker: string;
 		resourceLinkMarker: string;
 		selectVerseTooltip: string;
+		selectVerseAria: string;
 		noVersesFound: string;
 		retry: string;
 		selectionMode: string;
@@ -286,10 +287,20 @@ export interface TranslationStrings {
 		spacingSpacious: string;
 		twoColumnsToggle: string;
 		thompsonCrossRefs: string;
+		thompsonPositionLabel: string;
 		thompsonPositionMargin: string;
 		thompsonPositionCenter: string;
 		bottomCrossRefs: string;
+		panelPositionLabel: string;
+		panelPositionInline: string;
+		panelPositionFixed: string;
+		columnsLabel: string;
+		columnsOne: string;
+		columnsTwo: string;
 		appearance: string;
+		layoutSection: string;
+		typographySection: string;
+		crossRefsSection: string;
 		readingHistory: string;
 		selectionMode: string;
 		splitRight: string;
@@ -373,6 +384,10 @@ export interface TranslationStrings {
 		hubViewGrouped: string;
 		hubViewFlat: string;
 		hubAddType: string;
+		hubFilterByType: string;
+		hubResourcesCount: string;
+		hubSortAria: string;
+		hubViewLayoutAria: string;
 	};
 	popover: {
 		highlights: string;
@@ -420,6 +435,15 @@ export interface TranslationStrings {
 		verseRowHeader: string;
 		readingError: string;
 		openInTab: string;
+		copyVerseRow: string;
+		copiedVerseRowNotice: string;
+		dragToReorderChip: string;
+		clickToSelectChip: string;
+		dragCardToReorder: string;
+		removeVersion: string;
+		exportCanvasError: string;
+		exportExcalidrawError: string;
+		verseAbsent: string;
 	};
 	notices: {
 		textCopied: string;
@@ -489,6 +513,8 @@ export interface TranslationStrings {
 		stepChapter: string;
 		stepVerses: string;
 		noteCategory: string;
+		selectedCount: string;
+		chapterBreadcrumb: string;
 	};
 	chapterPicker: {
 		noChaptersDesc: string;
