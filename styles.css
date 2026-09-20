@@ -5348,3 +5348,110 @@ mark.open-bible-selected-text-range {
 	width: 100%;
 }
 
+/* Bible Comparison Modal */
+.open-bible-compare-dialog {
+	position: relative !important;
+	padding: 0 !important;
+	display: flex !important;
+	flex-direction: column !important;
+	overflow: hidden !important;
+}
+
+.open-bible-compare-dialog .modal-header {
+	padding: 14px 20px 12px 20px !important;
+	margin: 0 !important;
+	border-bottom: 1px solid var(--background-modifier-border);
+	display: flex !important;
+	align-items: center !important;
+	position: relative !important;
+}
+
+.open-bible-compare-dialog .modal-title {
+	font-size: 1.15rem;
+	font-weight: 600;
+	margin: 0;
+	padding: 0;
+}
+
+.open-bible-compare-dialog .open-bible-modal-header-tab-btn {
+	position: absolute;
+	top: var(--size-4-3, 14px);
+	right: 48px;
+	width: var(--size-4-8, 28px);
+	height: var(--size-4-8, 28px);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	cursor: pointer;
+	border: none;
+	background: transparent;
+	color: var(--text-muted);
+	border-radius: var(--radius-s, 4px);
+	z-index: 10;
+	transition: color 0.15s ease, background-color 0.15s ease;
+}
+
+.open-bible-compare-dialog .open-bible-modal-header-tab-btn:hover {
+	color: var(--text-normal);
+	background-color: var(--background-modifier-hover);
+}
+
+.open-bible-compare-dialog .modal-content.open-bible-compare-modal-root {
+	padding: 0 !important;
+	margin: 0 !important;
+	flex: 1 1 auto !important;
+	min-height: 0 !important;
+	height: 100% !important;
+	overflow: hidden !important;
+	display: flex !important;
+	flex-direction: column !important;
+}
+
+/* Bible Compare Workspace View Root */
+.open-bible-compare-view-root {
+	padding: 0 !important;
+	margin: 0 !important;
+	height: 100% !important;
+	width: 100% !important;
+	overflow: hidden !important;
+	display: flex !important;
+	flex-direction: column !important;
+	box-sizing: border-box !important;
+}
+
+.open-bible-compare-container {
+	width: 100% !important;
+	height: 100% !important;
+	box-sizing: border-box !important;
+}
+
+.open-bible-compare-header {
+	width: 100% !important;
+	box-sizing: border-box !important;
+}
+
+.open-bible-compare-toolbar-top {
+	display: flex !important;
+	flex-direction: row !important;
+	align-items: center !important;
+	justify-content: space-between !important;
+	width: 100% !important;
+	box-sizing: border-box !important;
+	flex-wrap: nowrap !important;
+}
+
+.open-bible-compare-passage-btn {
+	flex-shrink: 0 !important;
+	white-space: nowrap !important;
+}
+
+.open-bible-compare-toolbar-right {
+	display: flex !important;
+	flex-direction: row !important;
+	align-items: center !important;
+	margin-left: auto !important;
+	flex-shrink: 0 !important;
+	flex-wrap: nowrap !important;
+}
+
+
