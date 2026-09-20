@@ -82,3 +82,8 @@ Users can configure these options under **Settings → OpenBible → Study Resou
 ### Floating Tooltip Component (`src/ui/components/VerseHoverTooltip.ts`)
 - Dynamically attaches to `document.body` and computes viewport collisions to stay within screen margins.
 - Keeps tooltip active when moving the cursor directly into the tooltip content.
+
+### Verse Preview Modal (`src/ui/modals/VersePreviewModal.ts`)
+- Accessible dialog displaying the scripture text, version name, context subtitle, and action buttons ("Open in reader", "Copy", and "More options" context menu).
+- Cross-reference chain navigation with position counter (`currentIndex + 1 / total`) and keyboard shortcut support (`ArrowLeft` / `ArrowRight` to step through the chain, `Enter` to jump into the reader view).
+- Polished layout adhering to Obsidian craft floor standards: dual-ring `:focus-visible` focus outlines, responsive scroll container, and tabular numeric verse alignment.

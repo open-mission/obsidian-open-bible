@@ -401,7 +401,7 @@
 					{#if selectedChapter !== null}
 						<span class="open-bible-crumb-sep">›</span>
 						<span class="open-bible-crumb-text is-active">
-							Cap. {selectedChapter}
+							{t("passagePicker.chapterBreadcrumb", { chapter: selectedChapter })}
 						</span>
 					{/if}
 				</div>
@@ -498,7 +498,7 @@
 						<strong>{selectedBook.name} {selectedChapter}</strong>:
 						{selectedVerseNumbers.length === chapterVerses.length
 							? t("passagePicker.allChapter")
-							: `${selectedVerseNumbers.length} selecionado(s)`}
+							: t("passagePicker.selectedCount", { count: selectedVerseNumbers.length })}
 					</span>
 					<button
 						type="button"

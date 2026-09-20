@@ -30,6 +30,7 @@ export class VersePreviewModal extends Modal {
 	private navEl!: HTMLElement | null;
 	private prevBtn!: HTMLButtonElement | null;
 	private nextBtn!: HTMLButtonElement | null;
+	private navCounterEl: HTMLElement | null = null;
 	private versesContainer!: HTMLElement;
 	private openReaderBtn!: HTMLButtonElement;
 	private copyBtn!: HTMLButtonElement;
@@ -67,7 +68,7 @@ export class VersePreviewModal extends Modal {
 			cls: "open-bible-preview-modal-more-btn clickable-icon",
 			attr: {
 				type: "button",
-				"aria-label": t("contextMenu.moreOptions") || "Mais opções",
+				"aria-label": t("contextMenu.moreOptions"),
 			},
 		});
 		setIcon(actionsBtn, "more-vertical");
@@ -86,27 +87,52 @@ export class VersePreviewModal extends Modal {
 			this.navEl = headerEl.createDiv("open-bible-preview-modal-chain-nav");
 			this.prevBtn = this.navEl.createEl("button", {
 				cls: "open-bible-preview-modal-chain-btn",
-				attr: { type: "button" },
+				attr: {
+					type: "button",
+					"aria-label": t("resources.previous"),
+				},
 			});
 			setIcon(this.prevBtn.createSpan({ cls: "open-bible-preview-modal-chain-btn-icon" }), "chevron-left");
-			this.prevBtn.createSpan({ text: t("resources.previous") || "Anterior" });
+			this.prevBtn.createSpan({ text: t("resources.previous") });
 			this.prevBtn.addEventListener("click", () => {
 				void this.navigateToIndex(this.currentIndex - 1);
 			});
 
+			this.navCounterEl = this.navEl.createSpan({
+				cls: "open-bible-preview-modal-chain-counter",
+			});
+
 			this.nextBtn = this.navEl.createEl("button", {
 				cls: "open-bible-preview-modal-chain-btn",
-				attr: { type: "button" },
+				attr: {
+					type: "button",
+					"aria-label": t("resources.next"),
+				},
 			});
-			this.nextBtn.createSpan({ text: t("resources.next") || "Próximo" });
+			this.nextBtn.createSpan({ text: t("resources.next") });
 			setIcon(this.nextBtn.createSpan({ cls: "open-bible-preview-modal-chain-btn-icon" }), "chevron-right");
 			this.nextBtn.addEventListener("click", () => {
 				void this.navigateToIndex(this.currentIndex + 1);
+			});
+
+			// Register keyboard shortcuts for fast chain cycling
+			this.scope.register([], "ArrowLeft", (evt) => {
+				if (this.currentIndex > 0 && !this.loading) {
+					evt.preventDefault();
+					void this.navigateToIndex(this.currentIndex - 1);
+				}
+			});
+			this.scope.register([], "ArrowRight", (evt) => {
+				if (this.currentIndex < this.chainRefs.length - 1 && !this.loading) {
+					evt.preventDefault();
+					void this.navigateToIndex(this.currentIndex + 1);
+				}
 			});
 		} else {
 			this.navEl = null;
 			this.prevBtn = null;
 			this.nextBtn = null;
+			this.navCounterEl = null;
 		}
 
 		this.versesContainer = createUiDialogBody(contentEl);
@@ -114,7 +140,7 @@ export class VersePreviewModal extends Modal {
 
 		const footer = createUiFooter(contentEl);
 		this.openReaderBtn = createUiButton(footer, {
-			text: t("commands.openReader") || "Abrir no leitor",
+			text: t("commands.openReader"),
 			variant: "cta",
 			onClick: async () => {
 				this.close();
@@ -122,7 +148,7 @@ export class VersePreviewModal extends Modal {
 			},
 		});
 		this.copyBtn = createUiButton(footer, {
-			text: t("popover.copyText") || "Copiar",
+			text: t("popover.copyText"),
 			onClick: async () => {
 				if (!this.currentPreview?.verses.length) {
 					return;
@@ -132,11 +158,11 @@ export class VersePreviewModal extends Modal {
 					.join("\n");
 				const formatted = `"${textToCopy}" — ${this.currentPreview.reference} (${this.currentPreview.versionAbbr})`;
 				await navigator.clipboard.writeText(formatted);
-				new Notice(t("notices.textCopied") || "Texto copiado.");
+				new Notice(t("notices.textCopied"));
 			},
 		});
 		createUiButton(footer, {
-			text: t("bookPicker.close") || "Fechar",
+			text: t("bookPicker.close"),
 			variant: "ghost",
 			onClick: () => this.close(),
 		});
@@ -206,7 +232,7 @@ export class VersePreviewModal extends Modal {
 		if (!preview?.verses.length) {
 			this.versesContainer.createDiv({
 				cls: "open-bible-preview-modal-missing",
-				text: t("resources.verseMissing") || "Versículo não encontrado.",
+				text: t("resources.verseMissing"),
 			});
 			return;
 		}
@@ -230,6 +256,9 @@ export class VersePreviewModal extends Modal {
 		}
 		this.prevBtn.disabled = this.currentIndex <= 0 || this.loading;
 		this.nextBtn.disabled = this.currentIndex >= this.chainRefs.length - 1 || this.loading;
+		if (this.navCounterEl) {
+			this.navCounterEl.setText(`${this.currentIndex + 1} / ${this.chainRefs.length}`);
+		}
 	}
 
 	private updateActionButtons(): void {

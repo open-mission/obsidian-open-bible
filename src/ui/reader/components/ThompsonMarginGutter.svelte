@@ -13,8 +13,8 @@
 
 	const ariaLabel = $derived(
 		refs.length === 1
-			? (t("resources.countSingle") || "1 referência")
-			: (t("resources.countPlural", { count: refs.length }) || `${refs.length} referências`),
+			? t("resources.countSingle")
+			: t("resources.countPlural", { count: refs.length }),
 	);
 </script>
 

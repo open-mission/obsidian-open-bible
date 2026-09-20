@@ -262,12 +262,17 @@
 
 	<div class="open-bible-footnotes-inner">
 		<div class="open-bible-footnotes-header">
-			<!-- svelte-ignore a11y_click_events_have_key_events -->
 			<div
 				class="open-bible-footnotes-title-group"
 				role="button"
 				tabindex="0"
 				onclick={onToggleExpanded}
+				onkeydown={(e) => {
+					if (e.key === "Enter" || e.key === " ") {
+						e.preventDefault();
+						onToggleExpanded?.();
+					}
+				}}
 				aria-expanded={isExpanded}
 				title={isExpanded ? t("resources.collapsePanel") : t("resources.expandPanel")}
 			>

@@ -67,8 +67,18 @@
 	role="group"
 >
 	<div class="open-bible-footnote-header-row">
-		<!-- svelte-ignore a11y_click_events_have_key_events -->
-		<div class="open-bible-footnote-header-left" role="button" tabindex="0" onclick={toggleCollapse}>
+		<div
+			class="open-bible-footnote-header-left"
+			role="button"
+			tabindex="0"
+			onclick={toggleCollapse}
+			onkeydown={(e) => {
+				if (e.key === "Enter" || e.key === " ") {
+					e.preventDefault();
+					toggleCollapse();
+				}
+			}}
+		>
 			<span class="open-bible-footnote-chevron" class:is-expanded={!isCollapsed}>
 				<IconButton
 					class="open-bible-footnote-action-icon"
@@ -89,6 +99,13 @@
 				onclick={(e) => {
 					e.stopPropagation();
 					onScrollToVerse?.(fromVerse);
+				}}
+				onkeydown={(e) => {
+					if (e.key === "Enter" || e.key === " ") {
+						e.preventDefault();
+						e.stopPropagation();
+						onScrollToVerse?.(fromVerse);
+					}
 				}}
 			>
 				{fromBookName} {fromChapter}:{fromVerse}
