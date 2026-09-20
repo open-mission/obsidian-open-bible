@@ -48,7 +48,15 @@ export class BibleComparisonService {
 		versionPaths: string[],
 	): Promise<PassageComparisonData> {
 		const canonBook = getCanonBook(bookId);
-		const bookName = canonBook?.namePt || canonBook?.nameEn || `Livro ${bookId}`;
+		let bookName = canonBook?.namePt || canonBook?.nameEn || `Livro ${bookId}`;
+		try {
+			const lang = (typeof window !== "undefined" && window?.localStorage?.getItem("language")) || "";
+			if (lang.startsWith("en") && canonBook?.nameEn) {
+				bookName = canonBook.nameEn;
+			}
+		} catch {
+			// fallback
+		}
 
 		// If no versions specified, fallback to default or first installed
 		let targetVersionPaths = versionPaths.filter(Boolean);
@@ -163,6 +171,20 @@ export class BibleComparisonService {
 			}
 		}
 
+		return lines.join("\n").trim();
+	}
+
+	/**
+	 * Formats a single verse row as Markdown comparing all selected translations.
+	 */
+	formatVerseRowMarkdown(data: PassageComparisonData, row: VerseComparisonRow): string {
+		const lines: string[] = [];
+		lines.push(`### ${data.bookName} ${data.chapter}:${row.verseNumber}`);
+		for (const v of row.versions) {
+			if (v.text) {
+				lines.push(`- **${v.versionAbbr}** (${v.versionName}): ${v.text}`);
+			}
+		}
 		return lines.join("\n").trim();
 	}
 

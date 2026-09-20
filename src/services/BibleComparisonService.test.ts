@@ -168,4 +168,36 @@ describe("BibleComparisonService", () => {
 		assert.ok(markdownVerses.includes("- **ARC** (ARC): Deitar-me faz em verdes pastos..."));
 		assert.ok(markdownVerses.includes("- **NVI** (NVI): Em verdes pastagens me faz repousar..."));
 	});
+
+	test("formatVerseRowMarkdown formats a single verse comparison across versions", () => {
+		const mockService = new BibleComparisonService(
+			{} as any,
+			{} as any,
+			{} as any,
+			() => ({ dataFolder: "OpenBible" } as any),
+		);
+
+		const sampleData: PassageComparisonData = {
+			bookId: 43,
+			bookName: "João",
+			chapter: 3,
+			verseNumbers: [16],
+			reference: "João 3:16",
+			versions: [],
+			rows: [
+				{
+					verseNumber: 16,
+					versions: [
+						{ versionId: "arc.sqlite", versionAbbr: "ARC", versionName: "Almeida Revista e Corrigida", text: "Porque Deus amou o mundo..." },
+						{ versionId: "nvi.sqlite", versionAbbr: "NVI", versionName: "Nova Versão Internacional", text: "Porque Deus tanto amou o mundo..." },
+					],
+				},
+			],
+		};
+
+		const formatted = mockService.formatVerseRowMarkdown(sampleData, sampleData.rows[0]);
+		assert.ok(formatted.includes("### João 3:16"));
+		assert.ok(formatted.includes("- **ARC** (Almeida Revista e Corrigida): Porque Deus amou o mundo..."));
+		assert.ok(formatted.includes("- **NVI** (Nova Versão Internacional): Porque Deus tanto amou o mundo..."));
+	});
 });

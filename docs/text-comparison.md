@@ -99,12 +99,20 @@ The comparison toolbar maximizes vertical reading space by presenting controls i
   - **Layout Switcher Tabs**: Segmented toggle with icon-only buttons (`[ ⊞ | ☰ ]`) with accessible tooltips (`aria-label`) to toggle between column-based and verse-based comparative views.
   - **More Options (`...`) Context Menu**: Native Obsidian popup `Menu` providing quick exports to **Exportar para o Canvas** and **Exportar para o Excalidraw** without cluttering the main toolbar.
 
-### E. Markdown Formatting & Copy
+### E. Markdown Formatting & Single Verse Copy
 
-Users can copy the entire comparison to the system clipboard via `handleCopyMarkdown()`. The service formats the output cleanly for inclusion in study notes or essays:
+Users can copy comparisons to the system clipboard:
+- **Complete Passage**: Click **Copy Comparison** in the top toolbar to copy all selected versions in the active layout (`columns` or `verses`).
+- **Single Verse Comparison**: Click the copy icon (`[📋]`) directly on any individual verse block in Verse-by-Verse mode to copy just that verse across all selected translations into your notes (e.g. `### John 3:16` followed by bulleted translations).
 
-- **Columns Layout**: Produces Markdown blockquotes with individual version headings.
-- **Verses Layout**: Produces verse-numbered headers with bulleted translation items.
+### F. Typography, Theming & Visual Polish
+
+- **Obsidian Theme Harmony**: Verse text strictly adopts Obsidian's reading font (`var(--font-text, var(--font-text-theme, var(--font-interface))`), text size (`var(--font-text-size, 1rem)`), and line spacing (`var(--line-height-normal, 1.75)`).
+- **Sticky Column Headers**: In Columns mode, version cards feature sticky headers with backdrop blur (`backdrop-filter: blur(8px)`) so version badges, titles, and remove actions stay visible during deep chapter scrolling.
+- **Tabular Text Alignment**: In Verse-by-Verse mode, version abbreviation pills use a fixed-width grid (`56px 1fr`) ensuring that every translation's scripture text starts at the exact same horizontal alignment for effortless cross-reading.
+- **Omitted Verse Handling**: Translations omitting certain textual variants render a polite, muted label (`— (Versículo ausente nesta versão)` / `— (Verse absent in this version)`) instead of empty whitespace.
+- **Direct Column Removal**: Column cards feature a quick `[x]` remove button to unselect a translation without navigating back to the top chip strip.
+- **Accessibility & Interaction**: Full keyboard focus visibility (`:focus-visible`), aria labels, localized tooltips in English and Portuguese, and smooth micro-interactions for dragging.
 
 ---
 

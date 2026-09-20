@@ -2,13 +2,14 @@
 	import { onMount } from "svelte";
 	import { Menu, Notice } from "obsidian";
 	import { icon } from "../actions/icon";
-	import { t } from "../../i18n";
+	import { t, getLocale } from "../../i18n";
 	import type OpenBiblePlugin from "../../main";
 	import type { BibleBook, BibleVerse } from "../../models/bible";
 	import type { BibleVersion } from "../../models/bibleVersion";
-	import type { PassageComparisonData } from "../../models/comparison";
+	import type { PassageComparisonData, VerseComparisonRow } from "../../models/comparison";
 	import { PassagePickerModal } from "./PassagePickerModal";
-	import { toSuperscript } from "../../services/verseFormat";
+	import { formatVerseRange, toSuperscript } from "../../services/verseFormat";
+	import { getCanonBook } from "../../bibleCanon";
 
 	interface Props {
 		plugin: OpenBiblePlugin;
@@ -183,11 +184,26 @@
 		}).open();
 	}
 
+	function getFallbackReference(): string {
+		const canonBook = getCanonBook(bookId);
+		const isPt = getLocale() === "pt";
+		const name = (isPt ? canonBook?.namePt : canonBook?.nameEn) || canonBook?.namePt || canonBook?.nameEn || `Book ${bookId}`;
+		const vRange = verseNumbers && verseNumbers.length > 0 ? `:${formatVerseRange(verseNumbers)}` : "";
+		return `${name} ${chapter}${vRange}`;
+	}
+
 	async function handleCopyMarkdown() {
 		if (!comparisonData) return;
 		const text = plugin.comparisonService.formatMarkdownComparison(comparisonData, layout);
 		await navigator.clipboard.writeText(text);
 		new Notice(t("compare.copiedMarkdownNotice"));
+	}
+
+	async function handleCopyVerseRow(row: VerseComparisonRow) {
+		if (!comparisonData) return;
+		const text = plugin.comparisonService.formatVerseRowMarkdown(comparisonData, row);
+		await navigator.clipboard.writeText(text);
+		new Notice(t("compare.copiedVerseRowNotice"));
 	}
 
 	async function handleExportCanvas() {
@@ -199,7 +215,7 @@
 			onClose();
 		} catch (err) {
 			console.error("OpenBible: error exporting canvas:", err);
-			new Notice(`Erro ao exportar Canvas: ${err}`);
+			new Notice(t("compare.exportCanvasError").replace("{error}", String(err)));
 		} finally {
 			exportingCanvas = false;
 		}
@@ -218,7 +234,7 @@
 			}
 		} catch (err) {
 			console.error("OpenBible: error exporting Excalidraw:", err);
-			new Notice(`Erro ao exportar Excalidraw: ${err}`);
+			new Notice(t("compare.exportExcalidrawError").replace("{error}", String(err)));
 		} finally {
 			exportingExcalidraw = false;
 		}
@@ -322,7 +338,7 @@
 			>
 				<span class="open-bible-compare-badge-icon" use:icon={"book-open"}></span>
 				<span class="open-bible-compare-badge-text">
-					{comparisonData?.reference || `${bookId} ${chapter}`}
+					{comparisonData?.reference || getFallbackReference()}
 				</span>
 				<span class="open-bible-compare-badge-chevron" use:icon={"chevron-down"}></span>
 			</button>
@@ -404,7 +420,7 @@
 						ondragend={handleDragEnd}
 						onclick={() => toggleVersion(ver.filePath)}
 						aria-pressed={isSelected}
-						title={`${ver.name} (${isSelected ? "Arraste para reordenar / clique para desmarcar" : "Clique para selecionar"})`}
+						title={`${ver.name} (${isSelected ? t("compare.dragToReorderChip") : t("compare.clickToSelectChip")})`}
 					>
 						{#if isSelected}
 							<span class="open-bible-chip-grip" use:icon={"grip-vertical"}></span>
@@ -451,6 +467,13 @@
 				<span class="open-bible-compare-empty-icon" use:icon={"book-open"}></span>
 				<h3>{t("compare.noVersionsSelected")}</h3>
 				<p>{t("compare.selectAtLeastOneVersion")}</p>
+				<button
+					type="button"
+					class="open-bible-compare-empty-action-btn"
+					onclick={selectAllVersions}
+				>
+					{t("compare.selectAll")}
+				</button>
 			</div>
 		{:else if comparisonData}
 			{#if layout === "columns"}
@@ -477,19 +500,32 @@
 								<span
 									class="open-bible-drag-handle"
 									use:icon={"grip-vertical"}
-									title="Arraste para reordenar esta versão"
+									title={t("compare.dragCardToReorder")}
+									aria-label={t("compare.dragCardToReorder")}
 								></span>
 								<span class="open-bible-version-pill">{ver.versionAbbr}</span>
 								<span class="open-bible-version-title" title={ver.versionName}>
 									{ver.versionName}
 								</span>
+								<button
+									type="button"
+									class="open-bible-card-header-remove-btn clickable-icon"
+									onclick={(e) => {
+										e.stopPropagation();
+										void toggleVersion(ver.versionId);
+									}}
+									title={t("compare.removeVersion")}
+									aria-label={t("compare.removeVersion")}
+								>
+									<span use:icon={"x"}></span>
+								</button>
 							</div>
 							<div class="open-bible-compare-card-body">
 								{#each ver.verses as verse (verse.number)}
 									<p class="open-bible-compare-verse-line">
-										<span class="open-bible-compare-verse-num">
-											{toSuperscript(verse.number)}
-										</span>
+										<sup class="open-bible-compare-verse-num">
+											{verse.number}
+										</sup>
 										<span class="open-bible-compare-verse-text">{verse.text}</span>
 									</p>
 								{/each}
@@ -506,6 +542,15 @@
 								<span class="open-bible-compare-verse-pill">
 									{t("compare.verseRowHeader").replace("{number}", String(row.verseNumber))}
 								</span>
+								<button
+									type="button"
+									class="open-bible-compare-copy-verse-btn clickable-icon"
+									onclick={() => handleCopyVerseRow(row)}
+									title={t("compare.copyVerseRow")}
+									aria-label={t("compare.copyVerseRow")}
+								>
+									<span use:icon={"copy"}></span>
+								</button>
 							</div>
 							<div class="open-bible-compare-verse-translations">
 								{#each row.versions as item (item.versionId)}
@@ -513,8 +558,11 @@
 										<span class="open-bible-version-mini-pill" title={item.versionName}>
 											{item.versionAbbr}
 										</span>
-										<span class="open-bible-compare-verse-translation-text">
-											{item.text || "—"}
+										<span
+											class="open-bible-compare-verse-translation-text"
+											class:is-empty={!item.text}
+										>
+											{item.text || t("compare.verseAbsent")}
 										</span>
 									</div>
 								{/each}
@@ -554,9 +602,11 @@
 		gap: 8px;
 		padding: 10px 16px;
 		border-bottom: 1px solid var(--background-modifier-border);
+		background-color: var(--background-primary);
 		flex-shrink: 0;
 		width: 100%;
 		box-sizing: border-box;
+		z-index: 5;
 	}
 
 	.open-bible-compare-toolbar-top {
@@ -584,6 +634,11 @@
 		.open-bible-copy-label {
 			display: none;
 		}
+		.open-bible-compare-action-btn.mod-copy {
+			width: 30px;
+			padding: 0;
+			justify-content: center;
+		}
 	}
 
 	.open-bible-compare-passage-btn {
@@ -591,7 +646,7 @@
 		align-items: center;
 		gap: 7px;
 		padding: 4px 10px;
-		border-radius: 6px;
+		border-radius: var(--radius-s, 6px);
 		background-color: var(--background-modifier-box-shadow, rgba(0, 0, 0, 0.04));
 		border: 1px solid var(--background-modifier-border);
 		font-weight: 600;
@@ -605,6 +660,11 @@
 	.open-bible-compare-passage-btn:hover {
 		background-color: var(--background-modifier-hover);
 		border-color: var(--interactive-accent);
+	}
+
+	.open-bible-compare-passage-btn:focus-visible {
+		outline: 2px solid var(--interactive-accent);
+		outline-offset: 2px;
 	}
 
 	.open-bible-compare-badge-icon {
@@ -623,7 +683,7 @@
 	.open-bible-compare-layout-toggle {
 		display: inline-flex;
 		align-items: center;
-		border-radius: 6px;
+		border-radius: var(--radius-s, 6px);
 		background-color: var(--background-primary);
 		border: 1px solid var(--background-modifier-border);
 		padding: 2px;
@@ -639,7 +699,7 @@
 		width: 24px;
 		height: 24px;
 		padding: 0;
-		border-radius: 4px;
+		border-radius: var(--radius-s, 4px);
 		border: none;
 		background: transparent;
 		color: var(--text-muted);
@@ -652,10 +712,15 @@
 		color: var(--text-normal);
 	}
 
+	.open-bible-layout-btn:focus-visible {
+		outline: 2px solid var(--interactive-accent);
+		outline-offset: 1px;
+	}
+
 	.open-bible-layout-btn.is-active {
 		background-color: var(--background-secondary);
 		color: var(--text-normal);
-		box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+		box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
 	}
 
 	.open-bible-compare-versions-strip {
@@ -699,6 +764,11 @@
 		color: var(--text-normal);
 	}
 
+	.open-bible-compare-version-chip:focus-visible {
+		outline: 2px solid var(--interactive-accent);
+		outline-offset: 2px;
+	}
+
 	.open-bible-compare-version-chip.is-active {
 		background-color: var(--interactive-accent);
 		border-color: var(--interactive-accent);
@@ -727,12 +797,13 @@
 
 	.open-bible-chip-abbr {
 		font-weight: 700;
+		font-variant-numeric: tabular-nums;
 	}
 
 	.open-bible-compare-versions-quick-actions {
 		display: flex;
 		align-items: center;
-		gap: 5px;
+		gap: 6px;
 		font-size: 0.76rem;
 		margin-left: 2px;
 	}
@@ -740,14 +811,21 @@
 	.open-bible-compare-text-link {
 		background: none;
 		border: none;
-		padding: 0;
+		padding: 2px 4px;
+		border-radius: var(--radius-s, 3px);
 		color: var(--interactive-accent);
 		cursor: pointer;
 		font-size: 0.76rem;
+		transition: opacity 0.15s ease;
 	}
 
 	.open-bible-compare-text-link:hover {
 		text-decoration: underline;
+	}
+
+	.open-bible-compare-text-link:focus-visible {
+		outline: 2px solid var(--interactive-accent);
+		outline-offset: 1px;
 	}
 
 	.open-bible-compare-separator {
@@ -760,6 +838,8 @@
 		overflow-y: auto;
 		padding: 16px 20px;
 		min-height: 0;
+		scrollbar-width: thin;
+		scrollbar-color: var(--scrollbar-thumb-bg) transparent;
 	}
 
 	.open-bible-compare-loading,
@@ -769,33 +849,78 @@
 		flex-direction: column;
 		align-items: center;
 		justify-content: center;
-		padding: 40px 20px;
+		padding: 48px 20px;
 		text-align: center;
 		color: var(--text-muted);
 		gap: 12px;
 	}
 
 	.open-bible-compare-empty-icon {
-		font-size: 2rem;
+		font-size: 2.2rem;
 		opacity: 0.4;
+		color: var(--interactive-accent);
+	}
+
+	.open-bible-compare-spinner {
+		width: 1.5rem;
+		height: 1.5rem;
+		border: 2px solid var(--background-modifier-border);
+		border-top-color: var(--interactive-accent);
+		border-radius: 50%;
+		animation: openBibleSpin 0.75s linear infinite;
+	}
+
+	@keyframes openBibleSpin {
+		0% {
+			transform: rotate(0deg);
+		}
+		100% {
+			transform: rotate(360deg);
+		}
+	}
+
+	.open-bible-compare-empty-action-btn {
+		margin-top: 6px;
+		padding: 6px 14px;
+		border-radius: var(--radius-s, 6px);
+		background-color: var(--interactive-accent);
+		color: var(--text-on-accent);
+		border: none;
+		font-size: 0.82rem;
+		font-weight: 600;
+		cursor: pointer;
+		transition: opacity 0.15s ease;
+	}
+
+	.open-bible-compare-empty-action-btn:hover {
+		opacity: 0.9;
 	}
 
 	.open-bible-compare-columns-grid {
 		display: grid;
-		grid-template-columns: repeat(var(--columns-count, 1), minmax(280px, 1fr));
+		grid-template-columns: repeat(var(--columns-count, 1), minmax(300px, 1fr));
 		gap: 16px;
 		overflow-x: auto;
 		padding-bottom: 8px;
+		align-items: start;
+	}
+
+	@media (max-width: 600px) {
+		.open-bible-compare-columns-grid {
+			grid-template-columns: repeat(var(--columns-count, 1), minmax(260px, 1fr));
+			gap: 12px;
+		}
 	}
 
 	.open-bible-compare-version-card {
 		display: flex;
 		flex-direction: column;
-		border-radius: 8px;
+		border-radius: var(--radius-m, 8px);
 		border: 1px solid var(--background-modifier-border);
 		background-color: var(--background-secondary);
 		overflow: hidden;
-		transition: transform 0.15s ease, opacity 0.15s ease, outline 0.15s ease;
+		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+		transition: transform 0.15s ease, opacity 0.15s ease, outline 0.15s ease, border-color 0.15s ease;
 	}
 
 	.open-bible-compare-version-card.is-dragging {
@@ -807,6 +932,19 @@
 		outline: 2px solid var(--interactive-accent);
 		outline-offset: 2px;
 		transform: scale(1.01);
+	}
+
+	.open-bible-compare-card-header {
+		position: sticky;
+		top: 0;
+		z-index: 2;
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		padding: 10px 14px;
+		background-color: var(--background-secondary-alt, var(--background-secondary));
+		border-bottom: 1px solid var(--background-modifier-border);
+		backdrop-filter: blur(8px);
 	}
 
 	.open-bible-drag-handle {
@@ -827,68 +965,110 @@
 		cursor: grabbing;
 	}
 
-	.open-bible-compare-card-header {
-		display: flex;
-		align-items: center;
-		gap: 8px;
-		padding: 10px 14px;
-		background-color: var(--background-modifier-box-shadow, rgba(0, 0, 0, 0.04));
-		border-bottom: 1px solid var(--background-modifier-border);
-	}
-
 	.open-bible-version-pill {
-		font-size: 0.75rem;
+		font-size: 0.72rem;
 		font-weight: 700;
-		padding: 2px 8px;
+		padding: 2px 7px;
 		border-radius: 12px;
 		background-color: var(--interactive-accent);
 		color: var(--text-on-accent);
+		letter-spacing: 0.02em;
 	}
 
 	.open-bible-version-title {
 		font-weight: 600;
-		font-size: 0.9rem;
+		font-size: 0.88rem;
 		white-space: nowrap;
 		overflow: hidden;
 		text-overflow: ellipsis;
+		flex: 1 1 auto;
+		min-width: 0;
+	}
+
+	.open-bible-card-header-remove-btn {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 22px;
+		height: 22px;
+		border-radius: var(--radius-s, 4px);
+		border: none;
+		background: transparent;
+		color: var(--text-muted);
+		cursor: pointer;
+		margin-left: auto;
+		flex-shrink: 0;
+		transition: color 0.12s ease, background-color 0.12s ease;
+	}
+
+	.open-bible-card-header-remove-btn:hover {
+		color: var(--text-normal);
+		background-color: var(--background-modifier-hover);
 	}
 
 	.open-bible-compare-card-body {
-		padding: 14px;
+		padding: 14px 16px;
 		display: flex;
 		flex-direction: column;
 		gap: 10px;
-		line-height: 1.6;
-		font-size: 0.95rem;
 	}
 
 	.open-bible-compare-verse-line {
 		margin: 0;
+		font-family: var(--font-text, var(--font-text-theme, var(--font-interface)));
+		font-size: var(--font-text-size, 1rem);
+		line-height: var(--line-height-normal, 1.75);
+		color: var(--text-normal);
+		word-break: break-word;
+		border-radius: var(--radius-s, 4px);
+		padding: 3px 6px;
+		margin: -3px -6px;
+		transition: background-color 0.12s ease;
+	}
+
+	.open-bible-compare-verse-line:hover {
+		background-color: var(--background-modifier-hover);
 	}
 
 	.open-bible-compare-verse-num {
-		font-weight: 700;
-		color: var(--interactive-accent);
-		margin-right: 4px;
+		font-size: 0.72em;
+		font-weight: var(--font-bold, 700);
+		vertical-align: super;
+		line-height: 0;
+		color: var(--text-accent);
+		font-variant-numeric: tabular-nums;
+		user-select: none;
+		-webkit-user-select: none;
+		margin-right: 0.35rem;
 	}
 
 	/* Verse by verse stack */
 	.open-bible-compare-verses-stack {
 		display: flex;
 		flex-direction: column;
-		gap: 16px;
+		gap: 14px;
 	}
 
 	.open-bible-compare-verse-block {
 		display: flex;
 		flex-direction: column;
-		border-radius: 8px;
+		border-radius: var(--radius-m, 8px);
 		border: 1px solid var(--background-modifier-border);
 		background-color: var(--background-secondary);
 		overflow: hidden;
+		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+		transition: border-color 0.15s ease, box-shadow 0.15s ease;
+	}
+
+	.open-bible-compare-verse-block:hover {
+		border-color: var(--background-modifier-border-hover, var(--background-modifier-border));
+		box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
 	}
 
 	.open-bible-compare-verse-header {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
 		padding: 8px 14px;
 		background-color: var(--background-modifier-box-shadow, rgba(0, 0, 0, 0.04));
 		border-bottom: 1px solid var(--background-modifier-border);
@@ -898,30 +1078,87 @@
 		font-weight: 700;
 		font-size: 0.85rem;
 		color: var(--interactive-accent);
+		letter-spacing: 0.01em;
+	}
+
+	.open-bible-compare-copy-verse-btn {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 26px;
+		height: 26px;
+		border-radius: var(--radius-s, 4px);
+		border: none;
+		background: transparent;
+		color: var(--text-muted);
+		cursor: pointer;
+		transition: color 0.12s ease, background-color 0.12s ease;
+	}
+
+	.open-bible-compare-copy-verse-btn:hover {
+		color: var(--text-normal);
+		background-color: var(--background-modifier-hover);
+	}
+
+	.open-bible-compare-copy-verse-btn:focus-visible {
+		outline: 2px solid var(--interactive-accent);
+		outline-offset: 1px;
 	}
 
 	.open-bible-compare-verse-translations {
-		padding: 12px 14px;
+		padding: 8px 12px;
 		display: flex;
 		flex-direction: column;
-		gap: 10px;
+		gap: 4px;
 	}
 
 	.open-bible-compare-verse-translation-row {
-		display: flex;
+		display: grid;
+		grid-template-columns: 56px 1fr;
 		align-items: baseline;
-		gap: 10px;
-		line-height: 1.5;
+		gap: 12px;
+		padding: 6px 8px;
+		border-radius: var(--radius-s, 4px);
+		transition: background-color 0.12s ease;
+	}
+
+	.open-bible-compare-verse-translation-row:hover {
+		background-color: var(--background-modifier-hover);
 	}
 
 	.open-bible-version-mini-pill {
-		font-size: 0.7rem;
+		font-size: 0.72rem;
 		font-weight: 700;
-		padding: 1px 6px;
-		border-radius: 4px;
+		padding: 2px 6px;
+		border-radius: var(--radius-s, 4px);
 		background-color: var(--background-modifier-border);
+		color: var(--text-muted);
+		text-align: center;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		user-select: none;
+		letter-spacing: 0.02em;
+		font-variant-numeric: tabular-nums;
+		transition: background-color 0.12s ease, color 0.12s ease;
+	}
+
+	.open-bible-compare-verse-translation-row:hover .open-bible-version-mini-pill {
 		color: var(--text-normal);
-		flex-shrink: 0;
+		background-color: var(--background-modifier-border-hover, var(--background-modifier-border));
+	}
+
+	.open-bible-compare-verse-translation-text {
+		font-family: var(--font-text, var(--font-text-theme, var(--font-interface)));
+		font-size: var(--font-text-size, 1rem);
+		line-height: var(--line-height-normal, 1.75);
+		color: var(--text-normal);
+		word-break: break-word;
+	}
+
+	.open-bible-compare-verse-translation-text.is-empty {
+		color: var(--text-faint);
+		font-style: italic;
 	}
 
 	.open-bible-compare-action-btn {
@@ -929,7 +1166,7 @@
 		align-items: center;
 		gap: 6px;
 		padding: 4px 10px;
-		border-radius: 6px;
+		border-radius: var(--radius-s, 6px);
 		font-size: 0.8rem;
 		font-weight: 500;
 		cursor: pointer;
@@ -945,6 +1182,11 @@
 	.open-bible-compare-action-btn:hover:not(:disabled) {
 		background-color: var(--background-modifier-hover);
 		border-color: var(--text-muted);
+	}
+
+	.open-bible-compare-action-btn:focus-visible {
+		outline: 2px solid var(--interactive-accent);
+		outline-offset: 2px;
 	}
 
 	.open-bible-compare-action-btn:disabled {
