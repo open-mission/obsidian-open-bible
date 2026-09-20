@@ -9,6 +9,83 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.2] - 2026-09-20
+
+### Added
+- **Verse Preview Modal Keyboard Navigation**: `ArrowLeft` and `ArrowRight` navigate through cross-reference chains dynamically, accompanied by an accessible tabular-numeric position counter (`currentIndex + 1 / total`).
+- **Resource Hub Active State Highlighting**: Cards highlight the currently viewed resource (`.is-active`) with an Obsidian accent ring and subtle background tint when returning from the detail panel.
+- **Image Error Fallback for Resources**: Automatic fallback to category-themed placeholders on image loading errors (`onerror`), eliminating broken image boxes.
+- **Full Internationalization (i18n)**: Replaced all remaining hardcoded strings and Portuguese fallbacks across the Resource Hub, detail view, verse preview modals, and reader selectors with reactive localized strings in English and Portuguese.
+
+### Improved
+- **Resource Hub Cards Craft Polish**:
+  - Proportional 94px media header with smooth hover zoom on images (`transform: scale(1.04)`).
+  - Themed radial ambient placeholders with category accent colors and animated icon container.
+  - Two-line title clamps (`-webkit-line-clamp: 2`) with normalized minimum height for uniform card alignment across rows.
+  - Removed obstructive top-left type badges for clean media presentation while preserving category context through grouping and accessible `aria-label` metadata.
+  - Touch-friendly 32px targets and persistent button visibility on mobile devices (`@media (hover: none)`).
+- **Native Obsidian Settings & Picker Standards**:
+  - Preserved standard Obsidian `.setting-item`, `.setting-item-info`, `.setting-item-name`, and `select.dropdown` markup in `AppearancePanel`, ensuring complete compatibility with community themes.
+  - Added semantic `role="tablist"` and `role="tab"` with `aria-selected` to `BookPicker`.
+  - Added `aria-current="true"` on active book and chapter tiles for assistive technologies.
+- **Bible Text Comparison Toolbar**:
+  - Streamlined single-row header layout (`Referência` on the left; `Copiar`, `Layout`, and `...` menu on the right), unifying modal and workspace views.
+- **Thompson Gutter & Cross-References**:
+  - Upgraded touch padding, hover styling, and dual-ring `:focus-visible` outlines on margin triggers and cross-reference tiles.
+
+### Fixed
+- **Cross-References Panel Resizer Jank**: Replaced layout-animating width transition with GPU-accelerated `transform: scaleX(1.5)` on `.open-bible-footnotes-resizer-line` and removed `transition: max-height, height` during panel drag-resizing.
+- **Side-Tab Visual Anti-Patterns**: Replaced artificial thick colored borders (`border-left: 3px solid ...`) on active cross-references and secondary passage cards with subtle Obsidian-native boundary rings (`box-shadow: 0 0 0 1px var(--interactive-accent)`).
+- **Keyboard Action Isolation**: Prevented `Enter` and `Space` keystrokes on card action buttons (`IconButton`) from bubbling and triggering card selection.
+
+## [0.4.1] - 2026-09-20
+
+### Added
+- **Multi-Version Bible Text Comparison**:
+  - **Interactive Comparison Modal (`BibleCompareModal` & `BibleCompareApp.svelte`)**: Compare passages across any combination of installed Bible translations with multi-select version chips.
+  - **Dedicated Workspace View (`BibleCompareView` / `open-bible-compare-view`)**: Open comparisons in dedicated workspace tabs or editor split panes for persistent comparative study side-by-side with your notes.
+  - **Modal Pop-Out Button**: Convert any active modal comparison into a workspace tab with one click.
+  - **Drag-and-Drop Column & Chip Reordering**: Reorder translation columns or active selection chips by dragging them into the desired order.
+  - **Dual Layout Modes**:
+    - **Columns by Version**: Each translation rendered in a side-by-side card with horizontal scrolling, drag handle, translation badge, full name, and continuous text with superscript verse numbers.
+    - **Verse-by-Verse Rows**: Groups translations together under each verse number for micro-comparative and textual analysis.
+  - **Copy Markdown Comparison**: Formats and copies the complete multi-version comparison to the clipboard with 1 click.
+  - **Passage Navigation**: Switch between passages directly from within the modal using the integrated passage picker.
+- **Obsidian Canvas Export (JSON Canvas 1.0 Spec)**:
+  - Generates native `.canvas` files compliant with the open [JSON Canvas 1.0 Specification](https://jsoncanvas.org/spec/1.0/).
+  - Automatically arranges a central reference banner node connected with arrows to individual translation cards with preset color coding.
+  - Saves generated boards to `OpenBible/comparisons` (configurable) and opens them immediately in a new workspace tab.
+- **Excalidraw Integration (`obsidian-excalidraw-plugin`)**:
+  - Leverages the official `ExcalidrawAutomate` workbench API to create visual study diagrams with translation cards, borders, and connecting arrows.
+  - **Bound Text Containers**: Uses `ea.addText` with `{ box: "box" }` to automatically compute container height and wrap text cleanly without overflow or broken box layouts.
+  - Detects plugin availability with friendly feedback notices and automated diagram opening.
+- **Multiple Entry Points & Commands**:
+  - Added `[Comparar]` button to the floating `VerseActionBar` on verse selection.
+  - Added "Comparar versões" to the verse right-click context menu in the reader.
+  - Added "Comparar versões" to the editor right-click context menu on scripture references.
+  - Added "Comparar versões" to the Bible Reader pane menu (`...`).
+  - Added command `open-bible-compare` ("Comparar versículos bíblicos" / "Compare Bible verses").
+  - Added command `open-bible-compare-tab` ("Abrir comparação em nova aba" / "Open comparison in new tab").
+  - Added command `open-bible-compare-split` ("Dividir tela com comparação de versões" / "Split editor with version comparison").
+
+### Changed
+- **Comparison Header & Context Menu Reorganization**:
+  - **Clean Single-Line Toolbar**: Reorganized the top row into a balanced two-sided layout:
+    - **Left**: Clickable passage reference selector (`[📖 Romanos 9:3-5 ▾]`).
+    - **Right**:
+      - **Copy Comparison** button (`[📋 Copiar comparação]`) with responsive label hiding on narrow viewports.
+      - **Layout Tabs**: Icon-only segmented buttons (`[ ⊞ | ☰ ]`) with tooltips (`aria-label`) for columns and verse-by-verse modes.
+      - **Context Menu (`...`)**: Native Obsidian popup `Menu` containing "Exportar para o Canvas" and "Exportar para o Excalidraw", removing visual clutter from the toolbar.
+  - **Streamlined Versions Strip**: Shortened prompt to "Versões:" / "Versions:" to prevent horizontal wrapping and fixed double colons.
+  - **Unified Single-Row Action Bar**: Both modal and workspace views share the same clean single-line header (`Referencia -------------------- Botoes`) with Copy, Layout Toggle, and Canvas/Excalidraw options, eliminating the redundant bottom footer.
+  - **Modal Pop-Out Button Positioning**: Fixed button anchoring in the top right of the modal header adjacent to the close button.
+  - **Native Modal Header**: Integrated the comparison title directly into Obsidian's native `modal-header` (`modal-title`).
+  - **Seamless Modal Styling**: Configured `BibleCompareModal` with `padding: 0 !important` and removed the secondary background from `open-bible-compare-header` for a clean, modern aesthetic.
+
+### Fixed
+- **Modal Header "Open in Tab" Button Placement**: Fixed the placement of the "Open in tab" (`panel-top`) button in `BibleCompareModal` so it is anchored cleanly at the top-right corner next to Obsidian's native `.modal-close-button`, eliminating the bug where it was rendered at the bottom of the dialog.
+- **Modal Close Button**: Removed redundant custom close button inside `BibleCompareApp.svelte` header to eliminate duplicate "X" buttons, seamlessly aligning the header actions alongside Obsidian's native `.modal-close-button`.
+
 ## [0.4.0] - 2026-09-17
 
 ### Added

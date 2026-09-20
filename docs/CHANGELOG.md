@@ -9,6 +9,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.2] - 2026-09-20
+
+### Added
+- **Verse Preview Modal Keyboard Navigation**: `ArrowLeft` and `ArrowRight` navigate through cross-reference chains dynamically, accompanied by an accessible tabular-numeric position counter (`currentIndex + 1 / total`).
+- **Resource Hub Active State Highlighting**: Cards highlight the currently viewed resource (`.is-active`) with an Obsidian accent ring and subtle background tint when returning from the detail panel.
+- **Image Error Fallback for Resources**: Automatic fallback to category-themed placeholders on image loading errors (`onerror`), eliminating broken image boxes.
+- **Full Internationalization (i18n)**: Replaced all remaining hardcoded strings and Portuguese fallbacks across the Resource Hub, detail view, verse preview modals, and reader selectors with reactive localized strings in English and Portuguese.
+
+### Improved
+- **Resource Hub Cards Craft Polish**:
+  - Proportional 94px media header with smooth hover zoom on images (`transform: scale(1.04)`).
+  - Themed radial ambient placeholders with category accent colors and animated icon container.
+  - Two-line title clamps (`-webkit-line-clamp: 2`) with normalized minimum height for uniform card alignment across rows.
+  - Removed obstructive top-left type badges for clean media presentation while preserving category context through grouping and accessible `aria-label` metadata.
+  - Touch-friendly 32px targets and persistent button visibility on mobile devices (`@media (hover: none)`).
+- **Native Obsidian Settings & Picker Standards**:
+  - Preserved standard Obsidian `.setting-item`, `.setting-item-info`, `.setting-item-name`, and `select.dropdown` markup in `AppearancePanel`, ensuring complete compatibility with community themes.
+  - Added semantic `role="tablist"` and `role="tab"` with `aria-selected` to `BookPicker`.
+  - Added `aria-current="true"` on active book and chapter tiles for assistive technologies.
+- **Bible Text Comparison Toolbar**:
+  - Streamlined single-row header layout (`Referência` on the left; `Copiar`, `Layout`, and `...` menu on the right), unifying modal and workspace views.
+- **Thompson Gutter & Cross-References**:
+  - Upgraded touch padding, hover styling, and dual-ring `:focus-visible` outlines on margin triggers and cross-reference tiles.
+
+### Fixed
+- **Cross-References Panel Resizer Jank**: Replaced layout-animating width transition with GPU-accelerated `transform: scaleX(1.5)` on `.open-bible-footnotes-resizer-line` and removed `transition: max-height, height` during panel drag-resizing.
+- **Side-Tab Visual Anti-Patterns**: Replaced artificial thick colored borders (`border-left: 3px solid ...`) on active cross-references and secondary passage cards with subtle Obsidian-native boundary rings (`box-shadow: 0 0 0 1px var(--interactive-accent)`).
+- **Keyboard Action Isolation**: Prevented `Enter` and `Space` keystrokes on card action buttons (`IconButton`) from bubbling and triggering card selection.
+
 ## [0.4.1] - 2026-09-20
 
 ### Added
