@@ -3,6 +3,32 @@ export type SupportedLocale = "en" | "pt";
 /** Locale stored in settings: "auto" follows the Obsidian UI language. */
 export type LocalePreference = "auto" | SupportedLocale;
 
+export interface GuideCapabilityCopy {
+	title: string;
+	summary: string;
+	detail: string;
+}
+
+export interface GuideTranslations {
+	title: string;
+	searchPlaceholder: string;
+	contextFilterLabel: string;
+	filters: {
+		all: string;
+	};
+	contexts: Record<string, string>;
+	categories: Record<string, string>;
+	states: Record<string, string>;
+	errors: Record<string, string>;
+	actions: Record<string, string>;
+	actionLabels: Record<string, string>;
+	start: Record<string, string>;
+	reference: Record<string, string>;
+	results: Record<string, string>;
+	detail: Record<string, string>;
+	capabilities: Record<string, GuideCapabilityCopy>;
+}
+
 export interface TranslationStrings {
 	commands: {
 		openReader: string;
@@ -10,6 +36,11 @@ export interface TranslationStrings {
 		openReaderSplit: string;
 		openReaderRightSidebar: string;
 		openReaderLeftSidebar: string;
+		openGuide: string;
+		openGuideNewTab: string;
+		openGuideSplit: string;
+		openGuideRightSidebar: string;
+		openGuideLeftSidebar: string;
 		openBiblePassage: string;
 		toggleTwoColumns: string;
 		openHighlights: string;
@@ -32,6 +63,7 @@ export interface TranslationStrings {
 	};
 	ribbon: {
 		openReader: string;
+		openGuide: string;
 	};
 	view: {
 		title: string;
@@ -42,6 +74,7 @@ export interface TranslationStrings {
 		searchHint: string;
 		searchResult: string;
 	};
+	guide: GuideTranslations;
 	settings: {
 		pageReaderAppearance: string;
 		pageReaderAppearanceDesc: string;
@@ -227,6 +260,7 @@ export interface TranslationStrings {
 		loading: string;
 		backToSettings: string;
 		search: string;
+		clear: string;
 		recent: string;
 		importing: string;
 		empty: string;

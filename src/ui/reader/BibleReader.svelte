@@ -762,6 +762,7 @@
 			},
 			openHistory: () => openPicker("history"),
 			openBookPicker: () => openPicker("book"),
+			openChapterPicker: () => openPicker("chapter"),
 			openVersionPicker: () => openPicker("version"),
 			openAppearancePicker: () => openPicker("appearance"),
 			openHighlights: () => openPicker("highlights"),

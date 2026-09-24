@@ -49,6 +49,7 @@ export default class OpenBiblePlugin extends Plugin {
 	resourceService!: ResourceService;
 	comparisonService!: BibleComparisonService;
 	private ribbonIconEl?: HTMLElement;
+	private settingTab: OpenBibleSettingTab | null = null;
 	private registeredResourceViews: Set<string> = new Set();
 
 	async onload(): Promise<void> {
@@ -75,7 +76,7 @@ export default class OpenBiblePlugin extends Plugin {
 			}
 		});
 
-		this.registerView(OPEN_BIBLE_VIEW_TYPE, (leaf) => new OpenBibleView(leaf, this.app, this.settings));
+		this.registerView(OPEN_BIBLE_VIEW_TYPE, (leaf) => new OpenBibleView(leaf, this));
 		this.registerView(BIBLE_READER_VIEW_TYPE, (leaf) => new BibleReaderView(leaf, this));
 		this.registerView(BIBLE_HIGHLIGHTS_VIEW_TYPE, (leaf) => new HighlightsView(leaf, this));
 		this.registerView(BIBLE_RESOURCE_DETAIL_VIEW_TYPE, (leaf) => new ResourceDetailView(leaf, this));
@@ -115,6 +116,31 @@ export default class OpenBiblePlugin extends Plugin {
 					.setIcon("split")
 					.onClick(() => {
 						void this.openReader("split");
+					}),
+			);
+			menu.addSeparator();
+			menu.addItem((item) =>
+				item
+					.setTitle(t("commands.openGuide"))
+					.setIcon("book-open-text")
+					.onClick(() => {
+						void this.openGuideView("right");
+					}),
+			);
+			menu.addItem((item) =>
+				item
+					.setTitle(t("commands.openGuideNewTab"))
+					.setIcon("file-plus")
+					.onClick(() => {
+						void this.openGuideView("new-tab");
+					}),
+			);
+			menu.addItem((item) =>
+				item
+					.setTitle(t("commands.openGuideSplit"))
+					.setIcon("split")
+					.onClick(() => {
+						void this.openGuideView("split");
 					}),
 			);
 			menu.showAtMouseEvent(evt);
@@ -161,6 +187,46 @@ export default class OpenBiblePlugin extends Plugin {
 		});
 
 		this.addCommand({
+			id: "open-bible-guide",
+			name: t("commands.openGuide"),
+			callback: () => {
+				void this.openGuideView();
+			},
+		});
+
+		this.addCommand({
+			id: "open-bible-guide-new-tab",
+			name: t("commands.openGuideNewTab"),
+			callback: () => {
+				void this.openGuideView("new-tab");
+			},
+		});
+
+		this.addCommand({
+			id: "open-bible-guide-split",
+			name: t("commands.openGuideSplit"),
+			callback: () => {
+				void this.openGuideView("split");
+			},
+		});
+
+		this.addCommand({
+			id: "open-bible-guide-right-sidebar",
+			name: t("commands.openGuideRightSidebar"),
+			callback: () => {
+				void this.openGuideView("right");
+			},
+		});
+
+		this.addCommand({
+			id: "open-bible-guide-left-sidebar",
+			name: t("commands.openGuideLeftSidebar"),
+			callback: () => {
+				void this.openGuideView("left");
+			},
+		});
+
+		this.addCommand({
 			id: "toggle-two-columns",
 			name: t("commands.toggleTwoColumns"),
 			callback: async () => {
@@ -172,19 +238,8 @@ export default class OpenBiblePlugin extends Plugin {
 		this.addCommand({
 			id: "open-bible-highlights",
 			name: t("commands.openHighlights"),
-			callback: async () => {
-				let leaves = this.app.workspace.getLeavesOfType(BIBLE_READER_VIEW_TYPE);
-				if (leaves.length === 0) {
-					await this.openReader();
-					leaves = this.app.workspace.getLeavesOfType(BIBLE_READER_VIEW_TYPE);
-				}
-				for (const leaf of leaves) {
-					if (leaf.view instanceof BibleReaderView) {
-						await this.app.workspace.revealLeaf(leaf);
-						leaf.view.openHighlights();
-						break;
-					}
-				}
+			callback: () => {
+				void this.openHighlightsDrawer();
 			},
 		});
 
@@ -247,24 +302,8 @@ export default class OpenBiblePlugin extends Plugin {
 		this.addCommand({
 			id: "open-bible-resource-hub",
 			name: t("commands.openResourceHub"),
-			callback: async () => {
-				const mode = this.settings.resourceOpenMode ?? "reader";
-				if (mode === "workspace") {
-					void this.openResourceHubView();
-				} else {
-					let leaves = this.app.workspace.getLeavesOfType(BIBLE_READER_VIEW_TYPE);
-					if (leaves.length === 0) {
-						await this.openReader();
-						leaves = this.app.workspace.getLeavesOfType(BIBLE_READER_VIEW_TYPE);
-					}
-					for (const leaf of leaves) {
-						if (leaf.view instanceof BibleReaderView) {
-							await this.app.workspace.revealLeaf(leaf);
-							leaf.view.openResourceHub();
-							break;
-						}
-					}
-				}
+			callback: () => {
+				void this.openResourceHub();
 			},
 		});
 
@@ -303,17 +342,7 @@ export default class OpenBiblePlugin extends Plugin {
 			id: "open-bible-passage",
 			name: t("commands.openBiblePassage"),
 			callback: () => {
-				new PassagePickerModal(this.app, this, {
-					mode: "openPassage",
-					onNavigate: async (data) => {
-						await this.navigateToPassage(
-							data.book.id,
-							data.chapter,
-							data.verse,
-							data.versionAbbr
-						);
-					},
-				}).open();
+				this.openBiblePassage();
 			},
 		});
 
@@ -321,13 +350,7 @@ export default class OpenBiblePlugin extends Plugin {
 			id: "insert-verse-at-cursor",
 			name: t("commands.insertVerseAtCursor"),
 			editorCallback: (editor: Editor) => {
-				new PassagePickerModal(this.app, this, {
-					mode: "insert",
-					onInsert: (formattedText) => {
-						insertScriptureAtCursor(editor, formattedText);
-						new Notice(t("notices.verseInserted"));
-					},
-				}).open();
+				this.insertBibleText(editor);
 			},
 		});
 
@@ -335,13 +358,7 @@ export default class OpenBiblePlugin extends Plugin {
 			id: "create-bible-note",
 			name: t("commands.createBibleNote"),
 			callback: () => {
-				new PassagePickerModal(this.app, this, {
-					mode: "createNote",
-					onCreateNote: async (data) => {
-						await createNoteFromSelection(this.app, this.settings, data);
-						new Notice(t("notices.noteCreated"));
-					},
-				}).open();
+				this.createBibleNote();
 			},
 		});
 
@@ -476,7 +493,8 @@ export default class OpenBiblePlugin extends Plugin {
 			})
 		);
 
-		this.addSettingTab(new OpenBibleSettingTab(this.app, this));
+		this.settingTab = new OpenBibleSettingTab(this.app, this);
+		this.addSettingTab(this.settingTab);
 	}
 
 	override onunload(): void {
@@ -496,6 +514,141 @@ export default class OpenBiblePlugin extends Plugin {
 		if (view instanceof BibleReaderView) {
 			view.refreshSettings();
 		}
+	}
+
+	/** Opens (or reveals) the guided command center in the requested location. */
+	async openGuideView(split: ViewSplit = "tab"): Promise<void> {
+		const leaf = await openOrRevealView(this.app.workspace, OPEN_BIBLE_VIEW_TYPE, split);
+		if (!leaf) {
+			new Notice(t("view.errorOpening"));
+			return;
+		}
+		if (leaf.view instanceof OpenBibleView) {
+			leaf.view.refresh();
+		}
+	}
+
+	/** Opens a reader drawer or quick control in the active reader. */
+	async openReaderSurface(
+		surface: "book" | "chapter" | "version" | "history" | "appearance",
+	): Promise<void> {
+		const view = await this.revealReaderView();
+		if (!view) return;
+		switch (surface) {
+			case "book":
+				view.openBookPicker();
+				break;
+			case "chapter":
+				view.openChapterPicker();
+				break;
+			case "version":
+				view.openVersionPicker();
+				break;
+			case "history":
+				view.openHistory();
+				break;
+			case "appearance":
+				view.openAppearance();
+				break;
+		}
+	}
+
+	/** Toggles verse selection mode in the active reader. */
+	async toggleReaderSelectionMode(): Promise<void> {
+		const view = await this.revealReaderView();
+		view?.toggleSelectionMode();
+	}
+
+	/** Toggles the current reader between one and two columns. */
+	async toggleReaderTwoColumns(): Promise<void> {
+		const view = await this.revealReaderView();
+		view?.readerController?.toggleTwoColumns?.();
+	}
+
+	/** Toggles inline Thompson references in the current reader. */
+	async toggleReaderThompson(): Promise<void> {
+		const view = await this.revealReaderView();
+		view?.readerController?.toggleThompson?.();
+	}
+
+	/** Toggles the cross-reference panel in the current reader. */
+	async toggleReaderCrossReferencePanel(): Promise<void> {
+		const view = await this.revealReaderView();
+		view?.readerController?.toggleBottomPanel?.();
+	}
+
+	/** Opens the global passage picker in navigation mode. */
+	openBiblePassage(): void {
+		new PassagePickerModal(this.app, this, {
+			mode: "openPassage",
+			onNavigate: async (data) => {
+				await this.navigateToPassage(
+					data.book.id,
+					data.chapter,
+					data.verse,
+					data.versionAbbr,
+				);
+			},
+		}).open();
+	}
+
+	/** Opens the global passage picker and inserts the result into an editor. */
+	insertBibleText(editor: Editor | null = this.app.workspace.activeEditor?.editor ?? null): void {
+		if (!editor) {
+			new Notice(t("notices.noActiveMarkdownNote"));
+			return;
+		}
+		new PassagePickerModal(this.app, this, {
+			mode: "insert",
+			onInsert: (formattedText) => {
+				insertScriptureAtCursor(editor, formattedText);
+				new Notice(t("notices.verseInserted"));
+			},
+		}).open();
+	}
+
+	/** Opens the global passage picker and creates a Bible note. */
+	createBibleNote(): void {
+		new PassagePickerModal(this.app, this, {
+			mode: "createNote",
+			onCreateNote: async (data) => {
+				await createNoteFromSelection(this.app, this.settings, data);
+				new Notice(t("notices.noteCreated"));
+			},
+		}).open();
+	}
+
+	/** Opens the Highlights drawer in the active reader. */
+	async openHighlightsDrawer(): Promise<void> {
+		const view = await this.revealReaderView();
+		view?.openHighlights();
+	}
+
+	/** Opens the Resource Center according to the configured resource mode. */
+	async openResourceHub(): Promise<void> {
+		if ((this.settings.resourceOpenMode ?? "reader") === "workspace") {
+			await this.openResourceHubView();
+			return;
+		}
+		const view = await this.revealReaderView();
+		view?.openResourceHub();
+	}
+
+	private async revealReaderView(): Promise<BibleReaderView | null> {
+		const activeView = this.app.workspace.getActiveViewOfType(BibleReaderView);
+		if (activeView) {
+			await this.app.workspace.revealLeaf(activeView.leaf);
+			return activeView;
+		}
+		const existing = this.app.workspace
+			.getLeavesOfType(BIBLE_READER_VIEW_TYPE)
+			.find((leaf) => leaf.view instanceof BibleReaderView);
+		if (existing?.view instanceof BibleReaderView) {
+			await this.app.workspace.revealLeaf(existing);
+			return existing.view;
+		}
+		await this.openReader();
+		return this.app.workspace.getActiveViewOfType(BibleReaderView) ?? null;
 	}
 
 	/** Opens (or reveals) the Highlights view in the requested location (tab, right sidebar, or left sidebar). */
@@ -593,8 +746,11 @@ export default class OpenBiblePlugin extends Plugin {
 		}
 	}
 
-	/** Opens the plugin settings tab (used by the reader empty state). */
-	openPluginSettings(): void {
+	/** Opens the plugin settings tab, optionally at a specific section. */
+	openPluginSettings(sectionId?: string): void {
+		if (sectionId) {
+			this.settingTab?.openSection(sectionId);
+		}
 		const settings = (this.app as unknown as {
 			setting?: { open: () => void; openTabById: (id: string) => void };
 		}).setting;
@@ -614,6 +770,11 @@ export default class OpenBiblePlugin extends Plugin {
 	private applyLanguage(): void {
 		applyLocalePreference(this.settings.language);
 		this.ribbonIconEl?.setAttribute("aria-label", t("ribbon.openReader"));
+		for (const leaf of this.app.workspace.getLeavesOfType(OPEN_BIBLE_VIEW_TYPE)) {
+			if (leaf.view instanceof OpenBibleView) {
+				leaf.view.refresh();
+			}
+		}
 	}
 
 	async updateDataFolder(value: string): Promise<string> {
@@ -678,28 +839,7 @@ export default class OpenBiblePlugin extends Plugin {
 	}
 
 	async activateView(): Promise<void> {
-		const { workspace } = this.app;
-		let leaf: WorkspaceLeaf | null = null;
-
-		const leaves = workspace.getLeavesOfType(OPEN_BIBLE_VIEW_TYPE);
-		if (leaves.length > 0) {
-			leaf = leaves[0];
-		} else {
-			leaf = workspace.getRightLeaf(false);
-			if (leaf) {
-				await leaf.setViewState({ type: OPEN_BIBLE_VIEW_TYPE, active: true });
-			}
-		}
-
-		if (leaf) {
-			void workspace.revealLeaf(leaf);
-			const view = leaf.view;
-			if (view instanceof OpenBibleView) {
-				view.updateSettings(this.settings);
-			}
-		} else {
-			new Notice(t("view.errorOpening"));
-		}
+		await this.openGuideView("right");
 	}
 
 	async loadSettings(): Promise<void> {

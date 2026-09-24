@@ -33,6 +33,7 @@ export interface BibleReaderController {
 	) => Promise<boolean>;
 	openHistory: () => void;
 	openBookPicker: () => void;
+	openChapterPicker: () => void;
 	openVersionPicker: () => void;
 	openAppearancePicker: () => void;
 	openHighlights?: () => void;

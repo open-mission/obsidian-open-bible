@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { icon } from "../actions/icon";
+	import { t } from "../../i18n";
 
 	interface Props {
 		value?: string;
@@ -26,9 +26,7 @@
 			type="button"
 			class="search-input-clear-button"
 			onclick={() => (value = "")}
-			aria-label="Clear"
-		>
-			<span use:icon={"x"}></span>
-		</button>
+			aria-label={t("common.clear")}
+		></button>
 	{/if}
 </div>

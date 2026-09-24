@@ -81,6 +81,10 @@ export class BibleReaderView extends ItemView {
 		this.controller?.openBookPicker?.();
 	}
 
+	openChapterPicker(): void {
+		this.controller?.openChapterPicker?.();
+	}
+
 	openVersionPicker(): void {
 		this.controller?.openVersionPicker?.();
 	}
