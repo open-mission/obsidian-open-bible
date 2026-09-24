@@ -1,6 +1,6 @@
 {
 	"name": "obsidian-open-bible",
-	"version": "0.4.2",
+	"version": "0.4.3",
 	"description": "Offline-first Bible reader and study companion for Obsidian.",
 	"main": "main.js",
 	"scripts": {
