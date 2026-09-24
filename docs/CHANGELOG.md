@@ -9,16 +9,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.3] - 2026-09-24
+
 ### Added
-- **Open Bible Center**: A persistent, bilingual command and discovery surface with a guided first-use layer, 35 real capabilities across six task families, 38 safe actions, complete PT/EN reference copy, context filtering, accent-insensitive ranked search, detailed usage explanations, and safe Run/Open/Configure actions.
-- **Center Workspace Entry Points**: Added five commands for the current tab, new tab, vertical split, left sidebar, and right sidebar, plus ribbon context-menu access.
+- **Open Bible Center**: A persistent bilingual command and discovery surface with a guided first-use layer, 35 real capabilities across six task families, 38 safe actions, context filtering, accent-insensitive ranked search, detailed usage explanations, and safe Run/Open/Configure actions.
+- **Center Workspace Entry Points**: Added commands for the current tab, new tab, vertical split, left sidebar, and right sidebar, plus ribbon context-menu access.
 
 ### Improved
 - **Center Header and Content Alignment**: Replaced the duplicated title/privacy header with a centered Open Bible logo and aligned search/filter controls to the same content width as the guided task shelf.
-- **Live setup and editor context**: Database-dependent entries are setup-gated, no-version background refreshes remain stable, and editor availability re-evaluates on active-leaf and layout changes.
 - **Settings Routing**: Capability actions now open the exact plugin settings section instead of only the settings root.
-- **Detail navigation and action safety**: Detail headings receive focus, Back restores the source row's focus and scroll, and destructive operations remain behind existing confirmations with no fake Center action.
 - **Legacy View Compatibility**: Replaced the hidden placeholder `open-bible-view` surface while preserving its view type for existing workspace layouts.
+- **Action Safety**: Destructive operations remain behind the plugin's existing confirmation flows, with no fake commands exposed by the Center.
+
+### Fixed
+- **Accurate No-Database State**: Database-dependent capabilities are now setup-gated and route to version management instead of reporting themselves as immediately available; background refreshes preserve the known zero-version state without a misleading setup flash.
+- **Reactive Editor Availability**: Editor-only actions now recalculate when Obsidian changes the active leaf or workspace layout.
+- **Detail Focus and Scroll Restoration**: Opening a capability focuses its detail heading, while Back restores the originating row's focus and previous reference scroll position.
+- **Metadata Contrast**: Replaced low-contrast Center metadata and context labels with the theme's readable muted text token.
+- **Duplicate Resource Action**: Removed an identical right-sidebar command from the linked-resources capability, leaving only distinct left/right placements.
 
 ## [0.4.2] - 2026-09-20
 
