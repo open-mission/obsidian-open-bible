@@ -7,6 +7,9 @@ Welcome to the internal and developer documentation for **OpenBible**, the offli
 - [**Architecture**](ARCHITECTURE.md)  
   High-level design, Svelte 5 frontend, WebAssembly SQLite engine, cross-reference decoding, and state management.
 
+- [**Guided Command Center**](guided-command-center.md)
+  Capability catalog, executable actions, search behavior, workspace integration, and extension rules.
+
 - [**Obsidian Guidelines Compliance**](GUIDELINES-COMPLIANCE.md)  
   Audit and reference for how OpenBible follows official Obsidian plugin guidelines, security constraints, and UI conventions.
 

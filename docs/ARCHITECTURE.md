@@ -35,6 +35,7 @@ OpenBible is engineered to be **100% offline-first**, running inside Obsidian's 
   │  • ResourceDetailPanel (Secondary Study Panel)          │
   │  • BookPicker (Fuzzy book/chapter navigation)           │
   │  • CrossRefBottomPanel (Backlinks-style references)     │
+  │  • OpenBibleGuideApp (Searchable capability catalog)    │
   │  • SettingsApp (Hierarchical multi-page settings)       │
   └─────────────────────────────────────────────────────────┘
 ```
@@ -51,6 +52,7 @@ obsidian-open-bible/
 │       └── release.yml            # Automated GitHub releases with attestations
 ├── docs/                          # Developer & architecture documentation
 │   ├── ARCHITECTURE.md            # System architecture and directory map
+│   ├── guided-command-center.md   # Capability catalog and executable discovery surface
 │   ├── text-comparison.md         # Multi-version comparison, Canvas & Excalidraw exports
 │   └── verse-previews.md          # Scripture reference auto-detection & previews
 ├── src/
@@ -59,7 +61,7 @@ obsidian-open-bible/
 │   ├── HighlightsView.ts          # Highlights browser workspace view
 │   ├── ResourcesView.ts           # General and per-type resources list view
 │   ├── ResourceDetailView.ts      # Dedicated study resource secondary workspace view
-│   ├── OpenBibleView.ts           # Secondary view wrapper
+│   ├── OpenBibleView.ts           # Guided command center ItemView wrapper
 │   ├── bibleCanon.ts              # Canonical book metadata (testaments, chapters, verses)
 │   ├── constants.ts               # Shared constants, book abbreviation mappings, paths
 │   ├── settings.ts                # Settings interface & defaults
@@ -91,6 +93,7 @@ obsidian-open-bible/
 │   │   ├── components/            # UI components (VerseHoverTooltip)
 │   │   ├── core/                  # Core primitives (EmptyState, LoadingState, icons)
 │   │   ├── kit/                   # UI Kit (buttons, search, drawers, modals)
+│   │   ├── guide/                 # Typed capability catalog, search, and action routing
 │   │   ├── modals/                # Obsidian Modal dialogs (VersePreviewModal, EditVersionModal)
 │   │   ├── reader/                # Bible Reader component tree
 │   │   └── settings/              # Plugin settings pages & subpages
@@ -127,6 +130,16 @@ The UI is constructed using **Svelte 5 runes**:
 - The reader view is registered via `this.registerView(BIBLE_READER_VIEW_TYPE, (leaf) => new BibleReaderView(leaf, this))`.
 - Views can be opened as main workspace tabs, or docked into the right or left sidebars.
 - Layout preferences (single column vs. two-column, text width, verse spacing) are scoped reactively.
+
+### Guided Command Center
+- `OpenBibleView` preserves the historical `open-bible-view` type and mounts `OpenBibleGuideApp.svelte` for compatibility with persisted workspace leaves.
+- `capabilityCatalog.ts` defines 35 real capabilities, six task families, 38 safe action IDs, contexts, requirements, bilingual keywords, related entries, and localized PT/EN copy.
+- The plugin resolves actions through existing public methods. Reader actions reveal or create a reader first; settings actions open the exact `OpenBibleSettingTab` section.
+- Database presence is checked on mount and window focus; no-version background refreshes keep the setup state stable, while active-leaf and layout events re-derive editor availability.
+- The surface never bypasses existing confirmations for destructive operations. Detail navigation focuses the selected heading and restores the source row's focus and scroll on Back.
+- Search is accent-insensitive, context-filterable, and deterministically ranked by title, keywords, summary, and detail.
+- The Center stays on the incumbent Obsidian visual system: native variables, existing UI kit primitives, Lucide icons, one-pixel separators, restrained accents, and responsive/reduced-motion rules.
+- See [`guided-command-center.md`](guided-command-center.md) for the complete extension and state model.
 
 ### Chapter Transitions & Navigation Motion
 - Implements hardware-accelerated directional transitions (`transform: translateX` and `opacity`) when switching chapters.

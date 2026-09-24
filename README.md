@@ -37,6 +37,7 @@
 - 🔗 **Cross-References**: Inline Thompson cross-reference indications and expandable bottom reference panel inspired by Obsidian's backlinks.
 - 🔍 **Verse Preview**: Interactive popover/modal to preview passages and cross-references without losing your reading position, with one-click copying.
 - 🌐 **Bilingual Interface**: Built-in support for English and Portuguese, adapting automatically to your Obsidian language settings.
+- 🧭 **Open Bible Center**: A searchable, executable guide that explains every real command and feature and can open it in the current or a new tab, a split, or either sidebar.
 - 🔒 **100% Offline & Private**: Powered by SQLite compiled to WebAssembly. Zero telemetry, zero external network calls, zero tracking. All files stay securely in your local vault.
 
 ---
@@ -67,6 +68,7 @@
 ## 🛠️ Usage
 
 - **Open reader**: Click the book icon in the left ribbon or run `OpenBible: Open reader` from the Command Palette (`Ctrl/Cmd + P`).
+- **Discover every feature**: Run `OpenBible: Open Open Bible Center`, or right-click the Open Bible ribbon icon. Search by intent, inspect the usage context, and run or configure the feature directly; the Center can also be placed in a new tab, split, or either sidebar from the Command Palette.
 - **Sidebar view**: Open the reader docked directly in your right or left sidebar using `OpenBible: Open reader in right sidebar` or `OpenBible: Open reader in left sidebar`.
 - **Switch chapters**: Use the passage selector at the top or the previous/next buttons at the bottom.
 - **Toggle two-column layout**: Run `OpenBible: Toggle two-column layout` or adjust it in **Settings → OpenBible → Reader and appearance**.
