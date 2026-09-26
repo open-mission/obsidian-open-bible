@@ -9,6 +9,40 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-09-26
+
+### Added
+- **Scripture Study Maps & Mind Mapping (Canvas & Excalidraw)**: Export selected verses directly to Obsidian Canvas (`.canvas`) or Excalidraw (`.excalidraw.md`) diagrams from the selection action bar and right-click context menu.
+- **Native `.canvas` and `.excalidraw.md` Study Templates**: The templates folder (`Templates/Canvas/`) now seeds and loads actual visual `.canvas` files (for Obsidian Canvas) and `.excalidraw.md` files (for Excalidraw), allowing users to visually customize layouts, colors, card sizes, and arrows inside Obsidian.
+- **Dynamic Placeholders in Visual Templates**: Supported tokens `{{bible_text}}`, `{{reference}}`, `{{version}}`, `{{book}}`, `{{chapter}}`, and `{{snippet}}` are replaced automatically upon export, with automatic fallback injection into *Texto Bíblico* cards.
+- **Template Selection Modal (`CanvasTemplatePickerModal`)**: Opens when creating Canvas or Excalidraw from verse selection, displaying template titles, descriptions, and section count badges (with mobile drawer presentation).
+- **Configurable Templates Folder**: Added `canvasTemplatesFolder` setting (default `Templates/Canvas`) with folder management under Study settings.
+
+### Improved
+- **Format-Aware Template Filtering**: The template selection dialog shows only `.canvas` compatible templates when exporting to Canvas, and `.excalidraw.md` templates when exporting to Excalidraw.
+- **Unified Scripture Passage Block**: In both Obsidian Canvas and Excalidraw, all selected verses are consolidated into a single unified scripture card with superscript numerals and verse line breaks, maintaining textual integrity alongside connected study template cards.
+- **Single-Block Excalidraw Scripture Box**: Excalidraw export binds scripture text into a single container card (`box: "box"`) connected by arrows to the study sections.
+- **Excalidraw Single-Block Text Copying**: Plain text and single block copying formats verses with line breaks per verse without Markdown blockquote markers (`>`), optimized for pasting directly into Excalidraw and visual boards.
+
+## [0.4.3] - 2026-09-24
+
+### Added
+- **Open Bible Center**: A persistent bilingual command and discovery surface with a guided first-use layer, 35 real capabilities across six task families, 38 safe actions, context filtering, accent-insensitive ranked search, detailed usage explanations, and safe Run/Open/Configure actions.
+- **Center Workspace Entry Points**: Added commands for the current tab, new tab, vertical split, left sidebar, and right sidebar, plus ribbon context-menu access.
+
+### Improved
+- **Center Header and Content Alignment**: Replaced the duplicated title/privacy header with a centered Open Bible logo and aligned search/filter controls to the same content width as the guided task shelf.
+- **Settings Routing**: Capability actions now open the exact plugin settings section instead of only the settings root.
+- **Legacy View Compatibility**: Replaced the hidden placeholder `open-bible-view` surface while preserving its view type for existing workspace layouts.
+- **Action Safety**: Destructive operations remain behind the plugin's existing confirmation flows, with no fake commands exposed by the Center.
+
+### Fixed
+- **Accurate No-Database State**: Database-dependent capabilities are now setup-gated and route to version management instead of reporting themselves as immediately available; background refreshes preserve the known zero-version state without a misleading setup flash.
+- **Reactive Editor Availability**: Editor-only actions now recalculate when Obsidian changes the active leaf or workspace layout.
+- **Detail Focus and Scroll Restoration**: Opening a capability focuses its detail heading, while Back restores the originating row's focus and previous reference scroll position.
+- **Metadata Contrast**: Replaced low-contrast Center metadata and context labels with the theme's readable muted text token.
+- **Duplicate Resource Action**: Removed an identical right-sidebar command from the linked-resources capability, leaving only distinct left/right placements.
+
 ## [0.4.2] - 2026-09-20
 
 ### Added
@@ -61,12 +95,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Detects plugin availability with friendly feedback notices and automated diagram opening.
 - **Multiple Entry Points & Commands**:
   - Added `[Comparar]` button to the floating `VerseActionBar` on verse selection.
+  - Added `[Canvas]` button to the floating `VerseActionBar` on verse selection with instant Canvas (`.canvas`) and Excalidraw (`.excalidraw.md`) creation.
+  - Added "Criar canvas" and "Criar no Excalidraw" to the reader right-click context menu.
   - Added "Comparar versões" to the verse right-click context menu in the reader.
   - Added "Comparar versões" to the editor right-click context menu on scripture references.
   - Added "Comparar versões" to the Bible Reader pane menu (`...`).
   - Added command `open-bible-compare` ("Comparar versículos bíblicos" / "Compare Bible verses").
   - Added command `open-bible-compare-tab` ("Abrir comparação em nova aba" / "Open comparison in new tab").
   - Added command `open-bible-compare-split` ("Dividir tela com comparação de versões" / "Split editor with version comparison").
+- **Scripture Study Maps & Mind Mapping (Canvas & Excalidraw)**:
+  - Generate instant visual study boards directly from selected Scripture verses or text snippets.
+  - Automatically structures reference headers, scripture cards, analysis blocks (*Ideia central, Palavras-chave, Contexto*), and practical application notes connected with directed arrows.
+  - Saves `.canvas` and `.excalidraw.md` files to `OpenBible/canvas/` (or configured export folder) and opens them immediately in a new tab/pane.
 
 ### Changed
 - **Comparison Header & Context Menu Reorganization**:
@@ -85,6 +125,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - **Modal Header "Open in Tab" Button Placement**: Fixed the placement of the "Open in tab" (`panel-top`) button in `BibleCompareModal` so it is anchored cleanly at the top-right corner next to Obsidian's native `.modal-close-button`, eliminating the bug where it was rendered at the bottom of the dialog.
 - **Modal Close Button**: Removed redundant custom close button inside `BibleCompareApp.svelte` header to eliminate duplicate "X" buttons, seamlessly aligning the header actions alongside Obsidian's native `.modal-close-button`.
+
 
 ## [0.4.0] - 2026-09-17
 

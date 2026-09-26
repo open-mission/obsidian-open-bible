@@ -9,7 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-09-26
+
 ### Added
+- **Scripture Study Maps & Mind Mapping (Canvas & Excalidraw)**: Export selected verses directly to Obsidian Canvas (`.canvas`) or Excalidraw (`.excalidraw.md`) diagrams from the selection action bar and right-click context menu.
 - **Native `.canvas` and `.excalidraw.md` Study Templates**: The templates folder (`Templates/Canvas/`) now seeds and loads actual visual `.canvas` files (for Obsidian Canvas) and `.excalidraw.md` files (for Excalidraw), allowing users to visually customize layouts, colors, card sizes, and arrows inside Obsidian.
 - **Dynamic Placeholders in Visual Templates**: Supported tokens `{{bible_text}}`, `{{reference}}`, `{{version}}`, `{{book}}`, `{{chapter}}`, and `{{snippet}}` are replaced automatically upon export, with automatic fallback injection into *Texto Bíblico* cards.
 - **Template Selection Modal (`CanvasTemplatePickerModal`)**: Opens when creating Canvas or Excalidraw from verse selection, displaying template titles, descriptions, and section count badges (with mobile drawer presentation).
@@ -19,6 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Format-Aware Template Filtering**: The template selection dialog shows only `.canvas` compatible templates when exporting to Canvas, and `.excalidraw.md` templates when exporting to Excalidraw.
 - **Unified Scripture Passage Block**: In both Obsidian Canvas and Excalidraw, all selected verses are consolidated into a single unified scripture card with superscript numerals and verse line breaks, maintaining textual integrity alongside connected study template cards.
 - **Single-Block Excalidraw Scripture Box**: Excalidraw export binds scripture text into a single container card (`box: "box"`) connected by arrows to the study sections.
+- **Excalidraw Single-Block Text Copying**: Plain text and single block copying formats verses with line breaks per verse without Markdown blockquote markers (`>`), optimized for pasting directly into Excalidraw and visual boards.
 
 ## [0.4.3] - 2026-09-24
 
