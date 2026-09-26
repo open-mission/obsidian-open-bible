@@ -32,7 +32,11 @@ import { getCanonBook } from "./bibleCanon";
 import type { BibleBook } from "./models/bible";
 import { PassagePickerModal } from "./ui/modals/PassagePickerModal";
 import { BibleComparisonService } from "./services/BibleComparisonService";
-import { BibleCanvasService, type VerseCanvasExportParams } from "./services/BibleCanvasService";
+import {
+	BibleCanvasService,
+	type CanvasStudyTemplate,
+	type VerseCanvasExportParams,
+} from "./services/BibleCanvasService";
 import { BibleCompareModal, type BibleCompareModalOptions } from "./ui/modals/BibleCompareModal";
 import {
 	BIBLE_COMPARE_VIEW_TYPE,
@@ -77,6 +81,9 @@ export default class OpenBiblePlugin extends Plugin {
 					console.warn("OpenBible: failed to load cross-references:", error);
 				});
 			}
+			void this.canvasService.seedDefaultTemplates().catch((error) => {
+				console.warn("OpenBible: failed to seed default canvas templates:", error);
+			});
 		});
 
 		this.registerView(OPEN_BIBLE_VIEW_TYPE, (leaf) => new OpenBibleView(leaf, this));
@@ -741,13 +748,13 @@ export default class OpenBiblePlugin extends Plugin {
 	}
 
 	/** Exports selected Bible verses to a visual JSON Canvas (.canvas) file. */
-	async exportVersesToCanvas(params: VerseCanvasExportParams): Promise<TFile> {
-		return this.canvasService.exportToCanvasFile(params);
+	async exportVersesToCanvas(params: VerseCanvasExportParams, template?: CanvasStudyTemplate): Promise<TFile> {
+		return this.canvasService.exportToCanvasFile(params, template);
 	}
 
 	/** Exports selected Bible verses to an Excalidraw drawing. */
-	async exportVersesToExcalidraw(params: VerseCanvasExportParams): Promise<boolean> {
-		return this.canvasService.exportToExcalidrawFile(params);
+	async exportVersesToExcalidraw(params: VerseCanvasExportParams, template?: CanvasStudyTemplate): Promise<boolean> {
+		return this.canvasService.exportToExcalidrawFile(params, template);
 	}
 
 	/** Pushes a newly selected resource to all active ResourceDetailView workspace leaves. */

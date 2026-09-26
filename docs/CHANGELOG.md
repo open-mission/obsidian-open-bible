@@ -9,6 +9,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **Canvas & Excalidraw Study Templates**: Visual study template system offering multiple built-in models (*Análise do Texto*, *Devocional*, *Mapa de Ideias*, *Estudo Indutivo (OIA)*, *Esboço de Ensino & Pregação*).
+- **Template Selection Modal (`CanvasTemplatePickerModal`)**: Opens when creating Canvas or Excalidraw from verse selection, displaying template titles, descriptions, and section count badges (with mobile drawer presentation).
+- **Configurable Templates Folder**: Added `canvasTemplatesFolder` setting (default `Templates/Canvas`) with auto-seeding of markdown templates and support for custom user `.md` and `.json` template files.
+- **Canvas Settings Section**: Added folder settings for canvas export and canvas templates in plugin settings under Study.
+
+### Improved
+- **Unified Scripture Passage Block**: In both Obsidian Canvas and Excalidraw, all selected verses are consolidated into a single unified scripture card with superscript numerals and verse line breaks, maintaining textual integrity alongside connected study template cards.
+- **Single-Block Excalidraw Scripture Box**: Excalidraw export now binds the scripture text into a single container card (`box: "box"`) connected by arrows to the study sections.
+
 ## [0.4.3] - 2026-09-24
 
 ### Added

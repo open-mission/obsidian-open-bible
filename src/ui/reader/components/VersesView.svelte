@@ -28,6 +28,7 @@
 	import { ResourcePreviewModal } from "../../modals/ResourcePreviewModal";
 	import { HighlightPickerModal } from "../../modals/HighlightPickerModal";
 	import { ResourceTypePickerModal } from "../../modals/ResourceTypePickerModal";
+	import { CanvasTemplatePickerModal } from "../../modals/CanvasTemplatePickerModal";
 	import type { BibleResourceLink } from "../../../models/resource";
 
 	interface Props {
@@ -901,24 +902,44 @@
 				selectedSnippet: textRangeSelection?.selectedText,
 			};
 
-			if (format === "canvas") {
-				await plugin.exportVersesToCanvas(params);
-				new Notice(t("popover.canvasCreated") || "Canvas criado com sucesso!");
-				clearSelection();
-			} else {
-				const success = await plugin.exportVersesToExcalidraw(params);
-				if (success) {
-					new Notice(t("popover.canvasCreated") || "Excalidraw criado com sucesso!");
-					clearSelection();
-				} else {
-					new Notice(
-						t("popover.excalidrawNotInstalled") ||
-							"Plugin Excalidraw não encontrado. Instale e ative o plugin Obsidian Excalidraw."
-					);
-				}
-			}
+			const templates = (await plugin.canvasService?.getTemplates()) ?? [];
+
+			new CanvasTemplatePickerModal(
+				plugin.app,
+				formattedRef,
+				format,
+				templates,
+				async (template) => {
+					try {
+						if (format === "canvas") {
+							await plugin.exportVersesToCanvas(params, template);
+							new Notice(t("popover.canvasCreated") || "Canvas criado com sucesso!");
+							clearSelection();
+						} else {
+							const success = await plugin.exportVersesToExcalidraw(params, template);
+							if (success) {
+								new Notice(t("popover.canvasCreated") || "Excalidraw criado com sucesso!");
+								clearSelection();
+							} else {
+								new Notice(
+									t("popover.excalidrawNotInstalled") ||
+										"Plugin Excalidraw não encontrado. Instale e ative o plugin Obsidian Excalidraw."
+								);
+							}
+						}
+					} catch (err) {
+						console.error("OpenBible: error creating canvas/excalidraw:", err);
+						new Notice(
+							(t("popover.canvasError") || "Erro ao criar canvas: {error}").replace(
+								"{error}",
+								err instanceof Error ? err.message : String(err)
+							)
+						);
+					}
+				},
+			).open();
 		} catch (err) {
-			console.error("OpenBible: error creating canvas/excalidraw:", err);
+			console.error("OpenBible: error preparing canvas templates:", err);
 			new Notice(
 				(t("popover.canvasError") || "Erro ao criar canvas: {error}").replace(
 					"{error}",

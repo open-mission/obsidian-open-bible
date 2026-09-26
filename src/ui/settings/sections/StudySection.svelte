@@ -145,3 +145,45 @@
 		</div>
 	</div>
 {/if}
+
+<!-- Canvas & Excalidraw Templates & Export Folders -->
+<div class="setting-item setting-item-heading">
+	<div class="setting-item-info">
+		<div class="setting-item-name">{t("settings.canvasHeading")}</div>
+		<div class="setting-item-description">{t("settings.canvasHeadingDesc")}</div>
+	</div>
+</div>
+
+<div class="setting-item">
+	<div class="setting-item-info">
+		<div class="setting-item-name">{t("settings.canvasExportFolderName")}</div>
+		<div class="setting-item-description">{t("settings.canvasExportFolderDesc")}</div>
+	</div>
+	<div class="setting-item-control">
+		<input
+			type="text"
+			class="text-input"
+			value={settings.canvasExportFolder ?? "OpenBible/canvas"}
+			placeholder="OpenBible/canvas"
+			aria-label={t("settings.canvasExportFolderName")}
+			onchange={(e) => void updateGeneral({ canvasExportFolder: (e.target as HTMLInputElement).value.trim() || "OpenBible/canvas" })}
+		/>
+	</div>
+</div>
+
+<div class="setting-item">
+	<div class="setting-item-info">
+		<div class="setting-item-name">{t("settings.canvasTemplatesFolderName")}</div>
+		<div class="setting-item-description">{t("settings.canvasTemplatesFolderDesc")}</div>
+	</div>
+	<div class="setting-item-control">
+		<input
+			type="text"
+			class="text-input"
+			value={settings.canvasTemplatesFolder ?? "Templates/Canvas"}
+			placeholder="Templates/Canvas"
+			aria-label={t("settings.canvasTemplatesFolderName")}
+			onchange={(e) => void updateGeneral({ canvasTemplatesFolder: (e.target as HTMLInputElement).value.trim() || "Templates/Canvas" })}
+		/>
+	</div>
+</div>

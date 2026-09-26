@@ -168,19 +168,27 @@ Under **Settings → OpenBible → Reader**, users can select the default format
 
 ---
 
-## 7. Visual Mind Maps & Diagramming: Create Canvas & Excalidraw from Selection
+## 7. Visual Mind Maps & Diagramming: Canvas & Excalidraw Study Templates
 
-When one or more verses (or a text fragment) are selected in the reader, the floating selection toolbar (`VerseActionBar`) offers a **Criar canvas** (`[⊞ Canvas]`) action. Clicking it opens a popup menu with two visual export options:
+When one or more verses (or a text fragment) are selected in the reader, the floating selection toolbar (`VerseActionBar`) and the right-click context menu offer the **Criar canvas** action with choices for **Canvas (.canvas)** and **Excalidraw (.excalidraw.md)**.
 
-1. **Canvas (`.canvas`)**:
-   - Generates a fully formatted [JSON Canvas 1.0](https://jsoncanvas.org/spec/1.0/) diagram file saved to `OpenBible/canvas/` (or the user-configured export folder) and opens it immediately in a new Obsidian workspace tab.
-   - **Single Verse**: Generates a central reference header connected to the scripture card, an in-depth analysis block (*Tema central, Palavras-chave, Contexto*), a practical application block, and cross-reference connection slots.
-   - **Multi-Verse Branching (2–6 verses)**: Generates a top reference header connected to individual verse cards placed side-by-side, each with an analysis/notes card positioned directly below it.
-   - **Snippet Selection**: Focuses on the exact highlighted phrase with an emphasis block, full verse context card, and connected analytical study nodes.
-   - **Large Passages (> 6 verses)**: Creates a consolidated passage card alongside structured theme, structure, and reflection boards.
+### Study Template Selection Modal
+Selecting Canvas or Excalidraw opens the **CanvasTemplatePickerModal** (rendered as a bottom drawer on mobile), which presents all available visual study templates:
+- **Análise do Texto**: Focuses on keywords, original Greek/Hebrew nuances, historical & literary context, and core theological message.
+- **Devocional**: Centered on personal spiritual listening, daily practical application, and prayer & thanksgiving.
+- **Mapa de Ideias**: Visual brainstorming layout with central idea & argumentation, branches & logical connections, and cross-references.
+- **Estudo Indutivo (OIA)**: Classic inductive Bible study methodology (1. Observação, 2. Interpretação, 3. Aplicação).
+- **Esboço de Ensino & Pregação**: Homiletical & pedagogical structure with sermon title & proposition, textual divisions, and final conclusion & appeal.
 
-2. **Excalidraw (`.excalidraw.md`)**:
-   - Interfaces with `ExcalidrawAutomate` to build bound text card elements (`box: "box"`) with soft pastel backgrounds, connecting arrows, and auto-sized dimensions to prevent text clipping.
-   - Saves the drawing to the canvas export folder and opens it in a new pane, enabling users to immediately draw mind maps, theological diagrams, arrows, and personal annotations.
+### Unified Scripture Block
+To preserve textual unity and provide seamless visual flow in both Obsidian Canvas and Excalidraw:
+- All selected scripture verses are placed together inside **one single unified scripture text card/box**, formatted with superscript verse numbers and clean verse line breaks (`\n`).
+- If a text snippet is highlighted, the focused snippet is highlighted at the top of the scripture card.
+- Companion study sections from the selected template are generated alongside the scripture block and connected with directional arrows.
+
+### Customizable Templates Folder
+- Templates are stored in `Templates/Canvas` by default, configurable in **Settings > Study > Canvas Templates Folder**.
+- Default template files are automatically seeded as `.md` files in this folder upon startup.
+- Users can create their own custom study templates by adding `.md` files (with `# Title`, description, and `### Section` blocks) or `.json` files to the configured folder.
 
 

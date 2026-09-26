@@ -142,6 +142,8 @@ export interface OpenBibleSettings {
 	compareExportFolder?: string;
 	/** Folder where generated Canvas (.canvas) and Excalidraw study map files are saved from verse selection. */
 	canvasExportFolder?: string;
+	/** Folder where custom Canvas and Excalidraw study templates (.md or .json) are loaded from. */
+	canvasTemplatesFolder?: string;
 	/** Preferred layout for comparison modal ("columns" or "verses"). */
 	comparePreferredLayout?: "columns" | "verses";
 	/** Format when copying verses from selection toolbar ("singleBlock" for clean Excalidraw-ready block, or "quoteMarkdown" for '>' blockquote). */
@@ -153,6 +155,7 @@ export const DEFAULT_SETTINGS: OpenBibleSettings = {
 	notesFolder: "OpenBible/notes",
 	highlightsFolder: "OpenBible/highlights",
 	canvasExportFolder: "OpenBible/canvas",
+	canvasTemplatesFolder: "Templates/Canvas",
 	configuredHighlights: DEFAULT_HIGHLIGHT_CONFIGS,
 	configuredNotes: DEFAULT_NOTE_CONFIGS,
 	configuredResources: DEFAULT_RESOURCE_TYPES,

@@ -14,6 +14,176 @@ export interface VerseCanvasExportParams {
 	selectedSnippet?: string;
 }
 
+export interface CanvasTemplateSection {
+	title: string;
+	placeholder: string;
+	color?: string; // Canvas color preset "1" to "6"
+	bgHex?: string; // Excalidraw fill
+	borderHex?: string; // Excalidraw border
+}
+
+export interface CanvasStudyTemplate {
+	id: string;
+	title: string;
+	description: string;
+	icon: string;
+	color: string;
+	sections: CanvasTemplateSection[];
+}
+
+export const DEFAULT_CANVAS_TEMPLATES: CanvasStudyTemplate[] = [
+	{
+		id: "text_analysis",
+		title: "Análise do Texto",
+		description: "Estudo analítico e exegético com palavras-chave, contexto histórico e teologia.",
+		icon: "file-search",
+		color: "6",
+		sections: [
+			{
+				title: "Palavras-chave & Original",
+				placeholder: "• Termos importantes no hebraico/grego:\n• Definições e nuances:\n• Repetições intencionais:",
+				color: "5",
+				bgHex: "#f0f9ff",
+				borderHex: "#0284c7",
+			},
+			{
+				title: "Contexto Histórico & Literário",
+				placeholder: "• Autor e audiência original:\n• Gênero literário:\n• Situação histórica / cultural:",
+				color: "2",
+				bgHex: "#fffbeb",
+				borderHex: "#d97706",
+			},
+			{
+				title: "Teologia & Mensagem Central",
+				placeholder: "• O que o texto revela sobre Deus?\n• Tema teológico principal:\n• Conexão com o Evangelho:",
+				color: "6",
+				bgHex: "#faf5ff",
+				borderHex: "#9333ea",
+			},
+		],
+	},
+	{
+		id: "devotional",
+		title: "Devocional",
+		description: "Meditação pessoal focada em comunhão com Deus, escuta e aplicação no dia a dia.",
+		icon: "heart",
+		color: "3",
+		sections: [
+			{
+				title: "O que Deus está me dizendo?",
+				placeholder: "• Frase ou verdade que mais tocou meu coração:\n• O que aprendo sobre o Senhor:\n• Promessa ou advertência presente:",
+				color: "5",
+				bgHex: "#f0f9ff",
+				borderHex: "#0284c7",
+			},
+			{
+				title: "Aplicação Prática",
+				placeholder: "• Como posso viver essa verdade hoje?\n• Uma atitude ou mudança concreta a tomar:\n• Pessoas que posso abençoar com isso:",
+				color: "3",
+				bgHex: "#fefce8",
+				borderHex: "#ca8a04",
+			},
+			{
+				title: "Oração & Gratidão",
+				placeholder: "• Agradeço por:\n• Peço perdão por:\n• Minha súplica hoje:",
+				color: "2",
+				bgHex: "#fff7ed",
+				borderHex: "#ea580c",
+			},
+		],
+	},
+	{
+		id: "mind_map",
+		title: "Mapa de Ideias",
+		description: "Mapeamento visual de conceitos, conexões lógicas, ramificações e referências cruzadas.",
+		icon: "git-branch",
+		color: "5",
+		sections: [
+			{
+				title: "Ideia Central & Argumento",
+				placeholder: "• Tese principal do autor:\n• Linha de raciocínio:\n• Causa e efeito no texto:",
+				color: "5",
+				bgHex: "#f0f9ff",
+				borderHex: "#0284c7",
+			},
+			{
+				title: "Ramificações & Conexões",
+				placeholder: "• Ponto 1:\n• Ponto 2:\n• Ponto 3:",
+				color: "6",
+				bgHex: "#faf5ff",
+				borderHex: "#9333ea",
+			},
+			{
+				title: "Referências Cruzadas",
+				placeholder: "• [[ ]]\n• ",
+				color: "2",
+				bgHex: "#fffbeb",
+				borderHex: "#d97706",
+			},
+		],
+	},
+	{
+		id: "inductive",
+		title: "Estudo Indutivo (OIA)",
+		description: "Método clássico de estudo bíblico: Observação, Interpretação e Aplicação.",
+		icon: "compass",
+		color: "2",
+		sections: [
+			{
+				title: "1. Observação (O que o texto diz?)",
+				placeholder: "• Quem, o quê, onde, quando e por quê?\n• Conectivos e verbos-chave:\n• Contrastes e comparações:",
+				color: "5",
+				bgHex: "#f0f9ff",
+				borderHex: "#0284c7",
+			},
+			{
+				title: "2. Interpretação (O que o texto significa?)",
+				placeholder: "• Qual era o sentido para os leitores originais?\n• Princípio atemporal imutável:\n• Iluminação por outras passagens:",
+				color: "6",
+				bgHex: "#faf5ff",
+				borderHex: "#9333ea",
+			},
+			{
+				title: "3. Aplicação (O que o texto exige de mim?)",
+				placeholder: "• Pecado a confessar?\n• Promessa a crer?\n• Exemplo a seguir?\n• Mandamento a obedecer?",
+				color: "3",
+				bgHex: "#fefce8",
+				borderHex: "#ca8a04",
+			},
+		],
+	},
+	{
+		id: "sermon_outline",
+		title: "Esboço de Ensino & Pregação",
+		description: "Estruturação didática com introdução, tópicos expositivos e conclusão.",
+		icon: "layout-list",
+		color: "1",
+		sections: [
+			{
+				title: "Título & Proposição",
+				placeholder: "• Título da mensagem:\n• Proposição central:\n• Pergunta norteadora:",
+				color: "1",
+				bgHex: "#fef2f2",
+				borderHex: "#dc2626",
+			},
+			{
+				title: "Divisões do Texto",
+				placeholder: "• I. Primeiro princípio:\n• II. Segundo princípio:\n• III. Terceiro princípio:",
+				color: "5",
+				bgHex: "#f0f9ff",
+				borderHex: "#0284c7",
+			},
+			{
+				title: "Conclusão & Apelo",
+				placeholder: "• Resumo prático:\n• Apelo ou desafio final:",
+				color: "3",
+				bgHex: "#fefce8",
+				borderHex: "#ca8a04",
+			},
+		],
+	},
+];
+
 function normalizeFilePath(path: string): string {
 	return path.replace(/\\/g, "/").replace(/\/+/g, "/").replace(/^\/+/, "");
 }
@@ -25,10 +195,155 @@ export class BibleCanvasService {
 	) {}
 
 	/**
-	 * Builds a structured JSON Canvas 1.0 document for the given verse selection.
-	 * Designed for mind mapping, analysis, theological study, and reflection.
+	 * Returns available study templates, combining built-in templates with any custom
+	 * templates found in the user-configured templates folder (e.g. Templates/Canvas).
 	 */
-	buildJsonCanvas(params: VerseCanvasExportParams): JsonCanvasData {
+	async getTemplates(): Promise<CanvasStudyTemplate[]> {
+		const templates: CanvasStudyTemplate[] = [...DEFAULT_CANVAS_TEMPLATES];
+
+		const configured = this.getSettings().canvasTemplatesFolder?.trim();
+		const folder = normalizeFilePath(configured || "Templates/Canvas");
+
+		try {
+			if (this.app?.vault?.adapter && (await this.app.vault.adapter.exists(folder))) {
+				const listing = await this.app.vault.adapter.list(folder);
+				for (const filePath of listing.files) {
+					if (filePath.endsWith(".json")) {
+						try {
+							const content = await this.app.vault.adapter.read(filePath);
+							const parsed = JSON.parse(content);
+							if (parsed.id && parsed.title && Array.isArray(parsed.sections)) {
+								const existingIndex = templates.findIndex((t) => t.id === parsed.id);
+								if (existingIndex >= 0) {
+									templates[existingIndex] = parsed;
+								} else {
+									templates.push(parsed);
+								}
+							}
+						} catch (e) {
+							console.warn("OpenBible: failed to parse canvas template JSON:", filePath, e);
+						}
+					} else if (filePath.endsWith(".md")) {
+						try {
+							const content = await this.app.vault.adapter.read(filePath);
+							const template = this.parseMarkdownTemplate(filePath, content);
+							if (template) {
+								const existingIndex = templates.findIndex((t) => t.id === template.id);
+								if (existingIndex >= 0) {
+									templates[existingIndex] = template;
+								} else {
+									templates.push(template);
+								}
+							}
+						} catch (e) {
+							console.warn("OpenBible: failed to parse canvas template MD:", filePath, e);
+						}
+					}
+				}
+			}
+		} catch (err) {
+			console.warn("OpenBible: error listing canvas templates folder:", err);
+		}
+
+		return templates;
+	}
+
+	/**
+	 * Parses a user markdown template file containing '### Section' headings.
+	 */
+	parseMarkdownTemplate(filePath: string, content: string): CanvasStudyTemplate | null {
+		const lines = content.split("\n");
+		let title = "";
+		let description = "";
+		const sections: CanvasTemplateSection[] = [];
+
+		let currentSection: CanvasTemplateSection | null = null;
+		let placeholderLines: string[] = [];
+
+		for (const line of lines) {
+			if (line.startsWith("# ") && !title) {
+				title = line.replace(/^#\s+/, "").trim();
+			} else if (line.startsWith("### ")) {
+				if (currentSection) {
+					currentSection.placeholder = placeholderLines.join("\n").trim();
+					sections.push(currentSection);
+					placeholderLines = [];
+				}
+				const secTitle = line.replace(/^###\s+/, "").trim();
+				currentSection = {
+					title: secTitle,
+					placeholder: "",
+					color: "6",
+					bgHex: "#faf5ff",
+					borderHex: "#9333ea",
+				};
+			} else if (currentSection) {
+				placeholderLines.push(line);
+			} else if (title && !currentSection && line.trim() && !description) {
+				description = line.trim();
+			} else if (!title && !currentSection && line.trim() && !description) {
+				description = line.trim();
+			}
+		}
+
+		if (currentSection) {
+			currentSection.placeholder = placeholderLines.join("\n").trim();
+			sections.push(currentSection);
+		}
+
+		if (!title) {
+			const baseName = filePath.split("/").pop()?.replace(/\.(md|json)$/, "") || "Modelo";
+			title = baseName;
+		}
+
+		if (sections.length === 0) return null;
+
+		const id = title.toLowerCase().replace(/[^a-z0-9]+/g, "_");
+		return {
+			id,
+			title,
+			description: description || `Modelo de estudo bíblico personalizado.`,
+			icon: "layout-dashboard",
+			color: "6",
+			sections,
+		};
+	}
+
+	/**
+	 * Seeds default templates as markdown files in the configured templates folder
+	 * so users can discover, edit, and create their own custom templates.
+	 */
+	async seedDefaultTemplates(): Promise<void> {
+		const configured = this.getSettings().canvasTemplatesFolder?.trim();
+		const folder = normalizeFilePath(configured || "Templates/Canvas");
+
+		try {
+			if (!this.app?.vault?.adapter) return;
+			if (!(await this.app.vault.adapter.exists(folder))) {
+				await this.app.vault.adapter.mkdir(folder);
+			}
+
+			for (const tpl of DEFAULT_CANVAS_TEMPLATES) {
+				const path = normalizeFilePath(`${folder}/${tpl.title}.md`);
+				if (!(await this.app.vault.adapter.exists(path))) {
+					let md = `# ${tpl.title}\n${tpl.description}\n\n`;
+					for (const sec of tpl.sections) {
+						md += `### ${sec.title}\n${sec.placeholder}\n\n`;
+					}
+					await this.app.vault.adapter.write(path, md.trim());
+				}
+			}
+		} catch (err) {
+			console.warn("OpenBible: failed to seed default canvas templates:", err);
+		}
+	}
+
+	/**
+	 * Builds a structured JSON Canvas 1.0 document for the given verse selection.
+	 * Formats all selected scripture verses into ONE SINGLE UNIFIED BLOCK,
+	 * connected to companion study/analysis blocks defined by the selected template.
+	 */
+	buildJsonCanvas(params: VerseCanvasExportParams, template?: CanvasStudyTemplate): JsonCanvasData {
 		const nodes: CanvasNode[] = [];
 		const edges: CanvasEdge[] = [];
 
@@ -36,272 +351,93 @@ export class BibleCanvasService {
 		const verseNumbers = sortedVerses.map((v) => v.number);
 		const reference = formatReference(params.book.name, params.chapter, verseNumbers, params.versionAbbr);
 
+		const activeTemplate = template || DEFAULT_CANVAS_TEMPLATES[0];
+
+		// 1. Header Node
 		const headerId = generateCanvasId();
-		const colorPresets = ["1", "2", "3", "5", "6"]; // Red, Orange, Yellow, Cyan, Purple
+		const headerWidth = 500;
+		const headerHeight = 120;
+		const headerTitle = `# ${reference}\n\n*Tradução: ${params.versionAbbr || "Bíblia"}* — **${activeTemplate.title}**`;
+		nodes.push({
+			id: headerId,
+			type: "text",
+			x: 0,
+			y: 0,
+			width: headerWidth,
+			height: headerHeight,
+			color: "4", // Green preset
+			text: headerTitle,
+		});
 
+		// 2. Unified Scripture Passage Node (ONE SINGLE BLOCK)
+		const passageId = generateCanvasId();
+		const versesText = sortedVerses
+			.map((v) => `${toSuperscript(v.number)} ${v.text}`)
+			.join("\n");
+
+		let scriptureContent = `### Texto Bíblico (${reference})\n\n`;
 		if (params.selectedSnippet) {
-			// Layout with focused text snippet
-			const headerWidth = 480;
-			const headerHeight = 120;
-			nodes.push({
-				id: headerId,
-				type: "text",
-				x: 0,
-				y: 0,
-				width: headerWidth,
-				height: headerHeight,
-				color: "4", // Green
-				text: `# ${reference}\n\n*Estudo & Mapeamento de Trecho*`,
-			});
-
-			const snippetId = generateCanvasId();
-			nodes.push({
-				id: snippetId,
-				type: "text",
-				x: 0,
-				y: 180,
-				width: 440,
-				height: 160,
-				color: "3", // Yellow
-				text: `### Trecho em Foco\n\n> "${params.selectedSnippet}"\n\n— *${reference}*`,
-			});
-
-			const contextId = generateCanvasId();
-			const versesText = sortedVerses.map((v) => `${toSuperscript(v.number)} ${v.text}`).join("\n\n");
-			nodes.push({
-				id: contextId,
-				type: "text",
-				x: 480,
-				y: 180,
-				width: 460,
-				height: 200,
-				color: "5", // Cyan
-				text: `### Contexto do Versículo\n\n${versesText}`,
-			});
-
-			const analysisId = generateCanvasId();
-			nodes.push({
-				id: analysisId,
-				type: "text",
-				x: 0,
-				y: 400,
-				width: 440,
-				height: 220,
-				color: "6", // Purple
-				text: `### Análise & Observações\n\n- **Significado central:**\n- **Palavras-chave no original:**\n- **Contexto da passagem:**\n- **Aplicação prática:**`,
-			});
-
-			const notesId = generateCanvasId();
-			nodes.push({
-				id: notesId,
-				type: "text",
-				x: 480,
-				y: 400,
-				width: 460,
-				height: 220,
-				color: "2", // Orange
-				text: `### Conexões & Referências Cruzadas\n\n- [[ ]]\n- `,
-			});
-
-			edges.push(
-				{ id: generateCanvasId(), fromNode: headerId, fromSide: "bottom", toNode: snippetId, toSide: "top", toEnd: "arrow" },
-				{ id: generateCanvasId(), fromNode: snippetId, fromSide: "right", toNode: contextId, toSide: "left", toEnd: "arrow" },
-				{ id: generateCanvasId(), fromNode: snippetId, fromSide: "bottom", toNode: analysisId, toSide: "top", toEnd: "arrow" },
-				{ id: generateCanvasId(), fromNode: contextId, fromSide: "bottom", toNode: notesId, toSide: "top", toEnd: "arrow" },
-			);
-		} else if (sortedVerses.length <= 1) {
-			// Single verse layout: Central header + Verse card + Analysis + Application + Cross-references
-			const headerWidth = 480;
-			const headerHeight = 120;
-			nodes.push({
-				id: headerId,
-				type: "text",
-				x: 0,
-				y: 0,
-				width: headerWidth,
-				height: headerHeight,
-				color: "4", // Green
-				text: `# ${reference}\n\n*Estudo & Mapa Visual*`,
-			});
-
-			const verseId = generateCanvasId();
-			const verse = sortedVerses[0] || { number: 1, text: "" };
-			nodes.push({
-				id: verseId,
-				type: "text",
-				x: 0,
-				y: 180,
-				width: 440,
-				height: 180,
-				color: "5", // Cyan
-				text: `### Texto Bíblico\n\n${toSuperscript(verse.number)} ${verse.text}`,
-			});
-
-			const analysisId = generateCanvasId();
-			nodes.push({
-				id: analysisId,
-				type: "text",
-				x: 480,
-				y: 180,
-				width: 440,
-				height: 200,
-				color: "6", // Purple
-				text: `### Análise & Observações\n\n- **Tema central:**\n- **Palavras-chave:**\n- **Contexto histórico/cultural:**`,
-			});
-
-			const appId = generateCanvasId();
-			nodes.push({
-				id: appId,
-				type: "text",
-				x: 0,
-				y: 420,
-				width: 440,
-				height: 190,
-				color: "3", // Yellow
-				text: `### Aplicação Prática\n\n- **Como viver este princípio?**\n- **Ações e compromissos:**\n- **Motivos de oração:**`,
-			});
-
-			const refsId = generateCanvasId();
-			nodes.push({
-				id: refsId,
-				type: "text",
-				x: 480,
-				y: 420,
-				width: 440,
-				height: 190,
-				color: "2", // Orange
-				text: `### Conexões & Referências Cruzadas\n\n- [[ ]]\n- `,
-			});
-
-			edges.push(
-				{ id: generateCanvasId(), fromNode: headerId, fromSide: "bottom", toNode: verseId, toSide: "top", toEnd: "arrow" },
-				{ id: generateCanvasId(), fromNode: verseId, fromSide: "right", toNode: analysisId, toSide: "left", toEnd: "arrow" },
-				{ id: generateCanvasId(), fromNode: verseId, fromSide: "bottom", toNode: appId, toSide: "top", toEnd: "arrow" },
-				{ id: generateCanvasId(), fromNode: analysisId, fromSide: "bottom", toNode: refsId, toSide: "top", toEnd: "arrow" },
-			);
-		} else if (sortedVerses.length <= 6) {
-			// Multi-verse branch layout (2 to 6 verses):
-			// Each verse gets a top branch card, with an analysis note block directly underneath it!
-			const cardWidth = 360;
-			const cardGap = 40;
-			const totalWidth = sortedVerses.length * (cardWidth + cardGap) - cardGap;
-			const headerWidth = Math.min(totalWidth, 520);
-			const headerX = Math.round((totalWidth - headerWidth) / 2);
-
-			nodes.push({
-				id: headerId,
-				type: "text",
-				x: headerX,
-				y: 0,
-				width: headerWidth,
-				height: 120,
-				color: "4", // Green
-				text: `# ${reference}\n\n*Estudo & Mapa de Versículos*`,
-			});
-
-			sortedVerses.forEach((v, index) => {
-				const cardX = index * (cardWidth + cardGap);
-				const verseCardId = generateCanvasId();
-				const estimatedHeight = Math.max(160, 90 + Math.ceil(v.text.length / 32) * 22);
-
-				nodes.push({
-					id: verseCardId,
-					type: "text",
-					x: cardX,
-					y: 180,
-					width: cardWidth,
-					height: estimatedHeight,
-					color: colorPresets[index % colorPresets.length],
-					text: `### Versículo ${v.number}\n\n${toSuperscript(v.number)} ${v.text}`,
-				});
-
-				edges.push({
-					id: generateCanvasId(),
-					fromNode: headerId,
-					fromSide: "bottom",
-					toNode: verseCardId,
-					toSide: "top",
-					toEnd: "arrow",
-				});
-
-				const notesCardId = generateCanvasId();
-				nodes.push({
-					id: notesCardId,
-					type: "text",
-					x: cardX,
-					y: 180 + estimatedHeight + 40,
-					width: cardWidth,
-					height: 180,
-					color: "3", // Yellow
-					text: `#### Anotações — v. ${v.number}\n\n- **Ideia-chave:**\n- **Conexões & Aplicação:**`,
-				});
-
-				edges.push({
-					id: generateCanvasId(),
-					fromNode: verseCardId,
-					fromSide: "bottom",
-					toNode: notesCardId,
-					toSide: "top",
-					toEnd: "arrow",
-				});
-			});
-		} else {
-			// Large passage layout (> 6 verses):
-			// Consolidated passage card + dedicated study cards
-			nodes.push({
-				id: headerId,
-				type: "text",
-				x: 0,
-				y: 0,
-				width: 520,
-				height: 120,
-				color: "4", // Green
-				text: `# ${reference}\n\n*Estudo & Panorama de Passagem*`,
-			});
-
-			const passageId = generateCanvasId();
-			const passageBody = sortedVerses.map((v) => `**${v.number}.** ${v.text}`).join("\n\n");
-			nodes.push({
-				id: passageId,
-				type: "text",
-				x: 0,
-				y: 180,
-				width: 520,
-				height: Math.min(600, Math.max(260, 80 + sortedVerses.length * 40)),
-				color: "5", // Cyan
-				text: `### Texto Bíblico\n\n${passageBody}`,
-			});
-
-			const themesId = generateCanvasId();
-			nodes.push({
-				id: themesId,
-				type: "text",
-				x: 560,
-				y: 180,
-				width: 440,
-				height: 220,
-				color: "6", // Purple
-				text: `### Temas & Estrutura\n\n- **Estrutura da passagem:**\n- **Temas principais:**\n- **Personagens / Locais:**`,
-			});
-
-			const notesId = generateCanvasId();
-			nodes.push({
-				id: notesId,
-				type: "text",
-				x: 560,
-				y: 440,
-				width: 440,
-				height: 240,
-				color: "3", // Yellow
-				text: `### Reflexão & Aplicação\n\n- **O que aprendemos sobre Deus?**\n- **O que aprendemos sobre a humanidade?**\n- **Como responder:**`,
-			});
-
-			edges.push(
-				{ id: generateCanvasId(), fromNode: headerId, fromSide: "bottom", toNode: passageId, toSide: "top", toEnd: "arrow" },
-				{ id: generateCanvasId(), fromNode: passageId, fromSide: "right", toNode: themesId, toSide: "left", toEnd: "arrow" },
-				{ id: generateCanvasId(), fromNode: themesId, fromSide: "bottom", toNode: notesId, toSide: "top", toEnd: "arrow" },
-			);
+			scriptureContent += `> "${params.selectedSnippet}"\n\n`;
 		}
+		scriptureContent += versesText;
+
+		const scriptureWidth = 480;
+		const scriptureHeight = Math.max(200, 100 + Math.ceil(scriptureContent.length / 32) * 20);
+
+		nodes.push({
+			id: passageId,
+			type: "text",
+			x: 0,
+			y: 160,
+			width: scriptureWidth,
+			height: scriptureHeight,
+			color: "5", // Cyan preset
+			text: scriptureContent,
+		});
+
+		// Connect Header -> Scripture Node
+		edges.push({
+			id: generateCanvasId(),
+			fromNode: headerId,
+			fromSide: "bottom",
+			toNode: passageId,
+			toSide: "top",
+			toEnd: "arrow",
+		});
+
+		// 3. Template Companion Section Nodes
+		const sections = activeTemplate.sections;
+		const col2X = scriptureWidth + 40; // 520
+		const sectionWidth = 460;
+		let currentY = 160;
+
+		sections.forEach((sec) => {
+			const secNodeId = generateCanvasId();
+			const secHeight = Math.max(180, 80 + Math.ceil(sec.placeholder.length / 28) * 18);
+
+			nodes.push({
+				id: secNodeId,
+				type: "text",
+				x: col2X,
+				y: currentY,
+				width: sectionWidth,
+				height: secHeight,
+				color: sec.color || "6",
+				text: `### ${sec.title}\n\n${sec.placeholder}`,
+			});
+
+			// Connect Scripture -> Template Section
+			edges.push({
+				id: generateCanvasId(),
+				fromNode: passageId,
+				fromSide: "right",
+				toNode: secNodeId,
+				toSide: "left",
+				toEnd: "arrow",
+			});
+
+			currentY += secHeight + 24;
+		});
 
 		return { nodes, edges };
 	}
@@ -309,7 +445,7 @@ export class BibleCanvasService {
 	/**
 	 * Creates a .canvas file inside the vault and opens it in a new workspace tab.
 	 */
-	async exportToCanvasFile(params: VerseCanvasExportParams): Promise<TFile> {
+	async exportToCanvasFile(params: VerseCanvasExportParams, template?: CanvasStudyTemplate): Promise<TFile> {
 		const configured =
 			this.getSettings().canvasExportFolder?.trim() ||
 			this.getSettings().compareExportFolder?.trim();
@@ -321,7 +457,9 @@ export class BibleCanvasService {
 
 		const sortedVerses = [...params.verses].sort((a, b) => a.number - b.number);
 		const rangeStr = formatVerseRange(sortedVerses.map((v) => v.number)).replace(/[, ]+/g, "_");
-		const baseName = `${params.book.name} ${params.chapter}_${rangeStr} - Mapa`;
+		const activeTemplate = template || DEFAULT_CANVAS_TEMPLATES[0];
+		const cleanTitle = activeTemplate.title.replace(/[\\/:*?"<>|]/g, "");
+		const baseName = `${params.book.name} ${params.chapter}_${rangeStr} - ${cleanTitle}`;
 		let targetPath = normalizeFilePath(`${folder}/${baseName}.canvas`);
 
 		// Avoid collisions if file already exists
@@ -331,7 +469,7 @@ export class BibleCanvasService {
 			counter++;
 		}
 
-		const canvasData = this.buildJsonCanvas(params);
+		const canvasData = this.buildJsonCanvas(params, activeTemplate);
 		const content = JSON.stringify(canvasData, null, 2);
 
 		const createdFile = await this.app.vault.create(targetPath, content);
@@ -344,9 +482,10 @@ export class BibleCanvasService {
 
 	/**
 	 * Generates an Excalidraw visual drawing using ExcalidrawAutomate if obsidian-excalidraw-plugin is active.
-	 * Returns true if successful, false if the plugin is unavailable.
+	 * Puts all selected scripture verses into ONE SINGLE BOUND TEXT CONTAINER,
+	 * connected to companion study blocks based on the selected template.
 	 */
-	async exportToExcalidrawFile(params: VerseCanvasExportParams): Promise<boolean> {
+	async exportToExcalidrawFile(params: VerseCanvasExportParams, template?: CanvasStudyTemplate): Promise<boolean> {
 		const win = typeof window !== "undefined" ? (window as unknown as { ExcalidrawAutomate?: any }) : {};
 		const pluginEa = (this.app as any)?.plugins?.getPlugin?.("obsidian-excalidraw-plugin")?.ea;
 		const ea = win.ExcalidrawAutomate || pluginEa;
@@ -365,14 +504,7 @@ export class BibleCanvasService {
 			const sortedVerses = [...params.verses].sort((a, b) => a.number - b.number);
 			const verseNumbers = sortedVerses.map((v) => v.number);
 			const reference = formatReference(params.book.name, params.chapter, verseNumbers, params.versionAbbr);
-
-			const cardWidth = 360;
-			const cardGap = 40;
-			const count = sortedVerses.length;
-
-			const totalWidth = Math.max(480, (count <= 6 ? count : 2) * (cardWidth + cardGap) - cardGap);
-			const headerWidth = Math.min(totalWidth, 520);
-			const headerX = Math.round((totalWidth - headerWidth) / 2);
+			const activeTemplate = template || DEFAULT_CANVAS_TEMPLATES[0];
 
 			// 1. Header Box
 			ea.style.strokeColor = "#2563eb";
@@ -380,148 +512,63 @@ export class BibleCanvasService {
 			ea.style.fillStyle = "solid";
 			ea.style.fontSize = 18;
 
-			const headerTitle = params.selectedSnippet
-				? `${reference}\nEstudo de Trecho Bíblico`
-				: `${reference}\nMapa de Análise Bíblica`;
-			const headerId = ea.addText(headerX, 0, headerTitle, {
+			const headerTitle = `${reference}\n${activeTemplate.title}${params.versionAbbr ? ` (${params.versionAbbr})` : ""}`;
+			const headerId = ea.addText(0, 0, headerTitle, {
 				box: "box",
-				width: headerWidth,
+				width: 480,
 				textAlign: "center",
 			});
 
+			// 2. Unified Scripture Passage Box (ONE SINGLE BLOCK)
+			ea.style.strokeColor = "#0284c7";
+			ea.style.backgroundColor = "#f0f9ff";
+			ea.style.fillStyle = "solid";
 			ea.style.fontSize = 14;
-			const bgColors = ["#f8fafc", "#f0fdf4", "#fffbeb", "#fef2f2", "#faf5ff", "#f0f9ff"];
-			const borderColors = ["#64748b", "#16a34a", "#d97706", "#dc2626", "#9333ea", "#0284c7"];
 
+			const versesText = sortedVerses
+				.map((v) => `${toSuperscript(v.number)} ${v.text}`)
+				.join("\n");
+
+			let scriptureText = `Texto Bíblico (${reference})\n\n`;
 			if (params.selectedSnippet) {
-				// Snippet card + Context card + Analysis card
-				ea.style.strokeColor = "#d97706";
-				ea.style.backgroundColor = "#fffbeb";
-				const snippetText = `Trecho em Foco\n\n"${params.selectedSnippet}"\n\n— ${reference}`;
-				const snippetCardId = ea.addText(0, 160, snippetText, {
+				scriptureText += `"${params.selectedSnippet}"\n\n`;
+			}
+			scriptureText += versesText;
+
+			const scriptureCardId = ea.addText(0, 160, scriptureText, {
+				box: "box",
+				width: 460,
+				textAlign: "left",
+			});
+
+			// Connect Header -> Scripture Box
+			if (typeof ea.connectObjects === "function") {
+				ea.connectObjects(headerId, "bottom", scriptureCardId, "top", { numberOfPoints: 2 });
+			}
+
+			// 3. Template Companion Section Boxes
+			const col2X = 500;
+			let currentY = 160;
+
+			for (const sec of activeTemplate.sections) {
+				ea.style.strokeColor = sec.borderHex || "#64748b";
+				ea.style.backgroundColor = sec.bgHex || "#f8fafc";
+				ea.style.fillStyle = "solid";
+				ea.style.fontSize = 14;
+
+				const secText = `${sec.title}\n\n${sec.placeholder}`;
+				const secCardId = ea.addText(col2X, currentY, secText, {
 					box: "box",
-					width: cardWidth,
+					width: 420,
 					textAlign: "left",
 				});
 
-				ea.style.strokeColor = "#0284c7";
-				ea.style.backgroundColor = "#f0f9ff";
-				const versesText = `Contexto\n\n${sortedVerses.map((v) => `${toSuperscript(v.number)} ${v.text}`).join("\n\n")}`;
-				const contextCardId = ea.addText(cardWidth + cardGap, 160, versesText, {
-					box: "box",
-					width: cardWidth,
-					textAlign: "left",
-				});
-
-				ea.style.strokeColor = "#9333ea";
-				ea.style.backgroundColor = "#faf5ff";
-				const analysisText = `Análise & Observações\n\n• Significado central:\n• Palavras-chave:\n• Aplicação prática:`;
-				const analysisCardId = ea.addText(0, 360, analysisText, {
-					box: "box",
-					width: cardWidth,
-					textAlign: "left",
-				});
-
-				ea.style.strokeColor = "#2563eb";
-				ea.style.strokeWidth = 1.5;
+				// Connect Scripture -> Section Box
 				if (typeof ea.connectObjects === "function") {
-					ea.connectObjects(headerId, "bottom", snippetCardId, "top", { numberOfPoints: 2 });
-					ea.connectObjects(snippetCardId, "right", contextCardId, "left", { numberOfPoints: 2 });
-					ea.connectObjects(snippetCardId, "bottom", analysisCardId, "top", { numberOfPoints: 2 });
+					ea.connectObjects(scriptureCardId, "right", secCardId, "left", { numberOfPoints: 2 });
 				}
-			} else if (count <= 1) {
-				// Single verse: Verse card + Analysis card + Application card
-				ea.style.strokeColor = "#0284c7";
-				ea.style.backgroundColor = "#f0f9ff";
-				const v = sortedVerses[0] || { number: 1, text: "" };
-				const verseText = `Texto Bíblico\n\n${toSuperscript(v.number)} ${v.text}`;
-				const verseCardId = ea.addText(0, 160, verseText, {
-					box: "box",
-					width: cardWidth,
-					textAlign: "left",
-				});
 
-				ea.style.strokeColor = "#9333ea";
-				ea.style.backgroundColor = "#faf5ff";
-				const analysisText = `Análise & Observações\n\n• Palavras-chave:\n• Contexto histórico:\n• Ideia central:`;
-				const analysisCardId = ea.addText(cardWidth + cardGap, 160, analysisText, {
-					box: "box",
-					width: cardWidth,
-					textAlign: "left",
-				});
-
-				ea.style.strokeColor = "#ca8a04";
-				ea.style.backgroundColor = "#fefce8";
-				const appText = `Aplicação Prática\n\n• Como aplicar hoje?\n• Ações e compromissos:`;
-				const appCardId = ea.addText(0, 360, appText, {
-					box: "box",
-					width: cardWidth,
-					textAlign: "left",
-				});
-
-				ea.style.strokeColor = "#2563eb";
-				ea.style.strokeWidth = 1.5;
-				if (typeof ea.connectObjects === "function") {
-					ea.connectObjects(headerId, "bottom", verseCardId, "top", { numberOfPoints: 2 });
-					ea.connectObjects(verseCardId, "right", analysisCardId, "left", { numberOfPoints: 2 });
-					ea.connectObjects(verseCardId, "bottom", appCardId, "top", { numberOfPoints: 2 });
-				}
-			} else if (count <= 6) {
-				// 2 to 6 verses: Branch per verse with notes card underneath
-				sortedVerses.forEach((v, index) => {
-					const cardX = index * (cardWidth + cardGap);
-					ea.style.strokeColor = borderColors[index % borderColors.length];
-					ea.style.backgroundColor = bgColors[index % bgColors.length];
-
-					const verseCardText = `Versículo ${v.number}\n\n${toSuperscript(v.number)} ${v.text}`;
-					const verseCardId = ea.addText(cardX, 160, verseCardText, {
-						box: "box",
-						width: cardWidth,
-						textAlign: "left",
-					});
-
-					ea.style.strokeColor = "#ca8a04";
-					ea.style.backgroundColor = "#fefce8";
-					const notesCardText = `Notas — v. ${v.number}\n\n• Ideia-chave:\n• Reflexão:`;
-					const notesCardId = ea.addText(cardX, 360, notesCardText, {
-						box: "box",
-						width: cardWidth,
-						textAlign: "left",
-					});
-
-					ea.style.strokeColor = borderColors[index % borderColors.length];
-					ea.style.strokeWidth = 1.5;
-					if (typeof ea.connectObjects === "function") {
-						ea.connectObjects(headerId, "bottom", verseCardId, "top", { numberOfPoints: 2 });
-						ea.connectObjects(verseCardId, "bottom", notesCardId, "top", { numberOfPoints: 2 });
-					}
-				});
-			} else {
-				// Large passage: Passage card + Analysis card
-				ea.style.strokeColor = "#0284c7";
-				ea.style.backgroundColor = "#f0f9ff";
-				const passageText = `Passagem Bíblica\n\n${sortedVerses.map((v) => `${toSuperscript(v.number)} ${v.text}`).join("\n\n")}`;
-				const passageCardId = ea.addText(0, 160, passageText, {
-					box: "box",
-					width: 440,
-					textAlign: "left",
-				});
-
-				ea.style.strokeColor = "#9333ea";
-				ea.style.backgroundColor = "#faf5ff";
-				const analysisText = `Análise & Estrutura\n\n• Temas principais:\n• Divisões do texto:\n• Aplicação prática:`;
-				const analysisCardId = ea.addText(480, 160, analysisText, {
-					box: "box",
-					width: 400,
-					textAlign: "left",
-				});
-
-				ea.style.strokeColor = "#2563eb";
-				ea.style.strokeWidth = 1.5;
-				if (typeof ea.connectObjects === "function") {
-					ea.connectObjects(headerId, "bottom", passageCardId, "top", { numberOfPoints: 2 });
-					ea.connectObjects(passageCardId, "right", analysisCardId, "left", { numberOfPoints: 2 });
-				}
+				currentY += 200;
 			}
 
 			const configured =
@@ -529,7 +576,8 @@ export class BibleCanvasService {
 				this.getSettings().compareExportFolder?.trim();
 			const folder = normalizeFilePath(configured || `${this.getSettings().dataFolder || "OpenBible"}/canvas`);
 			const rangeStr = formatVerseRange(verseNumbers).replace(/[, ]+/g, "_");
-			const filename = `${params.book.name} ${params.chapter}_${rangeStr} - Mapa`;
+			const cleanTitle = activeTemplate.title.replace(/[\\/:*?"<>|]/g, "");
+			const filename = `${params.book.name} ${params.chapter}_${rangeStr} - ${cleanTitle}`;
 
 			await ea.create({
 				filename,

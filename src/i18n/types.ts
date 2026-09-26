@@ -246,6 +246,12 @@ export interface TranslationStrings {
 		resourceWorkspaceSplitRight: string;
 		resourceWorkspaceSplitSplit: string;
 		resourceWorkspaceSplitTab: string;
+		canvasHeading: string;
+		canvasHeadingDesc: string;
+		canvasExportFolderName: string;
+		canvasExportFolderDesc: string;
+		canvasTemplatesFolderName: string;
+		canvasTemplatesFolderDesc: string;
 	};
 	errors: {
 		invalidFolderPath: string;
@@ -443,6 +449,9 @@ export interface TranslationStrings {
 		createCanvas: string;
 		canvasFormat: string;
 		excalidrawFormat: string;
+		canvasTemplatesTitle: string;
+		excalidrawTemplatesTitle: string;
+		sectionsCount: string;
 		canvasCreated: string;
 		canvasError: string;
 		excalidrawNotInstalled: string;
