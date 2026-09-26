@@ -186,9 +186,16 @@ To preserve textual unity and provide seamless visual flow in both Obsidian Canv
 - If a text snippet is highlighted, the focused snippet is highlighted at the top of the scripture card.
 - Companion study sections from the selected template are generated alongside the scripture block and connected with directional arrows.
 
-### Customizable Templates Folder
-- Templates are stored in `Templates/Canvas` by default, configurable in **Settings > Study > Canvas Templates Folder**.
-- Default template files are automatically seeded as `.md` files in this folder upon startup.
-- Users can create their own custom study templates by adding `.md` files (with `# Title`, description, and `### Section` blocks) or `.json` files to the configured folder.
+### Customizable Visual Templates Folder (`.canvas` & `.excalidraw.md`)
+- Templates are stored in `Templates/Canvas/` by default, configurable in **Settings > Study > Canvas Templates Folder**.
+- **Native Visual Files**: Default templates are seeded as actual `.canvas` files (for Obsidian Canvas) and `.excalidraw.md` files (for Excalidraw), so users can open and visually customize them inside Obsidian instead of dealing with raw text markdown notes.
+- **Placeholders**: Users can design custom templates with visual cards containing:
+  - `{{bible_text}}` (or `{{texto_biblico}}`): The unified scripture text with superscript numerals and line breaks.
+  - `{{reference}}` (or `{{referencia}}`): The canonical passage reference (e.g., `Romanos 10:2-3 (ARA)`).
+  - `{{version}}` (or `{{versao}}`): Bible translation abbreviation.
+  - `{{book}}` / `{{livro}}`: Book name.
+  - `{{chapter}}` / `{{capitulo}}`: Chapter number.
+  - `{{snippet}}` / `{{trecho}}`: Selected text fragment if highlighted.
+- If a custom `.canvas` template does not explicitly contain `{{bible_text}}`, the engine automatically detects and injects the scripture into any card titled *Texto Bíblico* or *Scripture*.
 
 

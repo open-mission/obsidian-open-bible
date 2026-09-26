@@ -196,6 +196,118 @@ Análise aprofundada de passagens narrativas e epistolares.
 		assert.ok(ids.includes("sermon_outline"));
 	});
 
+	test("buildTemplateCanvas generates native visual .canvas template data with placeholders", () => {
+		const tpl = DEFAULT_CANVAS_TEMPLATES[1]; // devotional
+		const canvasData = mockService.buildTemplateCanvas(tpl);
+
+		assert.ok(Array.isArray(canvasData.nodes));
+		assert.ok(Array.isArray(canvasData.edges));
+
+		const header = canvasData.nodes.find((n) => n.text?.includes("{{reference}}"));
+		assert.ok(header, "Header node must contain {{reference}} placeholder");
+
+		const scripture = canvasData.nodes.find((n) => n.text?.includes("{{bible_text}}"));
+		assert.ok(scripture, "Scripture node must contain {{bible_text}} placeholder");
+
+		assert.equal(canvasData.nodes.length, 2 + tpl.sections.length);
+	});
+
+	test("parseCanvasTemplate extracts template metadata from .canvas JSON content", () => {
+		const rawJson = JSON.stringify({
+			nodes: [
+				{ id: "h1", type: "text", text: "# {{reference}}\n\n*Estudo*" },
+				{ id: "s1", type: "text", text: "### Texto Bíblico\n\n{{bible_text}}" },
+				{ id: "c1", type: "text", text: "### Observação Pessoal\n\n• O que vejo:" },
+				{ id: "c2", type: "text", text: "### Oração Final\n\n• Senhor..." },
+			],
+			edges: [{ id: "e1", fromNode: "s1", toNode: "c1" }],
+		});
+
+		const parsed = mockService.parseCanvasTemplate("Templates/Canvas/Meu Estudo Visual.canvas", rawJson);
+		assert.ok(parsed);
+		assert.equal(parsed?.title, "Meu Estudo Visual");
+		assert.equal(parsed?.fileType, "canvas");
+		assert.equal(parsed?.sections.length, 2);
+		assert.equal(parsed?.sections[0].title, "Observação Pessoal");
+	});
+
+	test("applyCanvasTemplateReplacements replaces placeholders and remaps node/edge IDs", () => {
+		const rawData = {
+			nodes: [
+				{ id: "old_head", type: "text", text: "Estudo: {{reference}} ({{version}})", x: 0, y: 0, width: 400, height: 100 },
+				{ id: "old_scrip", type: "text", text: "Trecho: {{snippet}}\n\nVersos:\n{{bible_text}}", x: 0, y: 150, width: 400, height: 150 },
+			],
+			edges: [
+				{ id: "old_edge", fromNode: "old_head", toNode: "old_scrip", fromSide: "bottom", toSide: "top" as const, toEnd: "arrow" as const },
+			],
+		};
+
+		const params: VerseCanvasExportParams = {
+			book: { id: 45, name: "Romanos" } as any,
+			chapter: 10,
+			verses: [
+				{ number: 2, text: "Porque lhes dou testemunho..." },
+				{ number: 3, text: "Porquanto, desconhecendo..." },
+			],
+			versionAbbr: "ARA",
+			selectedSnippet: "zelo por Deus",
+		};
+
+		const result = mockService.applyCanvasTemplateReplacements(rawData as any, params);
+
+		assert.equal(result.nodes.length, 2);
+		assert.equal(result.edges.length, 1);
+
+		// Old IDs must be remapped to avoid collision
+		assert.notEqual(result.nodes[0].id, "old_head");
+		assert.notEqual(result.nodes[1].id, "old_scrip");
+		assert.equal(result.edges[0].fromNode, result.nodes[0].id);
+		assert.equal(result.edges[0].toNode, result.nodes[1].id);
+
+		// Placeholders replaced
+		assert.ok(result.nodes[0].text?.includes("Romanos 10:2-3 (ARA)"));
+		assert.ok(result.nodes[1].text?.includes("Trecho: zelo por Deus"));
+		assert.ok(result.nodes[1].text?.includes('> "zelo por Deus"'));
+		assert.ok(result.nodes[1].text?.includes("² Porque lhes dou testemunho"));
+		assert.ok(result.nodes[1].text?.includes("³ Porquanto, desconhecendo"));
+	});
+
+	test("applyExcalidrawTemplateReplacements replaces placeholders in Excalidraw files", () => {
+		const templateContent = `---
+excalidraw-plugin: parsed
+---
+# Text Elements
+{{reference}} ^head
+{{bible_text}} ^scripture
+`;
+
+		const params: VerseCanvasExportParams = {
+			book: { id: 19, name: "Salmos" } as any,
+			chapter: 23,
+			verses: [{ number: 1, text: "O SENHOR é o meu pastor; nada me faltará." }],
+			versionAbbr: "ARA",
+		};
+
+		const replaced = mockService.applyExcalidrawTemplateReplacements(templateContent, params);
+
+		assert.ok(replaced.includes("Salmos 23:1 (ARA)"));
+		assert.ok(replaced.includes("¹ O SENHOR é o meu pastor"));
+		assert.ok(!replaced.includes("{{reference}}"));
+		assert.ok(!replaced.includes("{{bible_text}}"));
+	});
+
+	test("getTemplates filters templates based on requested format", async () => {
+		const canvasTemplates = await mockService.getTemplates("canvas");
+		for (const t of canvasTemplates) {
+			assert.notEqual(t.fileType, "excalidraw", "Canvas templates must not include excalidraw-only files");
+		}
+
+		const excalTemplates = await mockService.getTemplates("excalidraw");
+		for (const t of excalTemplates) {
+			assert.notEqual(t.fileType, "canvas", "Excalidraw templates must not include canvas-only files");
+		}
+	});
+
 	test("exportToExcalidrawFile returns false gracefully when Excalidraw plugin is absent", async () => {
 		const params: VerseCanvasExportParams = {
 			book: { id: 43, name: "João" } as any,

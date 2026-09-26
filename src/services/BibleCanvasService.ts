@@ -29,6 +29,9 @@ export interface CanvasStudyTemplate {
 	icon: string;
 	color: string;
 	sections: CanvasTemplateSection[];
+	filePath?: string;
+	fileType?: "canvas" | "excalidraw" | "markdown" | "json";
+	rawCanvas?: JsonCanvasData;
 }
 
 export const DEFAULT_CANVAS_TEMPLATES: CanvasStudyTemplate[] = [
@@ -195,10 +198,10 @@ export class BibleCanvasService {
 	) {}
 
 	/**
-	 * Returns available study templates, combining built-in templates with any custom
-	 * templates found in the user-configured templates folder (e.g. Templates/Canvas).
+	 * Returns available study templates, discovering native .canvas and .excalidraw.md
+	 * files in the configured templates folder (Templates/Canvas) and combining them with built-in templates.
 	 */
-	async getTemplates(): Promise<CanvasStudyTemplate[]> {
+	async getTemplates(format?: "canvas" | "excalidraw"): Promise<CanvasStudyTemplate[]> {
 		const templates: CanvasStudyTemplate[] = [...DEFAULT_CANVAS_TEMPLATES];
 
 		const configured = this.getSettings().canvasTemplatesFolder?.trim();
@@ -208,7 +211,49 @@ export class BibleCanvasService {
 			if (this.app?.vault?.adapter && (await this.app.vault.adapter.exists(folder))) {
 				const listing = await this.app.vault.adapter.list(folder);
 				for (const filePath of listing.files) {
-					if (filePath.endsWith(".json")) {
+					if (filePath.endsWith(".canvas")) {
+						try {
+							const content = await this.app.vault.adapter.read(filePath);
+							const template = this.parseCanvasTemplate(filePath, content);
+							if (template) {
+								const existingIndex = templates.findIndex(
+									(t) => t.id === template.id || t.title.toLowerCase() === template.title.toLowerCase(),
+								);
+								if (existingIndex >= 0) {
+									templates[existingIndex] = { ...templates[existingIndex], ...template };
+								} else {
+									templates.push(template);
+								}
+							}
+						} catch (e) {
+							console.warn("OpenBible: failed to parse .canvas template:", filePath, e);
+						}
+					} else if (filePath.endsWith(".excalidraw.md") || (filePath.endsWith(".md") && filePath.includes(".excalidraw"))) {
+						try {
+							const baseName = filePath.split("/").pop()?.replace(/\.excalidraw\.md$/, "").replace(/\.md$/, "") || "Excalidraw";
+							const id = baseName.toLowerCase().replace(/[^a-z0-9]+/g, "_");
+							const template: CanvasStudyTemplate = {
+								id,
+								title: baseName,
+								description: `Modelo visual Excalidraw (.excalidraw.md).`,
+								icon: "pen-tool",
+								color: "6",
+								sections: [],
+								filePath,
+								fileType: "excalidraw",
+							};
+							const existingIndex = templates.findIndex(
+								(t) => t.id === template.id || t.title.toLowerCase() === template.title.toLowerCase(),
+							);
+							if (existingIndex >= 0) {
+								templates[existingIndex] = { ...templates[existingIndex], ...template };
+							} else {
+								templates.push(template);
+							}
+						} catch (e) {
+							console.warn("OpenBible: failed to parse .excalidraw.md template:", filePath, e);
+						}
+					} else if (filePath.endsWith(".json")) {
 						try {
 							const content = await this.app.vault.adapter.read(filePath);
 							const parsed = JSON.parse(content);
@@ -245,11 +290,54 @@ export class BibleCanvasService {
 			console.warn("OpenBible: error listing canvas templates folder:", err);
 		}
 
+		if (format === "canvas") {
+			return templates.filter((t) => t.fileType !== "excalidraw");
+		}
+		if (format === "excalidraw") {
+			return templates.filter((t) => t.fileType !== "canvas");
+		}
+
 		return templates;
 	}
 
 	/**
-	 * Parses a user markdown template file containing '### Section' headings.
+	 * Parses a .canvas JSON file into a CanvasStudyTemplate.
+	 */
+	parseCanvasTemplate(filePath: string, content: string): CanvasStudyTemplate | null {
+		try {
+			const rawCanvas = JSON.parse(content) as JsonCanvasData;
+			if (!rawCanvas || !Array.isArray(rawCanvas.nodes)) return null;
+
+			const baseName = filePath.split("/").pop()?.replace(/\.canvas$/, "") || "Canvas";
+			const id = baseName.toLowerCase().replace(/[^a-z0-9]+/g, "_");
+
+			const contentNodes = rawCanvas.nodes.filter((n) => {
+				const txt = n.text?.toLowerCase() || "";
+				return !txt.includes("{{bible_text}}") && !txt.includes("texto bíblico") && !txt.startsWith("# ");
+			});
+
+			return {
+				id,
+				title: baseName,
+				description: `Modelo visual Obsidian Canvas (${rawCanvas.nodes.length} cartões).`,
+				icon: "layout-grid",
+				color: "5",
+				sections: contentNodes.map((n) => ({
+					title: n.text?.split("\n")[0]?.replace(/^#+\s*/, "") || "Seção",
+					placeholder: n.text || "",
+				})),
+				filePath,
+				fileType: "canvas",
+				rawCanvas,
+			};
+		} catch (e) {
+			console.warn("OpenBible: failed to parse .canvas template content:", e);
+			return null;
+		}
+	}
+
+	/**
+	 * Parses a user markdown template file containing '### Section' headings (legacy fallback).
 	 */
 	parseMarkdownTemplate(filePath: string, content: string): CanvasStudyTemplate | null {
 		const lines = content.split("\n");
@@ -306,12 +394,88 @@ export class BibleCanvasService {
 			icon: "layout-dashboard",
 			color: "6",
 			sections,
+			filePath,
+			fileType: "markdown",
 		};
 	}
 
 	/**
-	 * Seeds default templates as markdown files in the configured templates folder
-	 * so users can discover, edit, and create their own custom templates.
+	 * Builds a visual .canvas template document with {{reference}} and {{bible_text}} placeholders.
+	 */
+	buildTemplateCanvas(template: CanvasStudyTemplate): JsonCanvasData {
+		const headerId = generateCanvasId();
+		const scriptureId = generateCanvasId();
+
+		const nodes: CanvasNode[] = [
+			{
+				id: headerId,
+				type: "text",
+				x: 0,
+				y: 0,
+				width: 500,
+				height: 120,
+				color: "4",
+				text: `# {{reference}}\n\n*Tradução: {{version}}* — **${template.title}**`,
+			},
+			{
+				id: scriptureId,
+				type: "text",
+				x: 0,
+				y: 160,
+				width: 480,
+				height: 240,
+				color: "5",
+				text: `### Texto Bíblico ({{reference}})\n\n{{bible_text}}`,
+			},
+		];
+
+		const edges: CanvasEdge[] = [
+			{
+				id: generateCanvasId(),
+				fromNode: headerId,
+				fromSide: "bottom",
+				toNode: scriptureId,
+				toSide: "top",
+				toEnd: "arrow",
+			},
+		];
+
+		const col2X = 520;
+		let currentY = 160;
+
+		for (const sec of template.sections) {
+			const secId = generateCanvasId();
+			const secHeight = Math.max(180, 80 + Math.ceil(sec.placeholder.length / 28) * 18);
+
+			nodes.push({
+				id: secId,
+				type: "text",
+				x: col2X,
+				y: currentY,
+				width: 460,
+				height: secHeight,
+				color: sec.color || "6",
+				text: `### ${sec.title}\n\n${sec.placeholder}`,
+			});
+
+			edges.push({
+				id: generateCanvasId(),
+				fromNode: scriptureId,
+				fromSide: "right",
+				toNode: secId,
+				toSide: "left",
+				toEnd: "arrow",
+			});
+
+			currentY += secHeight + 24;
+		}
+
+		return { nodes, edges };
+	}
+
+	/**
+	 * Seeds default study templates as actual visual .canvas (and .excalidraw.md) files
+	 * in the configured templates folder so users can open and visually edit them in Obsidian.
 	 */
 	async seedDefaultTemplates(): Promise<void> {
 		const configured = this.getSettings().canvasTemplatesFolder?.trim();
@@ -323,19 +487,106 @@ export class BibleCanvasService {
 				await this.app.vault.adapter.mkdir(folder);
 			}
 
+			// 1. Seed native .canvas templates
 			for (const tpl of DEFAULT_CANVAS_TEMPLATES) {
-				const path = normalizeFilePath(`${folder}/${tpl.title}.md`);
-				if (!(await this.app.vault.adapter.exists(path))) {
-					let md = `# ${tpl.title}\n${tpl.description}\n\n`;
-					for (const sec of tpl.sections) {
-						md += `### ${sec.title}\n${sec.placeholder}\n\n`;
+				const canvasPath = normalizeFilePath(`${folder}/${tpl.title}.canvas`);
+				if (!(await this.app.vault.adapter.exists(canvasPath))) {
+					const canvasData = this.buildTemplateCanvas(tpl);
+					await this.app.vault.adapter.write(canvasPath, JSON.stringify(canvasData, null, 2));
+				}
+			}
+
+			// 2. Seed native .excalidraw.md templates if ExcalidrawAutomate is available
+			const win = typeof window !== "undefined" ? (window as unknown as { ExcalidrawAutomate?: any }) : {};
+			const pluginEa = (this.app as any)?.plugins?.getPlugin?.("obsidian-excalidraw-plugin")?.ea;
+			const ea = win.ExcalidrawAutomate || pluginEa;
+
+			if (ea) {
+				for (const tpl of DEFAULT_CANVAS_TEMPLATES) {
+					const excalPath = normalizeFilePath(`${folder}/${tpl.title}.excalidraw.md`);
+					if (!(await this.app.vault.adapter.exists(excalPath))) {
+						try {
+							await this.createExcalidrawTemplateFile(ea, folder, tpl);
+						} catch (err) {
+							console.warn("OpenBible: failed to seed excalidraw template:", tpl.title, err);
+						}
 					}
-					await this.app.vault.adapter.write(path, md.trim());
 				}
 			}
 		} catch (err) {
 			console.warn("OpenBible: failed to seed default canvas templates:", err);
 		}
+	}
+
+	/**
+	 * Programmatically creates a native Excalidraw template file using ExcalidrawAutomate.
+	 */
+	private async createExcalidrawTemplateFile(ea: any, folder: string, tpl: CanvasStudyTemplate): Promise<void> {
+		ea.reset();
+		ea.style.roughness = 0;
+		ea.style.strokeWidth = 1.5;
+		ea.style.roundness = { type: 3 };
+		ea.style.fontFamily = 2;
+
+		// 1. Header Box
+		ea.style.strokeColor = "#2563eb";
+		ea.style.backgroundColor = "#eff6ff";
+		ea.style.fillStyle = "solid";
+		ea.style.fontSize = 18;
+
+		const headerTitle = `{{reference}}\n${tpl.title} ({{version}})`;
+		const headerId = ea.addText(0, 0, headerTitle, {
+			box: "box",
+			width: 480,
+			textAlign: "center",
+		});
+
+		// 2. Scripture Box
+		ea.style.strokeColor = "#0284c7";
+		ea.style.backgroundColor = "#f0f9ff";
+		ea.style.fillStyle = "solid";
+		ea.style.fontSize = 14;
+
+		const scriptureText = `Texto Bíblico ({{reference}})\n\n{{bible_text}}`;
+		const scriptureCardId = ea.addText(0, 160, scriptureText, {
+			box: "box",
+			width: 460,
+			textAlign: "left",
+		});
+
+		if (typeof ea.connectObjects === "function") {
+			ea.connectObjects(headerId, "bottom", scriptureCardId, "top", { numberOfPoints: 2 });
+		}
+
+		// 3. Companion Sections
+		const col2X = 500;
+		let currentY = 160;
+
+		for (const sec of tpl.sections) {
+			ea.style.strokeColor = sec.borderHex || "#64748b";
+			ea.style.backgroundColor = sec.bgHex || "#f8fafc";
+			ea.style.fillStyle = "solid";
+			ea.style.fontSize = 14;
+
+			const secText = `${sec.title}\n\n${sec.placeholder}`;
+			const secCardId = ea.addText(col2X, currentY, secText, {
+				box: "box",
+				width: 420,
+				textAlign: "left",
+			});
+
+			if (typeof ea.connectObjects === "function") {
+				ea.connectObjects(scriptureCardId, "right", secCardId, "left", { numberOfPoints: 2 });
+			}
+
+			currentY += 200;
+		}
+
+		await ea.create({
+			filename: tpl.title,
+			foldername: folder,
+			onNewPane: false,
+		});
 	}
 
 	/**
@@ -443,6 +694,147 @@ export class BibleCanvasService {
 	}
 
 	/**
+	 * Applies template replacements on a JsonCanvasData object, replacing {{reference}},
+	 * {{bible_text}}, {{version}}, etc. with the selected passage and remapping node/edge IDs.
+	 */
+	applyCanvasTemplateReplacements(
+		raw: JsonCanvasData,
+		params: VerseCanvasExportParams,
+	): JsonCanvasData {
+		const sortedVerses = [...params.verses].sort((a, b) => a.number - b.number);
+		const verseNumbers = sortedVerses.map((v) => v.number);
+		const reference = formatReference(params.book.name, params.chapter, verseNumbers, params.versionAbbr);
+
+		const versesText = sortedVerses
+			.map((v) => `${toSuperscript(v.number)} ${v.text}`)
+			.join("\n");
+
+		let scriptureBody = "";
+		if (params.selectedSnippet) {
+			scriptureBody += `> "${params.selectedSnippet}"\n\n`;
+		}
+		scriptureBody += versesText;
+
+		const idMap = new Map<string, string>();
+		const nodes: CanvasNode[] = [];
+		const edges: CanvasEdge[] = [];
+
+		for (const node of raw.nodes || []) {
+			const newId = generateCanvasId();
+			idMap.set(node.id, newId);
+			nodes.push({
+				...node,
+				id: newId,
+			});
+		}
+
+		for (const edge of raw.edges || []) {
+			edges.push({
+				...edge,
+				id: generateCanvasId(),
+				fromNode: idMap.get(edge.fromNode) || edge.fromNode,
+				toNode: idMap.get(edge.toNode) || edge.toNode,
+			});
+		}
+
+		let scriptureInjected = false;
+
+		for (const node of nodes) {
+			if (node.type === "text" && node.text) {
+				if (node.text.includes("{{bible_text}}") || node.text.includes("{{texto_biblico}}")) {
+					node.text = node.text
+						.replace(/\{\{bible_text\}\}/g, scriptureBody)
+						.replace(/\{\{texto_biblico\}\}/g, scriptureBody);
+					scriptureInjected = true;
+					node.height = Math.max(node.height, 120 + Math.ceil(node.text.length / 32) * 20);
+				}
+
+				node.text = node.text
+					.replace(/\{\{reference\}\}/g, reference)
+					.replace(/\{\{referencia\}\}/g, reference)
+					.replace(/\{\{version\}\}/g, params.versionAbbr || "")
+					.replace(/\{\{versao\}\}/g, params.versionAbbr || "")
+					.replace(/\{\{book\}\}/g, params.book.name)
+					.replace(/\{\{livro\}\}/g, params.book.name)
+					.replace(/\{\{chapter\}\}/g, String(params.chapter))
+					.replace(/\{\{capitulo\}\}/g, String(params.chapter))
+					.replace(/\{\{snippet\}\}/g, params.selectedSnippet || "")
+					.replace(/\{\{trecho\}\}/g, params.selectedSnippet || "");
+			}
+		}
+
+		if (!scriptureInjected) {
+			const candidate = nodes.find(
+				(n) =>
+					n.type === "text" &&
+					(n.text?.toLowerCase().includes("texto bíblico") || n.text?.toLowerCase().includes("scripture")),
+			);
+			if (candidate) {
+				candidate.text = `### Texto Bíblico (${reference})\n\n${scriptureBody}`;
+				candidate.height = Math.max(candidate.height, 120 + Math.ceil(candidate.text.length / 32) * 20);
+			}
+		}
+
+		return { nodes, edges };
+	}
+
+	/**
+	 * Instantiates a .canvas template file by loading its JSON and applying verse replacements.
+	 */
+	async instantiateCanvasTemplate(
+		template: CanvasStudyTemplate,
+		params: VerseCanvasExportParams,
+	): Promise<JsonCanvasData> {
+		let raw: JsonCanvasData;
+		if (template.rawCanvas) {
+			raw = JSON.parse(JSON.stringify(template.rawCanvas)) as JsonCanvasData;
+		} else if (template.filePath && this.app?.vault?.adapter) {
+			const content = await this.app.vault.adapter.read(template.filePath);
+			raw = JSON.parse(content) as JsonCanvasData;
+		} else {
+			return this.buildJsonCanvas(params, template);
+		}
+
+		return this.applyCanvasTemplateReplacements(raw, params);
+	}
+
+	/**
+	 * Replaces placeholders in an .excalidraw.md file string.
+	 */
+	applyExcalidrawTemplateReplacements(
+		content: string,
+		params: VerseCanvasExportParams,
+	): string {
+		const sortedVerses = [...params.verses].sort((a, b) => a.number - b.number);
+		const verseNumbers = sortedVerses.map((v) => v.number);
+		const reference = formatReference(params.book.name, params.chapter, verseNumbers, params.versionAbbr);
+
+		const versesText = sortedVerses
+			.map((v) => `${toSuperscript(v.number)} ${v.text}`)
+			.join("\n");
+
+		let scriptureText = `Texto Bíblico (${reference})\n\n`;
+		if (params.selectedSnippet) {
+			scriptureText += `"${params.selectedSnippet}"\n\n`;
+		}
+		scriptureText += versesText;
+
+		return content
+			.replaceAll("{{reference}}", reference)
+			.replaceAll("{{referencia}}", reference)
+			.replaceAll("{{bible_text}}", scriptureText)
+			.replaceAll("{{texto_biblico}}", scriptureText)
+			.replaceAll("{{version}}", params.versionAbbr || "")
+			.replaceAll("{{versao}}", params.versionAbbr || "")
+			.replaceAll("{{book}}", params.book.name)
+			.replaceAll("{{livro}}", params.book.name)
+			.replaceAll("{{chapter}}", String(params.chapter))
+			.replaceAll("{{capitulo}}", String(params.chapter))
+			.replaceAll("{{snippet}}", params.selectedSnippet || "")
+			.replaceAll("{{trecho}}", params.selectedSnippet || "");
+	}
+
+	/**
 	 * Creates a .canvas file inside the vault and opens it in a new workspace tab.
 	 */
 	async exportToCanvasFile(params: VerseCanvasExportParams, template?: CanvasStudyTemplate): Promise<TFile> {
@@ -469,7 +861,13 @@ export class BibleCanvasService {
 			counter++;
 		}
 
-		const canvasData = this.buildJsonCanvas(params, activeTemplate);
+		let canvasData: JsonCanvasData;
+		if (activeTemplate.filePath?.endsWith(".canvas") || activeTemplate.rawCanvas) {
+			canvasData = await this.instantiateCanvasTemplate(activeTemplate, params);
+		} else {
+			canvasData = this.buildJsonCanvas(params, activeTemplate);
+		}
+
 		const content = JSON.stringify(canvasData, null, 2);
 
 		const createdFile = await this.app.vault.create(targetPath, content);
@@ -486,6 +884,46 @@ export class BibleCanvasService {
 	 * connected to companion study blocks based on the selected template.
 	 */
 	async exportToExcalidrawFile(params: VerseCanvasExportParams, template?: CanvasStudyTemplate): Promise<boolean> {
+		const sortedVerses = [...params.verses].sort((a, b) => a.number - b.number);
+		const verseNumbers = sortedVerses.map((v) => v.number);
+		const rangeStr = formatVerseRange(verseNumbers).replace(/[, ]+/g, "_");
+		const activeTemplate = template || DEFAULT_CANVAS_TEMPLATES[0];
+		const cleanTitle = activeTemplate.title.replace(/[\\/:*?"<>|]/g, "");
+		const filename = `${params.book.name} ${params.chapter}_${rangeStr} - ${cleanTitle}`;
+
+		const configured =
+			this.getSettings().canvasExportFolder?.trim() ||
+			this.getSettings().compareExportFolder?.trim();
+		const folder = normalizeFilePath(configured || `${this.getSettings().dataFolder || "OpenBible"}/canvas`);
+
+		// 1. If an actual .excalidraw.md template file was selected, instantiate from file
+		if (activeTemplate.filePath?.endsWith(".excalidraw.md") && this.app?.vault?.adapter) {
+			try {
+				const content = await this.app.vault.adapter.read(activeTemplate.filePath);
+				const replaced = this.applyExcalidrawTemplateReplacements(content, params);
+
+				if (!(await this.app.vault.adapter.exists(folder))) {
+					await this.app.vault.adapter.mkdir(folder);
+				}
+
+				let targetPath = normalizeFilePath(`${folder}/${filename}.excalidraw.md`);
+				let counter = 1;
+				while (await this.app.vault.adapter.exists(targetPath)) {
+					targetPath = normalizeFilePath(`${folder}/${filename} (${counter}).excalidraw.md`);
+					counter++;
+				}
+
+				const createdFile = await this.app.vault.create(targetPath, replaced);
+				if (createdFile) {
+					await this.app.workspace.getLeaf("tab").openFile(createdFile);
+				}
+				return true;
+			} catch (err) {
+				console.warn("OpenBible: failed to instantiate .excalidraw.md template, falling back to EA:", err);
+			}
+		}
+
+		// 2. Programmatic ExcalidrawAutomate generation
 		const win = typeof window !== "undefined" ? (window as unknown as { ExcalidrawAutomate?: any }) : {};
 		const pluginEa = (this.app as any)?.plugins?.getPlugin?.("obsidian-excalidraw-plugin")?.ea;
 		const ea = win.ExcalidrawAutomate || pluginEa;

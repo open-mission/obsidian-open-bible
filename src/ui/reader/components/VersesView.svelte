@@ -902,7 +902,7 @@
 				selectedSnippet: textRangeSelection?.selectedText,
 			};
 
-			const templates = (await plugin.canvasService?.getTemplates()) ?? [];
+			const templates = (await plugin.canvasService?.getTemplates(format)) ?? [];
 
 			new CanvasTemplatePickerModal(
 				plugin.app,
