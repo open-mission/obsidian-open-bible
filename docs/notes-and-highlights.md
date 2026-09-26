@@ -39,7 +39,7 @@ OpenBible includes a complete Bible study note-taking and highlighting system di
   - **Reference Badge**: Displays the current passage and verse range (or selected phrase snippet).
   - **Highlights**: Quick palette of custom-configured highlight colors and labels. On mobile, opens a bottom drawer with color swatches and descriptive labels.
   - **Copy Reference**: Copies the reference string (e.g., `Gálatas 6:1-2`).
-  - **Copy Text**: Copies the verse text (or selected word/phrase) formatted as Scripture quotation.
+  - **Copy Text**: Copies the verse text (or selected word/phrase). By default, formats as a clean single unified block without blockquote symbols (`>`) and without blank lines, ensuring seamless 1-element pasting into **Excalidraw** and clean reading in Markdown notes. Right-clicking or accessing the button context menu allows choosing between single-block format and traditional Markdown blockquote (`>`). Can also be configured globally in **Settings → OpenBible → Reader**.
   - **Create Note**: Creates a new note file pre-populated with scripture quotation and reflection section, then opens it in a new editor tab.
 
 ---
@@ -153,3 +153,34 @@ Under **Settings → OpenBible → Notes & Highlights**, users can:
 
 - **Distinct Selected Verse Border**:
   Selected verses display a complete 1.5px accent border (`var(--interactive-accent)`) with rounded corners (`var(--radius-s)`) and subtle glow, ensuring high contrast and immediate visibility even beside note lanes in the gutter.
+
+---
+
+## 6. Scripture Copy Formats & Excalidraw Compatibility
+
+Under **Settings → OpenBible → Reader**, users can select the default format for copying Scripture text:
+
+1. **Single Block (Excalidraw / Plain Text)** (`singleBlock` - default):
+   - Formats selected verses without Markdown blockquote prefixes (`>`) and without blank lines (`\n\n`), preventing Excalidraw from splitting the pasted passage into multiple independent text elements.
+   - Breaks each verse cleanly onto its own line (`\n`) with superscript verse numerals, followed by the reference on a separate line (e.g. `\n— Romanos 10:2-3 (ARA)`).
+2. **Markdown Blockquote** (`quoteMarkdown`):
+   - Formats each verse as an Obsidian Markdown callout/quote line (`> ¹ ...\n>\n> — Reference`).
+
+---
+
+## 7. Visual Mind Maps & Diagramming: Create Canvas & Excalidraw from Selection
+
+When one or more verses (or a text fragment) are selected in the reader, the floating selection toolbar (`VerseActionBar`) offers a **Criar canvas** (`[⊞ Canvas]`) action. Clicking it opens a popup menu with two visual export options:
+
+1. **Canvas (`.canvas`)**:
+   - Generates a fully formatted [JSON Canvas 1.0](https://jsoncanvas.org/spec/1.0/) diagram file saved to `OpenBible/canvas/` (or the user-configured export folder) and opens it immediately in a new Obsidian workspace tab.
+   - **Single Verse**: Generates a central reference header connected to the scripture card, an in-depth analysis block (*Tema central, Palavras-chave, Contexto*), a practical application block, and cross-reference connection slots.
+   - **Multi-Verse Branching (2–6 verses)**: Generates a top reference header connected to individual verse cards placed side-by-side, each with an analysis/notes card positioned directly below it.
+   - **Snippet Selection**: Focuses on the exact highlighted phrase with an emphasis block, full verse context card, and connected analytical study nodes.
+   - **Large Passages (> 6 verses)**: Creates a consolidated passage card alongside structured theme, structure, and reflection boards.
+
+2. **Excalidraw (`.excalidraw.md`)**:
+   - Interfaces with `ExcalidrawAutomate` to build bound text card elements (`box: "box"`) with soft pastel backgrounds, connecting arrows, and auto-sized dimensions to prevent text clipping.
+   - Saves the drawing to the canvas export folder and opens it in a new pane, enabling users to immediately draw mind maps, theological diagrams, arrows, and personal annotations.
+
+

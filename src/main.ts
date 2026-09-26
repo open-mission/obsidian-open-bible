@@ -32,6 +32,7 @@ import { getCanonBook } from "./bibleCanon";
 import type { BibleBook } from "./models/bible";
 import { PassagePickerModal } from "./ui/modals/PassagePickerModal";
 import { BibleComparisonService } from "./services/BibleComparisonService";
+import { BibleCanvasService, type VerseCanvasExportParams } from "./services/BibleCanvasService";
 import { BibleCompareModal, type BibleCompareModalOptions } from "./ui/modals/BibleCompareModal";
 import {
 	BIBLE_COMPARE_VIEW_TYPE,
@@ -48,6 +49,7 @@ export default class OpenBiblePlugin extends Plugin {
 	highlightService!: HighlightService;
 	resourceService!: ResourceService;
 	comparisonService!: BibleComparisonService;
+	canvasService!: BibleCanvasService;
 	private ribbonIconEl?: HTMLElement;
 	private settingTab: OpenBibleSettingTab | null = null;
 	private registeredResourceViews: Set<string> = new Set();
@@ -62,6 +64,7 @@ export default class OpenBiblePlugin extends Plugin {
 		this.highlightService = new HighlightService(this.app, () => this.settings);
 		this.resourceService = new ResourceService(this.app, () => this.settings);
 		this.comparisonService = new BibleComparisonService(this.app, this.bibleText, this.bibleVersions, () => this.settings);
+		this.canvasService = new BibleCanvasService(this.app, () => this.settings);
 
 		this.registerEditorExtension(createVerseReferenceEditorExtension(this));
 		this.registerMarkdownPostProcessor((el, ctx) => {
@@ -735,6 +738,16 @@ export default class OpenBiblePlugin extends Plugin {
 	/** Opens the Bible text comparison modal for side-by-side study and canvas export. */
 	openCompareModal(options?: BibleCompareModalOptions): void {
 		new BibleCompareModal(this.app, this, options).open();
+	}
+
+	/** Exports selected Bible verses to a visual JSON Canvas (.canvas) file. */
+	async exportVersesToCanvas(params: VerseCanvasExportParams): Promise<TFile> {
+		return this.canvasService.exportToCanvasFile(params);
+	}
+
+	/** Exports selected Bible verses to an Excalidraw drawing. */
+	async exportVersesToExcalidraw(params: VerseCanvasExportParams): Promise<boolean> {
+		return this.canvasService.exportToExcalidrawFile(params);
 	}
 
 	/** Pushes a newly selected resource to all active ResourceDetailView workspace leaves. */

@@ -140,14 +140,19 @@ export interface OpenBibleSettings {
 	compareSelectedVersions?: string[];
 	/** Folder where generated Canvas (.canvas) and Excalidraw comparison files are saved. */
 	compareExportFolder?: string;
+	/** Folder where generated Canvas (.canvas) and Excalidraw study map files are saved from verse selection. */
+	canvasExportFolder?: string;
 	/** Preferred layout for comparison modal ("columns" or "verses"). */
 	comparePreferredLayout?: "columns" | "verses";
+	/** Format when copying verses from selection toolbar ("singleBlock" for clean Excalidraw-ready block, or "quoteMarkdown" for '>' blockquote). */
+	copyVerseFormat?: "singleBlock" | "quoteMarkdown";
 }
 
 export const DEFAULT_SETTINGS: OpenBibleSettings = {
 	dataFolder: DEFAULT_DATA_FOLDER,
 	notesFolder: "OpenBible/notes",
 	highlightsFolder: "OpenBible/highlights",
+	canvasExportFolder: "OpenBible/canvas",
 	configuredHighlights: DEFAULT_HIGHLIGHT_CONFIGS,
 	configuredNotes: DEFAULT_NOTE_CONFIGS,
 	configuredResources: DEFAULT_RESOURCE_TYPES,
@@ -190,4 +195,5 @@ export const DEFAULT_SETTINGS: OpenBibleSettings = {
 	compareSelectedVersions: [],
 	compareExportFolder: "OpenBible/Comparisons",
 	comparePreferredLayout: "columns",
+	copyVerseFormat: "singleBlock",
 };

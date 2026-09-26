@@ -16,8 +16,10 @@
 		configuredResources?: ResourceTypeConfig[];
 		currentColor?: string | null;
 		onCopyReference: () => void;
-		onCopyText: () => void;
+		onCopyText: (format?: "singleBlock" | "quoteMarkdown") => void;
+		onCopyPlainText?: () => void;
 		onCreateNote: (colorId?: string) => void;
+		onCreateCanvas?: (format: "canvas" | "excalidraw") => void;
 		onHighlightColor?: (color: string) => void;
 		onRemoveHighlight?: () => void;
 		onOpenConfigureHighlights?: () => void;
@@ -36,7 +38,9 @@
 		currentColor = null,
 		onCopyReference,
 		onCopyText,
+		onCopyPlainText,
 		onCreateNote,
+		onCreateCanvas,
 		onHighlightColor,
 		onRemoveHighlight,
 		onOpenConfigureHighlights,
@@ -158,6 +162,28 @@
 					});
 			});
 		}
+		menu.showAtMouseEvent(event);
+	}
+
+	function handleCreateCanvasClick(event: MouseEvent) {
+		if (!onCreateCanvas) return;
+		const menu = new Menu();
+		menu.addItem((item) => {
+			item
+				.setTitle(t("popover.canvasFormat") || "Canvas (.canvas)")
+				.setIcon("layout-grid")
+				.onClick(() => {
+					onCreateCanvas("canvas");
+				});
+		});
+		menu.addItem((item) => {
+			item
+				.setTitle(t("popover.excalidrawFormat") || "Excalidraw (.excalidraw.md)")
+				.setIcon("pen-tool")
+				.onClick(() => {
+					onCreateCanvas("excalidraw");
+				});
+		});
 		menu.showAtMouseEvent(event);
 	}
 </script>
@@ -283,7 +309,27 @@
 				class="open-bible-action-bar-btn"
 				aria-label={t("popover.copyText")}
 				title={t("popover.copyText")}
-				onclick={onCopyText}
+				onclick={() => onCopyText()}
+				oncontextmenu={(e) => {
+					e.preventDefault();
+					const menu = new Menu();
+					menu.addItem((item) => {
+						item
+							.setTitle(t("popover.copyPlainText") || "Copiar como bloco único (Excalidraw)")
+							.setIcon("copy")
+							.onClick(() => {
+								if (onCopyPlainText) onCopyPlainText();
+								else onCopyText("singleBlock");
+							});
+					});
+					menu.addItem((item) => {
+						item
+							.setTitle(t("settings.copyVerseFormatQuoteMarkdown") || "Copiar com citação Markdown (>)")
+							.setIcon("quote")
+							.onClick(() => onCopyText("quoteMarkdown"));
+					});
+					menu.showAtMouseEvent(e);
+				}}
 			>
 				<span class="open-bible-action-bar-icon" use:icon={"quote"}></span>
 				<span class="open-bible-action-bar-label">{t("popover.copyText")}</span>
@@ -300,6 +346,20 @@
 				<span class="open-bible-action-bar-icon" use:icon={"file-plus"}></span>
 				<span class="open-bible-action-bar-label">{t("popover.createNote")}</span>
 			</button>
+
+			{#if onCreateCanvas}
+				<!-- Create Canvas / Study Map -->
+				<button
+					type="button"
+					class="open-bible-action-bar-btn"
+					aria-label={t("popover.createCanvas") || "Criar canvas"}
+					title={t("popover.createCanvas") || "Criar canvas"}
+					onclick={handleCreateCanvasClick}
+				>
+					<span class="open-bible-action-bar-icon" use:icon={"layout-grid"}></span>
+					<span class="open-bible-action-bar-label">{t("popover.createCanvas") || "Canvas"}</span>
+				</button>
+			{/if}
 
 			{#if onLinkResource && configuredResources.length > 0}
 				<!-- Link Resource -->

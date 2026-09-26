@@ -144,6 +144,10 @@ export interface TranslationStrings {
 		readerVerseSpacingDesc: string;
 		readerLineSpacingName: string;
 		readerLineSpacingDesc: string;
+		copyVerseFormatName: string;
+		copyVerseFormatDesc: string;
+		copyVerseFormatSingleBlock: string;
+		copyVerseFormatQuoteMarkdown: string;
 		thompsonCrossRefsName: string;
 		thompsonCrossRefsDesc: string;
 		thompsonCrossRefsPositionName: string;
@@ -431,10 +435,17 @@ export interface TranslationStrings {
 		configureHighlights: string;
 		copyReference: string;
 		copyText: string;
+		copyPlainText: string;
 		createNote: string;
 		linkResource: string;
 		selectResourceType: string;
 		compare: string;
+		createCanvas: string;
+		canvasFormat: string;
+		excalidrawFormat: string;
+		canvasCreated: string;
+		canvasError: string;
+		excalidrawNotInstalled: string;
 		close: string;
 	};
 	contextMenu: {
@@ -447,6 +458,8 @@ export interface TranslationStrings {
 		linkResource: string;
 		highlight: string;
 		compare: string;
+		createCanvas: string;
+		createExcalidraw: string;
 	};
 	compare: {
 		modalTitle: string;
@@ -457,6 +470,11 @@ export interface TranslationStrings {
 		layoutVerses: string;
 		copyMarkdown: string;
 		copiedMarkdownNotice: string;
+		copyVersion: string;
+		copiedVersionNotice: string;
+		copyExcalidraw: string;
+		copiedExcalidrawNotice: string;
+		copyMarkdownFull: string;
 		exportCanvas: string;
 		exportExcalidraw: string;
 		exporting: string;

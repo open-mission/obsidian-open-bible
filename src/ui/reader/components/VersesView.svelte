@@ -18,7 +18,8 @@
 	import { applyVerseClick } from "../verseSelection";
 	import { captureTextSelection, captureWordAtPosition, clearBrowserSelection, type TextRangeData } from "../textRangeSelection";
 	import { buildNoteLanes, buildVerseLanesMap, resolveNoteTitle } from "../noteLanes";
-	import { formatReference, formatVersesText } from "../../../services/verseFormat";
+	import { formatReference, formatVersesText, formatVersesPlainText } from "../../../services/verseFormat";
+	import type { VerseCanvasExportParams } from "../../../services/BibleCanvasService";
 	import { createNoteFromSelection, findNotesForPassage } from "../../../services/NoteService";
 	import { NotePreviewModal, openNoteInEditor } from "../../modals/NotePreviewModal";
 	import { ConfirmDeleteHighlightModal } from "../../modals/ConfirmDeleteModal";
@@ -429,18 +430,32 @@
 		}
 	}
 
-	async function copyText() {
+	async function copyText(forceFormat?: "singleBlock" | "quoteMarkdown") {
 		if (!book || chapter === undefined || selectedVerses.length === 0) return;
 		try {
-			const quote =
-				textRangeSelection?.selectedText ||
-				formatVersesText(selectedVerses, book.name, chapter, versionAbbr);
+			const format = forceFormat || plugin?.settings.copyVerseFormat || "singleBlock";
+			let quote: string;
+			if (textRangeSelection?.selectedText) {
+				const rangeRef = formatReference(book.name, chapter, selectedVerseNumbers, versionAbbr);
+				quote = format === "quoteMarkdown"
+					? `> ${textRangeSelection.selectedText}\n>\n> — ${rangeRef}`
+					: `${textRangeSelection.selectedText}\n— ${rangeRef}`;
+			} else {
+				quote = format === "quoteMarkdown"
+					? formatVersesText(selectedVerses, book.name, chapter, versionAbbr)
+					: formatVersesPlainText(selectedVerses, book.name, chapter, versionAbbr);
+			}
+
 			await navigator.clipboard.writeText(quote);
 			new Notice(t("notices.textCopied"));
 			clearSelection();
 		} catch (e) {
 			console.error("OpenBible: error copying scripture text", e);
 		}
+	}
+
+	async function copyPlainText() {
+		await copyText("singleBlock");
 	}
 
 	async function handleCreateNote(colorId?: string) {
@@ -845,6 +860,24 @@
 				});
 		});
 
+		// 5. Criar canvas
+		menu.addItem((item) => {
+			item.setTitle(t("contextMenu.createCanvas") || "Criar canvas")
+				.setIcon("layout-grid")
+				.onClick(() => {
+					void handleCreateCanvas("canvas");
+				});
+		});
+
+		// 6. Excalidraw
+		menu.addItem((item) => {
+			item.setTitle(t("contextMenu.createExcalidraw") || "Criar no Excalidraw")
+				.setIcon("pen-tool")
+				.onClick(() => {
+					void handleCreateCanvas("excalidraw");
+				});
+		});
+
 		menu.showAtMouseEvent(event);
 	}
 
@@ -855,6 +888,44 @@
 			chapter,
 			verseNumbers: selectedVerseNumbers.length > 0 ? selectedVerseNumbers : [],
 		});
+	}
+
+	async function handleCreateCanvas(format: "canvas" | "excalidraw") {
+		if (!plugin || !book || chapter === undefined || selectedVerses.length === 0) return;
+		try {
+			const params: VerseCanvasExportParams = {
+				book,
+				chapter,
+				verses: selectedVerses,
+				versionAbbr,
+				selectedSnippet: textRangeSelection?.selectedText,
+			};
+
+			if (format === "canvas") {
+				await plugin.exportVersesToCanvas(params);
+				new Notice(t("popover.canvasCreated") || "Canvas criado com sucesso!");
+				clearSelection();
+			} else {
+				const success = await plugin.exportVersesToExcalidraw(params);
+				if (success) {
+					new Notice(t("popover.canvasCreated") || "Excalidraw criado com sucesso!");
+					clearSelection();
+				} else {
+					new Notice(
+						t("popover.excalidrawNotInstalled") ||
+							"Plugin Excalidraw não encontrado. Instale e ative o plugin Obsidian Excalidraw."
+					);
+				}
+			}
+		} catch (err) {
+			console.error("OpenBible: error creating canvas/excalidraw:", err);
+			new Notice(
+				(t("popover.canvasError") || "Erro ao criar canvas: {error}").replace(
+					"{error}",
+					err instanceof Error ? err.message : String(err)
+				)
+			);
+		}
 	}
 </script>
 
@@ -1077,7 +1148,9 @@
 			{currentColor}
 			onCopyReference={copyReference}
 			onCopyText={copyText}
+			onCopyPlainText={copyPlainText}
 			onCreateNote={handleCreateNote}
+			onCreateCanvas={handleCreateCanvas}
 			onHighlightColor={handleHighlightColor}
 			onRemoveHighlight={handleRemoveHighlight}
 			onLinkResource={handleLinkResource}

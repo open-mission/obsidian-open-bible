@@ -80,12 +80,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Detects plugin availability with friendly feedback notices and automated diagram opening.
 - **Multiple Entry Points & Commands**:
   - Added `[Comparar]` button to the floating `VerseActionBar` on verse selection.
+  - Added `[Canvas]` button to the floating `VerseActionBar` on verse selection with instant Canvas (`.canvas`) and Excalidraw (`.excalidraw.md`) creation.
+  - Added "Criar canvas" and "Criar no Excalidraw" to the reader right-click context menu.
   - Added "Comparar versões" to the verse right-click context menu in the reader.
   - Added "Comparar versões" to the editor right-click context menu on scripture references.
   - Added "Comparar versões" to the Bible Reader pane menu (`...`).
   - Added command `open-bible-compare` ("Comparar versículos bíblicos" / "Compare Bible verses").
   - Added command `open-bible-compare-tab` ("Abrir comparação em nova aba" / "Open comparison in new tab").
   - Added command `open-bible-compare-split` ("Dividir tela com comparação de versões" / "Split editor with version comparison").
+- **Scripture Study Maps & Mind Mapping (Canvas & Excalidraw)**:
+  - Generate instant visual study boards directly from selected Scripture verses or text snippets.
+  - Automatically structures reference headers, scripture cards, analysis blocks (*Ideia central, Palavras-chave, Contexto*), and practical application notes connected with directed arrows.
+  - Saves `.canvas` and `.excalidraw.md` files to `OpenBible/canvas/` (or configured export folder) and opens them immediately in a new tab/pane.
 
 ### Changed
 - **Comparison Header & Context Menu Reorganization**:
