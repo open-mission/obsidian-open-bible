@@ -72,7 +72,8 @@ export function formatVersesPlainText(
 	versionAbbr?: string
 ): string {
 	const sorted = [...verses].sort((a, b) => a.number - b.number);
-	const text = sorted.map((v) => `${v.number}. ${v.text}`).join(" ");
+	const text = sorted.map((v) => `${toSuperscript(v.number)} ${v.text}`).join("\n");
 	const reference = formatReference(bookName, chapter, sorted.map((v) => v.number), versionAbbr);
-	return `"${text}" — ${reference}`;
+	return `${text}\n— ${reference}`;
 }
+

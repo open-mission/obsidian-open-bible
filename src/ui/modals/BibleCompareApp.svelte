@@ -6,7 +6,7 @@
 	import type OpenBiblePlugin from "../../main";
 	import type { BibleBook, BibleVerse } from "../../models/bible";
 	import type { BibleVersion } from "../../models/bibleVersion";
-	import type { PassageComparisonData, VerseComparisonRow } from "../../models/comparison";
+	import type { PassageComparisonData, VersionComparisonItem } from "../../models/comparison";
 	import { PassagePickerModal } from "./PassagePickerModal";
 	import { formatVerseRange, toSuperscript } from "../../services/verseFormat";
 	import { getCanonBook } from "../../bibleCanon";
@@ -194,16 +194,16 @@
 
 	async function handleCopyMarkdown() {
 		if (!comparisonData) return;
-		const text = plugin.comparisonService.formatMarkdownComparison(comparisonData, layout);
+		const text = plugin.comparisonService.formatSingleBlockComparison(comparisonData);
 		await navigator.clipboard.writeText(text);
 		new Notice(t("compare.copiedMarkdownNotice"));
 	}
 
-	async function handleCopyVerseRow(row: VerseComparisonRow) {
+	async function handleCopyVersion(ver: VersionComparisonItem) {
 		if (!comparisonData) return;
-		const text = plugin.comparisonService.formatVerseRowMarkdown(comparisonData, row);
+		const text = plugin.comparisonService.formatVersionPassage(comparisonData, ver);
 		await navigator.clipboard.writeText(text);
-		new Notice(t("compare.copiedVerseRowNotice"));
+		new Notice(t("compare.copiedVersionNotice") || t("notices.textCopied"));
 	}
 
 	async function handleExportCanvas() {
@@ -243,6 +243,32 @@
 	function handleOpenContextMenu(event: MouseEvent) {
 		if (!comparisonData) return;
 		const menu = new Menu();
+
+		menu.addItem((item) => {
+			item
+				.setTitle(t("compare.copyExcalidraw") || "Copiar para Excalidraw (bloco único)")
+				.setIcon("copy")
+				.onClick(async () => {
+					if (!comparisonData) return;
+					const text = plugin.comparisonService.formatSingleBlockComparison(comparisonData);
+					await navigator.clipboard.writeText(text);
+					new Notice(t("compare.copiedExcalidrawNotice") || "Comparação copiada como bloco único para Excalidraw!");
+				});
+		});
+
+		menu.addItem((item) => {
+			item
+				.setTitle(t("compare.copyMarkdownFull") || "Copiar comparação em Markdown")
+				.setIcon("file-text")
+				.onClick(async () => {
+					if (!comparisonData) return;
+					const text = plugin.comparisonService.formatMarkdownComparison(comparisonData, "columns");
+					await navigator.clipboard.writeText(text);
+					new Notice(t("compare.copiedMarkdownNotice") || "Comparação copiada em Markdown!");
+				});
+		});
+
+		menu.addSeparator();
 
 		menu.addItem((item) => {
 			item
@@ -477,7 +503,7 @@
 			</div>
 		{:else if comparisonData}
 			{#if layout === "columns"}
-				<!-- Columns Mode: Side-by-side cards -->
+				<!-- Columns Mode: Side-by-side cards per version -->
 				<div
 					class="open-bible-compare-columns-grid"
 					style:--columns-count={comparisonData.versions.length}
@@ -507,65 +533,122 @@
 								<span class="open-bible-version-title" title={ver.versionName}>
 									{ver.versionName}
 								</span>
-								<button
-									type="button"
-									class="open-bible-card-header-remove-btn clickable-icon"
-									onclick={(e) => {
-										e.stopPropagation();
-										void toggleVersion(ver.versionId);
-									}}
-									title={t("compare.removeVersion")}
-									aria-label={t("compare.removeVersion")}
-								>
-									<span use:icon={"x"}></span>
-								</button>
+								<div class="open-bible-card-header-actions">
+									<button
+										type="button"
+										class="open-bible-card-header-copy-btn clickable-icon"
+										onclick={(e) => {
+											e.stopPropagation();
+											void handleCopyVersion(ver);
+										}}
+										title={t("compare.copyVersion")}
+										aria-label={t("compare.copyVersion")}
+									>
+										<span use:icon={"copy"}></span>
+									</button>
+									<button
+										type="button"
+										class="open-bible-card-header-remove-btn clickable-icon"
+										onclick={(e) => {
+											e.stopPropagation();
+											void toggleVersion(ver.versionId);
+										}}
+										title={t("compare.removeVersion")}
+										aria-label={t("compare.removeVersion")}
+									>
+										<span use:icon={"x"}></span>
+									</button>
+								</div>
 							</div>
 							<div class="open-bible-compare-card-body">
-								{#each ver.verses as verse (verse.number)}
-									<p class="open-bible-compare-verse-line">
-										<sup class="open-bible-compare-verse-num">
-											{verse.number}
-										</sup>
-										<span class="open-bible-compare-verse-text">{verse.text}</span>
+								{#if ver.verses.length > 0}
+									<p class="open-bible-compare-passage-flow">
+										{#each ver.verses as verse (verse.number)}
+											<span class="open-bible-compare-verse-token">
+												<sup class="open-bible-compare-verse-num">{verse.number}</sup>
+												<span class="open-bible-compare-verse-text">{verse.text}</span>
+											</span>{' '}
+										{/each}
 									</p>
-								{/each}
+								{:else}
+									<p class="open-bible-compare-verse-empty">
+										{t("compare.verseAbsent")}
+									</p>
+								{/if}
 							</div>
 						</div>
 					{/each}
 				</div>
 			{:else}
-				<!-- Verses Mode: Row-by-row comparative stack -->
-				<div class="open-bible-compare-verses-stack">
-					{#each comparisonData.rows as row (row.verseNumber)}
-						<div class="open-bible-compare-verse-block">
-							<div class="open-bible-compare-verse-header">
-								<span class="open-bible-compare-verse-pill">
-									{t("compare.verseRowHeader").replace("{number}", String(row.verseNumber))}
+				<!-- Stacked List Mode: Version cards stacked vertically -->
+				<div class="open-bible-compare-versions-stack">
+					{#each comparisonData.versions as ver, index (ver.versionId)}
+						<div
+							class="open-bible-compare-version-card mod-stack"
+							class:is-dragging={draggedIndex === index}
+							class:is-drag-over={dragOverIndex === index}
+							role="region"
+							aria-label={ver.versionName}
+							draggable="true"
+							ondragstart={(e) => handleDragStart(index, e)}
+							ondragover={(e) => handleDragOver(index, e)}
+							ondragleave={() => handleDragLeave(index)}
+							ondrop={(e) => handleDrop(index, e)}
+							ondragend={handleDragEnd}
+						>
+							<div class="open-bible-compare-card-header">
+								<span
+									class="open-bible-drag-handle"
+									use:icon={"grip-vertical"}
+									title={t("compare.dragCardToReorder")}
+									aria-label={t("compare.dragCardToReorder")}
+								></span>
+								<span class="open-bible-version-pill">{ver.versionAbbr}</span>
+								<span class="open-bible-version-title" title={ver.versionName}>
+									{ver.versionName}
 								</span>
-								<button
-									type="button"
-									class="open-bible-compare-copy-verse-btn clickable-icon"
-									onclick={() => handleCopyVerseRow(row)}
-									title={t("compare.copyVerseRow")}
-									aria-label={t("compare.copyVerseRow")}
-								>
-									<span use:icon={"copy"}></span>
-								</button>
+								<div class="open-bible-card-header-actions">
+									<button
+										type="button"
+										class="open-bible-card-header-copy-btn clickable-icon"
+										onclick={(e) => {
+											e.stopPropagation();
+											void handleCopyVersion(ver);
+										}}
+										title={t("compare.copyVersion")}
+										aria-label={t("compare.copyVersion")}
+									>
+										<span use:icon={"copy"}></span>
+									</button>
+									<button
+										type="button"
+										class="open-bible-card-header-remove-btn clickable-icon"
+										onclick={(e) => {
+											e.stopPropagation();
+											void toggleVersion(ver.versionId);
+										}}
+										title={t("compare.removeVersion")}
+										aria-label={t("compare.removeVersion")}
+									>
+										<span use:icon={"x"}></span>
+									</button>
+								</div>
 							</div>
-							<div class="open-bible-compare-verse-translations">
-								{#each row.versions as item (item.versionId)}
-									<div class="open-bible-compare-verse-translation-row">
-										<span class="open-bible-version-mini-pill" title={item.versionName}>
-											{item.versionAbbr}
-										</span>
-										<span
-											class="open-bible-compare-verse-translation-text"
-											class:is-empty={!item.text}
-										>
-											{item.text || t("compare.verseAbsent")}
-										</span>
-									</div>
-								{/each}
+							<div class="open-bible-compare-card-body">
+								{#if ver.verses.length > 0}
+									<p class="open-bible-compare-passage-flow">
+										{#each ver.verses as verse (verse.number)}
+											<span class="open-bible-compare-verse-token">
+												<sup class="open-bible-compare-verse-num">{verse.number}</sup>
+												<span class="open-bible-compare-verse-text">{verse.text}</span>
+											</span>{' '}
+										{/each}
+									</p>
+								{:else}
+									<p class="open-bible-compare-verse-empty">
+										{t("compare.verseAbsent")}
+									</p>
+								{/if}
 							</div>
 						</div>
 					{/each}
@@ -985,6 +1068,15 @@
 		min-width: 0;
 	}
 
+	.open-bible-card-header-actions {
+		display: flex;
+		align-items: center;
+		gap: 4px;
+		margin-left: auto;
+		flex-shrink: 0;
+	}
+
+	.open-bible-card-header-copy-btn,
 	.open-bible-card-header-remove-btn {
 		display: inline-flex;
 		align-items: center;
@@ -996,14 +1088,20 @@
 		background: transparent;
 		color: var(--text-muted);
 		cursor: pointer;
-		margin-left: auto;
 		flex-shrink: 0;
 		transition: color 0.12s ease, background-color 0.12s ease;
 	}
 
+	.open-bible-card-header-copy-btn:hover,
 	.open-bible-card-header-remove-btn:hover {
 		color: var(--text-normal);
 		background-color: var(--background-modifier-hover);
+	}
+
+	.open-bible-card-header-copy-btn:focus-visible,
+	.open-bible-card-header-remove-btn:focus-visible {
+		outline: 2px solid var(--interactive-accent);
+		outline-offset: 1px;
 	}
 
 	.open-bible-compare-card-body {
@@ -1013,20 +1111,22 @@
 		gap: 10px;
 	}
 
-	.open-bible-compare-verse-line {
+	.open-bible-compare-passage-flow {
 		margin: 0;
 		font-family: var(--font-text, var(--font-text-theme, var(--font-interface)));
 		font-size: var(--font-text-size, 1rem);
 		line-height: var(--line-height-normal, 1.75);
 		color: var(--text-normal);
 		word-break: break-word;
-		border-radius: var(--radius-s, 4px);
-		padding: 3px 6px;
-		margin: -3px -6px;
+	}
+
+	.open-bible-compare-verse-token {
+		display: inline;
+		border-radius: var(--radius-s, 3px);
 		transition: background-color 0.12s ease;
 	}
 
-	.open-bible-compare-verse-line:hover {
+	.open-bible-compare-verse-token:hover {
 		background-color: var(--background-modifier-hover);
 	}
 
@@ -1039,126 +1139,34 @@
 		font-variant-numeric: tabular-nums;
 		user-select: none;
 		-webkit-user-select: none;
-		margin-right: 0.35rem;
+		margin-right: 0.25rem;
+		margin-left: 0.2rem;
 	}
 
-	/* Verse by verse stack */
-	.open-bible-compare-verses-stack {
+	.open-bible-compare-verse-token:first-child .open-bible-compare-verse-num {
+		margin-left: 0;
+	}
+
+	.open-bible-compare-verse-text {
+		color: var(--text-normal);
+	}
+
+	.open-bible-compare-verse-empty {
+		margin: 0;
+		font-style: italic;
+		color: var(--text-faint);
+		font-size: 0.9rem;
+	}
+
+	/* Stacked list mode */
+	.open-bible-compare-versions-stack {
 		display: flex;
 		flex-direction: column;
 		gap: 14px;
 	}
 
-	.open-bible-compare-verse-block {
-		display: flex;
-		flex-direction: column;
-		border-radius: var(--radius-m, 8px);
-		border: 1px solid var(--background-modifier-border);
-		background-color: var(--background-secondary);
-		overflow: hidden;
-		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-		transition: border-color 0.15s ease, box-shadow 0.15s ease;
-	}
-
-	.open-bible-compare-verse-block:hover {
-		border-color: var(--background-modifier-border-hover, var(--background-modifier-border));
-		box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
-	}
-
-	.open-bible-compare-verse-header {
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		padding: 8px 14px;
-		background-color: var(--background-modifier-box-shadow, rgba(0, 0, 0, 0.04));
-		border-bottom: 1px solid var(--background-modifier-border);
-	}
-
-	.open-bible-compare-verse-pill {
-		font-weight: 700;
-		font-size: 0.85rem;
-		color: var(--interactive-accent);
-		letter-spacing: 0.01em;
-	}
-
-	.open-bible-compare-copy-verse-btn {
-		display: inline-flex;
-		align-items: center;
-		justify-content: center;
-		width: 26px;
-		height: 26px;
-		border-radius: var(--radius-s, 4px);
-		border: none;
-		background: transparent;
-		color: var(--text-muted);
-		cursor: pointer;
-		transition: color 0.12s ease, background-color 0.12s ease;
-	}
-
-	.open-bible-compare-copy-verse-btn:hover {
-		color: var(--text-normal);
-		background-color: var(--background-modifier-hover);
-	}
-
-	.open-bible-compare-copy-verse-btn:focus-visible {
-		outline: 2px solid var(--interactive-accent);
-		outline-offset: 1px;
-	}
-
-	.open-bible-compare-verse-translations {
-		padding: 8px 12px;
-		display: flex;
-		flex-direction: column;
-		gap: 4px;
-	}
-
-	.open-bible-compare-verse-translation-row {
-		display: grid;
-		grid-template-columns: 56px 1fr;
-		align-items: baseline;
-		gap: 12px;
-		padding: 6px 8px;
-		border-radius: var(--radius-s, 4px);
-		transition: background-color 0.12s ease;
-	}
-
-	.open-bible-compare-verse-translation-row:hover {
-		background-color: var(--background-modifier-hover);
-	}
-
-	.open-bible-version-mini-pill {
-		font-size: 0.72rem;
-		font-weight: 700;
-		padding: 2px 6px;
-		border-radius: var(--radius-s, 4px);
-		background-color: var(--background-modifier-border);
-		color: var(--text-muted);
-		text-align: center;
-		display: inline-flex;
-		align-items: center;
-		justify-content: center;
-		user-select: none;
-		letter-spacing: 0.02em;
-		font-variant-numeric: tabular-nums;
-		transition: background-color 0.12s ease, color 0.12s ease;
-	}
-
-	.open-bible-compare-verse-translation-row:hover .open-bible-version-mini-pill {
-		color: var(--text-normal);
-		background-color: var(--background-modifier-border-hover, var(--background-modifier-border));
-	}
-
-	.open-bible-compare-verse-translation-text {
-		font-family: var(--font-text, var(--font-text-theme, var(--font-interface)));
-		font-size: var(--font-text-size, 1rem);
-		line-height: var(--line-height-normal, 1.75);
-		color: var(--text-normal);
-		word-break: break-word;
-	}
-
-	.open-bible-compare-verse-translation-text.is-empty {
-		color: var(--text-faint);
-		font-style: italic;
+	.open-bible-compare-version-card.mod-stack {
+		width: 100%;
 	}
 
 	.open-bible-compare-action-btn {

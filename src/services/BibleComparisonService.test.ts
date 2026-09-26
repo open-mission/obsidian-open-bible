@@ -200,4 +200,92 @@ describe("BibleComparisonService", () => {
 		assert.ok(formatted.includes("- **ARC** (Almeida Revista e Corrigida): Porque Deus amou o mundo..."));
 		assert.ok(formatted.includes("- **NVI** (Nova Versão Internacional): Porque Deus tanto amou o mundo..."));
 	});
+
+	test("formatSingleBlockComparison produces unified single-block text without '>' or blank lines for Excalidraw", () => {
+		const mockService = new BibleComparisonService(
+			{} as any,
+			{} as any,
+			{} as any,
+			() => ({ dataFolder: "OpenBible" } as any),
+		);
+
+		const sampleData: PassageComparisonData = {
+			bookId: 43,
+			bookName: "João",
+			chapter: 14,
+			verseNumbers: [2, 3],
+			reference: "João 14:2-3",
+			versions: [
+				{
+					versionId: "acf.sqlite",
+					versionName: "Almeida Corrigida Fiel",
+					versionAbbr: "ACF",
+					verses: [
+						{ number: 2, text: "Na casa de meu Pai há muitas moradas..." },
+						{ number: 3, text: "E quando eu for..." },
+					],
+					fullText: "² Na casa de meu Pai... ³ E quando eu for...",
+				},
+				{
+					versionId: "ara.sqlite",
+					versionName: "Almeida Revista e Atualizada",
+					versionAbbr: "ARA",
+					verses: [
+						{ number: 2, text: "Na casa de meu Pai há muitas moradas." },
+						{ number: 3, text: "E, quando eu for..." },
+					],
+					fullText: "² Na casa de meu Pai... ³ E, quando eu for...",
+				},
+			],
+			rows: [],
+		};
+
+		const formatted = mockService.formatSingleBlockComparison(sampleData);
+		// Must not contain markdown quote '>'
+		assert.ok(!formatted.includes(">"));
+		// Must not contain double newline paragraphs that break in Excalidraw
+		assert.ok(!formatted.includes("\n\n"));
+		// Verses 2 and 3 must be grouped per version with line breaks per verse
+		assert.ok(formatted.includes("João 14:2-3 — Comparação de Versões"));
+		assert.ok(formatted.includes("ACF:\n² Na casa de meu Pai há muitas moradas...\n³ E quando eu for..."));
+		assert.ok(formatted.includes("ARA:\n² Na casa de meu Pai há muitas moradas.\n³ E, quando eu for..."));
+	});
+
+	test("formatVersionPassage formats single version as unified single block with verse line breaks without '>'", () => {
+		const mockService = new BibleComparisonService(
+			{} as any,
+			{} as any,
+			{} as any,
+			() => ({ dataFolder: "OpenBible" } as any),
+		);
+
+		const sampleData: PassageComparisonData = {
+			bookId: 43,
+			bookName: "João",
+			chapter: 14,
+			verseNumbers: [2, 3],
+			reference: "João 14:2-3",
+			versions: [],
+			rows: [],
+		};
+
+		const versionItem = {
+			versionId: "acf.sqlite",
+			versionName: "Almeida Corrigida Fiel",
+			versionAbbr: "ACF",
+			verses: [
+				{ number: 2, text: "Na casa de meu Pai há muitas moradas; se não fosse assim, eu vo-lo teria dito." },
+				{ number: 3, text: "E quando eu for, virei outra vez." },
+			],
+			fullText: "",
+		};
+
+		const formatted = mockService.formatVersionPassage(sampleData, versionItem);
+		assert.ok(!formatted.includes(">"));
+		assert.ok(!formatted.includes("\n\n"));
+		assert.equal(
+			formatted,
+			"² Na casa de meu Pai há muitas moradas; se não fosse assim, eu vo-lo teria dito.\n³ E quando eu for, virei outra vez.\n— João 14:2-3 (ACF)"
+		);
+	});
 });

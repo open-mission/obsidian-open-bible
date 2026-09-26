@@ -7,7 +7,7 @@ import { getLocale, t } from "../../i18n";
 import type { ResolvedVersePreview } from "../../services/VersePreviewService";
 import { formatCrossRef } from "../resources/formatCrossRef";
 import { crossRefToParsedVerseReference } from "../resources/crossRefPreviewParse";
-import { formatVersesText } from "../../services/verseFormat";
+import { formatVersesText, toSuperscript } from "../../services/verseFormat";
 import { insertScriptureInEditor } from "../../services/editorInsertion";
 import { createNoteFromSelection } from "../../services/NoteService";
 import { createUiButton, createUiDialogBody, createUiFooter, setupOpenBibleDialog } from "../kit/dom";
@@ -154,9 +154,9 @@ export class VersePreviewModal extends Modal {
 					return;
 				}
 				const textToCopy = this.currentPreview.verses
-					.map((v) => `${v.number}. ${v.text}`)
+					.map((v) => `${toSuperscript(v.number)} ${v.text}`)
 					.join("\n");
-				const formatted = `"${textToCopy}" — ${this.currentPreview.reference} (${this.currentPreview.versionAbbr})`;
+				const formatted = `${textToCopy}\n— ${this.currentPreview.reference} (${this.currentPreview.versionAbbr})`;
 				await navigator.clipboard.writeText(formatted);
 				new Notice(t("notices.textCopied"));
 			},

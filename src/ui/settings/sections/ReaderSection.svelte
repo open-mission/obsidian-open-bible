@@ -160,3 +160,21 @@
 		</select>
 	</div>
 </div>
+
+<div class="setting-item">
+	<div class="setting-item-info">
+		<div class="setting-item-name">{t("settings.copyVerseFormatName")}</div>
+		<div class="setting-item-description">{t("settings.copyVerseFormatDesc")}</div>
+	</div>
+	<div class="setting-item-control">
+		<select
+			class="dropdown"
+			value={settings.copyVerseFormat || "singleBlock"}
+			aria-label={t("settings.copyVerseFormatName")}
+			onchange={(e) => void updateGeneral({ copyVerseFormat: e.currentTarget.value as "singleBlock" | "quoteMarkdown" })}
+		>
+			<option value="singleBlock">{t("settings.copyVerseFormatSingleBlock")}</option>
+			<option value="quoteMarkdown">{t("settings.copyVerseFormatQuoteMarkdown")}</option>
+		</select>
+	</div>
+</div>

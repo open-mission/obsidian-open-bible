@@ -4,6 +4,7 @@ import {
 	formatReference,
 	formatVerseRange,
 	formatVersesText,
+	formatVersesPlainText,
 	toSuperscript,
 } from "./verseFormat";
 
@@ -39,5 +40,23 @@ describe("verseFormat", () => {
 		assert.ok(formatted.includes("> ¹ Irmãos"));
 		assert.ok(formatted.includes("> ² Levem"));
 		assert.ok(formatted.includes("— Gálatas 6:1-2 (ARA)"));
+	});
+
+	it("formats verses as single block plain text with line breaks per verse without '>' for Excalidraw", () => {
+		const formatted = formatVersesPlainText(
+			[
+				{ number: 2, text: "Porque lhes dou testemunho de que eles têm zelo por Deus, porém não com entendimento." },
+				{ number: 3, text: "Porquanto, desconhecendo a justiça de Deus e procurando estabelecer a sua própria, não se sujeitaram à que vem de Deus." },
+			],
+			"Romanos",
+			10,
+			"ARA"
+		);
+		assert.equal(
+			formatted,
+			"² Porque lhes dou testemunho de que eles têm zelo por Deus, porém não com entendimento.\n³ Porquanto, desconhecendo a justiça de Deus e procurando estabelecer a sua própria, não se sujeitaram à que vem de Deus.\n— Romanos 10:2-3 (ARA)"
+		);
+		assert.ok(!formatted.includes(">"));
+		assert.ok(!formatted.includes("\n\n"));
 	});
 });

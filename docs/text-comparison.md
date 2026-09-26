@@ -61,25 +61,27 @@ flowchart TD
 
 ## 2. Comparison Modes & User Experience
 
-### A. Read-Only Comparison
+### A. Passage Grouping & View Layouts
 
-The comparison interface supports two complementary layouts:
+When comparing passages containing multiple verses (such as John 14:2-3), OpenBible groups verses into continuous, natural textual flow within each version container. Verses are not artificially fragmented into isolated verse boxes; instead, the separation exists purely across the compared Bible versions (one card per translation).
+
+The comparison surface supports two complementary layouts:
 
 1. **Columns by Version (`columns`)**:
    - Displays each selected translation in an independent vertical card arranged side-by-side in a horizontally scrollable grid.
-   - Each card features a drag handle (`grip-vertical`), version abbreviation badge, full translation title, and running verses with superscript numbers.
+   - Each card features a drag handle (`grip-vertical`), version abbreviation badge, full translation title, copy button, remove action, and running verses formatted with superscript numbers.
    - Users can **drag and drop** column cards or version chips to rearrange translations in any custom order.
-   - Ideal for reading larger continuous sections (e.g., Psalm 23 or Romans 8:28-39) across translations.
+   - Ideal for reading larger continuous sections side-by-side across translations.
 
-2. **Verse-by-Verse Rows (`verses`)**:
-   - Groups translations by individual verse number in stacked comparative blocks.
-   - For each verse number, all selected translations are displayed together with their respective badges.
-   - Ideal for micro-comparative textual criticism, word choice analysis, and exegetical study.
+2. **List by Version (`verses` / stacked list mode)**:
+   - Displays each selected translation in a full-width stacked card layout.
+   - All verses for that translation flow together as a unified biblical passage.
+   - Ideal for mobile devices, narrower workspace split panes, or in-depth study of long paragraphs.
 
 ### B. Drag-and-Drop Version Reordering
 
 Users can reorder Bible translations using intuitive drag-and-drop interactions:
-- **In Columns View**: Grab any version card by its header grip handle and drop it over another card to swap column positions.
+- **In Cards View**: Grab any version card by its header grip handle and drop it over another card to swap positions.
 - **In the Version Selection Bar**: Active version chips feature drag handles and can be dragged directly within the chip strip to reorder translations.
 - Custom order is preserved during the session and synchronized across layout switches.
 
@@ -95,23 +97,27 @@ In addition to the quick modal popup, comparisons can be opened directly as full
 The comparison toolbar maximizes vertical reading space by presenting controls in a single streamlined row:
 - **Left**: Clickable Scripture reference pill (`[📖 Romanos 9:3-5 ▾]`) that opens the passage picker modal on click.
 - **Right**:
-  - **Copy Comparison** (`[📋 Copiar comparação]`): Formats and copies the complete multi-version comparison to the clipboard with 1 click. Responsive styling collapses text label on narrow panes.
-  - **Layout Switcher Tabs**: Segmented toggle with icon-only buttons (`[ ⊞ | ☰ ]`) with accessible tooltips (`aria-label`) to toggle between column-based and verse-based comparative views.
-  - **More Options (`...`) Context Menu**: Native Obsidian popup `Menu` providing quick exports to **Exportar para o Canvas** and **Exportar para o Excalidraw** without cluttering the main toolbar.
+  - **Copy Comparison** (`[📋 Copiar comparação]`): Formats and copies the complete multi-version comparison as a unified single text block without blockquote symbols (`>`) or blank lines, preventing fragmentation when pasted into Excalidraw. Responsive styling collapses the text label on narrow panes.
+  - **Layout Switcher Tabs**: Segmented toggle with icon-only buttons (`[ ⊞ | ☰ ]`) with accessible tooltips (`aria-label`) to toggle between column-based and stacked list comparative views.
+  - **More Options (`...`) Context Menu**: Native Obsidian popup `Menu` providing:
+    - **Copiar para Excalidraw (bloco único)**: Direct clipboard copy optimized for Excalidraw without `>` or empty lines.
+    - **Copiar comparação em Markdown**: Full markdown export with section headings.
+    - **Exportar para o Canvas**: Generates `.canvas` file.
+    - **Exportar para o Excalidraw**: Automates drawing creation via ExcalidrawAutomate.
 
-### E. Markdown Formatting & Single Verse Copy
+### E. Excalidraw Single-Block Clipboard Optimization & Per-Version Copy
 
-Users can copy comparisons to the system clipboard:
-- **Complete Passage**: Click **Copy Comparison** in the top toolbar to copy all selected versions in the active layout (`columns` or `verses`).
-- **Single Verse Comparison**: Click the copy icon (`[📋]`) directly on any individual verse block in Verse-by-Verse mode to copy just that verse across all selected translations into your notes (e.g. `### John 3:16` followed by bulleted translations).
+Pastings into Excalidraw frequently created fragmented, multiple detached text boxes due to Markdown blockquote symbols (`>`) and blank lines (`\n\n`). OpenBible optimizes clipboard export:
+- **Unified Single Block for Excalidraw with Verse Line Breaks**: Scripture comparisons copied to the clipboard avoid empty lines (`\n\n`) and omit `>` prefixes, ensuring Obsidian Excalidraw generates exactly one unified text element. Within this single element, each verse cleanly breaks into its own line (`\n`) for optimal legibility (e.g. verse 2 on line 1, verse 3 on line 2, and the reference on the following line).
+- **Individual Version Copy**: Every translation card in both columns and list layouts provides a dedicated header copy button (`[📋]`), enabling users to copy that single version's complete passage without `>` prefixes, breaking each verse onto a new line and concluding with the reference.
 
 ### F. Typography, Theming & Visual Polish
 
 - **Obsidian Theme Harmony**: Verse text strictly adopts Obsidian's reading font (`var(--font-text, var(--font-text-theme, var(--font-interface))`), text size (`var(--font-text-size, 1rem)`), and line spacing (`var(--line-height-normal, 1.75)`).
-- **Sticky Column Headers**: In Columns mode, version cards feature sticky headers with backdrop blur (`backdrop-filter: blur(8px)`) so version badges, titles, and remove actions stay visible during deep chapter scrolling.
-- **Tabular Text Alignment**: In Verse-by-Verse mode, version abbreviation pills use a fixed-width grid (`56px 1fr`) ensuring that every translation's scripture text starts at the exact same horizontal alignment for effortless cross-reading.
+- **Sticky Column Headers**: In Columns mode, version cards feature sticky headers with backdrop blur (`backdrop-filter: blur(8px)`) so version badges, titles, and actions stay visible during deep chapter scrolling.
+- **Continuous Verse Flow**: Verses within a card flow naturally with superscript numerals (`² ... ³ ...`), making multi-verse reading seamless.
 - **Omitted Verse Handling**: Translations omitting certain textual variants render a polite, muted label (`— (Versículo ausente nesta versão)` / `— (Verse absent in this version)`) instead of empty whitespace.
-- **Direct Column Removal**: Column cards feature a quick `[x]` remove button to unselect a translation without navigating back to the top chip strip.
+- **Direct Card Removal**: Version cards feature a quick `[x]` remove button to unselect a translation without navigating back to the top chip strip.
 - **Accessibility & Interaction**: Full keyboard focus visibility (`:focus-visible`), aria labels, localized tooltips in English and Portuguese, and smooth micro-interactions for dragging.
 
 ---

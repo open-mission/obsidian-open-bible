@@ -87,7 +87,7 @@ export class BibleComparisonService {
 
 				const fullText = filteredVerses
 					.map((v) => `${toSuperscript(v.number)} ${v.text}`)
-					.join(" ");
+					.join("\n");
 
 				versionItems.push({
 					versionId: vPath,
@@ -164,14 +164,42 @@ export class BibleComparisonService {
 			for (const v of data.versions) {
 				lines.push(`### ${v.versionAbbr} — ${v.versionName}`);
 				const versesText = v.verses
-					.map((item) => `> ${toSuperscript(item.number)} ${item.text}`)
-					.join("\n>\n");
+					.map((item) => `${toSuperscript(item.number)} ${item.text}`)
+					.join("\n");
 				lines.push(versesText);
 				lines.push("");
 			}
 		}
 
 		return lines.join("\n").trim();
+	}
+
+	/**
+	 * Formats comparison as a unified single block without '>' or blank lines,
+	 * ensuring Excalidraw creates exactly one unified text element on paste,
+	 * with each verse placed on its own line.
+	 */
+	formatSingleBlockComparison(data: PassageComparisonData): string {
+		const lines: string[] = [];
+		lines.push(`${data.reference} — Comparação de Versões`);
+		for (const v of data.versions) {
+			lines.push(`${v.versionAbbr}:`);
+			for (const item of v.verses) {
+				lines.push(`${toSuperscript(item.number)} ${item.text}`);
+			}
+		}
+		return lines.join("\n").trim();
+	}
+
+	/**
+	 * Formats a single version passage as a clean single block without '>' for Excalidraw and general copy,
+	 * breaking each verse into its own line and placing the reference on a separate line.
+	 */
+	formatVersionPassage(data: PassageComparisonData, version: VersionComparisonItem): string {
+		const text = version.verses
+			.map((item) => `${toSuperscript(item.number)} ${item.text}`)
+			.join("\n");
+		return `${text}\n— ${data.reference} (${version.versionAbbr})`;
 	}
 
 	/**
@@ -345,10 +373,10 @@ export class BibleComparisonService {
 			data.versions.forEach((ver, index) => {
 				const cardX = index * (cardWidth + cardGap);
 
-				let textContent = `${ver.versionAbbr} — ${ver.versionName}\n\n`;
-				for (const v of ver.verses) {
-					textContent += `${v.number}. ${v.text}\n\n`;
-				}
+				const versesBody = ver.verses
+					.map((v) => `${toSuperscript(v.number)} ${v.text}`)
+					.join("\n");
+				const textContent = `${ver.versionAbbr} — ${ver.versionName}\n\n${versesBody}`;
 
 				ea.style.strokeColor = borderColors[index % borderColors.length];
 				ea.style.backgroundColor = bgColors[index % bgColors.length];
