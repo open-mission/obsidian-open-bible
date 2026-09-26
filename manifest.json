@@ -1,7 +1,7 @@
 {
 	"id": "open-bible",
 	"name": "OpenBible",
-	"version": "0.4.3",
+	"version": "0.5.0",
 	"minAppVersion": "1.8.0",
 	"description": "Offline-first Bible reader and study companion with SQLite databases, translations, and cross-references.",
 	"author": "Open Mission",
